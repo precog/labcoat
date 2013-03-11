@@ -1,0 +1,7 @@
+{
+  "name": "labcoat",
+  "main": "www/index.html",
+  "window": {
+    "toolbar": false
+  }
+}
