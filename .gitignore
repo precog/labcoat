@@ -1,2 +1,6 @@
 node_modules
 bin/www/output
+
+labcoat.sublime-project
+
+labcoat.sublime-workspace
