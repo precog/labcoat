@@ -1,0 +1,19 @@
+body {
+    margin: 0;
+    padding: 0;
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+}
+.CodeMirror {
+    height: 100% !important;
+}
+
+.editor-figure {
+    background: #EDD;
+    padding: 0.5em;
+    margin-top: 0.25em;
+    margin-bottom: 0.5em;
+}
