@@ -7,6 +7,12 @@ class TestAll
 	{
 		runner.addCase(new precog.communicator.TestCommunicator());
 		runner.addCase(new precog.communicator.TestModuleManager());
+		
+		runner.addCase(new precog.geom.TestPoint());
+
+		runner.addCase(new precog.layout.TestLayout());
+		runner.addCase(new precog.layout.TestCanvasLayout());
+
 	}
 
 	public static function main()
