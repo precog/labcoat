@@ -8,8 +8,7 @@ typedef Pos = {
 };
 
 typedef BookMark = {
-    line: Int,
-    ch: Int,
+    > Pos,
     clear: Void -> Void
 };
 
@@ -30,26 +29,44 @@ typedef Widget = {
     changed: Void -> Void
 };
 
+typedef TextMarker = {
+    lines: Array<Int>,
+    type: String,
+    doc: CodeMirror,
+    clear: Void -> Void,
+    find: Void -> {from: Pos, to: Pos},
+    getOptions: Bool -> {className: String, atomic: Bool, collapsed: Bool}
+};
+
 @:native("CodeMirror") extern class CodeMirror {
     static var keyMap: {
       macDefault: Dynamic,
       pcDefault: Dynamic
     };
+
     @:overload(function(event: String, callback: CodeMirror -> ChangeObj -> Void): Void {})
     function on(event: String, callback: CodeMirror -> Void): Void;
-    function markText(from: Pos, to: {line: Int}, options: {replacedWith: Node, atomic: Bool}): Void;
+
+    function markText(from: Pos, to: Pos, options: {?className: String, ?replacedWith: Node, ?atomic: Bool, ?inclusiveLeft: Bool, ?inclusiveRight: Bool}): TextMarker;
+    function findMarksAt(pos: Pos): Array<TextMarker>;
+    function getAllMarks(): Array<TextMarker>;
+
+    function setGutterMarker(line: Int, gutter: String, value: Node): {clear: Void -> Void};
+
     function getCursor(?start: String): Pos;
-    function findMarksAt(pos: {line: Int}): Array<BookMark>;
-    function getAllMarks(): Array<BookMark>;
+    function getRange(from: Pos, to: Pos): String;
+
     function addLineWidget(line: Int, node: Node, options: {?coverGutter: Bool, ?noHScroll: Bool, ?above: Bool, ?showIfHidden: Bool}): BookMark;
     function getLine(n: Int): String;
     function firstLine(): Int;
     function lastLine(): Int;
     function lineInfo(line: Int): {line: Int, text: String, widgets: Array<Widget>};
+
+    function replaceSelection(text: String, ?collapse: String, ?origin: String): Void;
 }
 
 class CodeMirrorFactory {
-    public static function create(elem: Node, ?options: {?lineNumbers: Bool}): CodeMirror untyped {
+    public static function create(elem: Node, ?options: {?lineNumbers: Bool, ?gutters: Array<String>}): CodeMirror untyped {
         return CodeMirror(elem, options);
     }
 }
