@@ -13,33 +13,51 @@ class Main {
     }
 
     static function insertRegion(editor: CodeMirror) {
-        trace(editor.getAllMarks());
+        clearCurrentRegion(editor);
+        makeOrEvaluateRegion(editor);
+    }
 
+    static function clearCurrentRegion(editor: CodeMirror) {
         var region = currentRegion(editor);
         var pos = if(region != null) region.find() else null;
-        if(region == null || pos == null) {
-            makeOrEvaluateRegion(editor);
-            return;
-        }
+        if(region == null || pos == null) return;
 
         // Delete the current region make a new one from its new start.
+        var nextLine = editor.getCursor().line + 1;
+        if(pos.to.line < nextLine) return;
         region.clear();
         markText(
             editor,
             {
-                line: editor.getCursor().line + 1,
+                line: nextLine,
                 ch: 0
             },
             pos.to
         );
-
-        makeOrEvaluateRegion(editor);
     }
 
     static function makeOrEvaluateRegion(editor: CodeMirror) {
         var pos = makeRegion(editor).find();
         if(pos == null) return;
         updateOutput(editor, pos.from, pos.to);
+    }
+
+    static function clearMarkers(editor: CodeMirror, line: Int) {
+        var lineInfo = editor.lineInfo(line);
+
+        var lineWidgets = lineInfo.widgets;
+        if(lineWidgets != null) {
+            for(widget in lineWidgets) {
+                widget.clear();
+            }
+        }
+
+        var lineGutters = lineInfo.gutterMarkers;
+        if(lineGutters != null) {
+            for(gutterId in Reflect.fields(lineGutters)) {
+                editor.setGutterMarker(line, gutterId, null);
+            }
+        }
     }
 
     static function makeRegion(editor: CodeMirror) {
@@ -50,20 +68,16 @@ class Main {
         var line = editor.getCursor().line;
 
         var from = {line: editor.firstLine(), ch: 0};
-        var to = {line: editor.lastLine() + 1, ch: 0};
-
         for(mark in marks) {
             if(mark.find() == null) continue;
 
             var pos = mark.find();
-            if(line < pos.from.line) {
-                to.line = pos.from.line - 1;
-                to.ch = editor.getLine(to.line).length;
-                break;
-            }
+            if(line < pos.from.line) break;
 
             from.line = pos.to.line + 1;
         }
+
+        var to = {line: line, ch: editor.getLine(line).length};
 
         return markText(editor, from, to);
     }
@@ -75,7 +89,7 @@ class Main {
     static function currentRegion(editor: CodeMirror) {
         var cursorLine = editor.getCursor().line;
         var marks = editor.findMarksAt({line: cursorLine, ch: 0});
-        if(marks == null || marks[0] == null) return null;
+        if(marks == null || marks.length == 0) return null;
         return marks[0];
     }
 
@@ -90,17 +104,11 @@ class Main {
             error;
         }
 
+        clearMarkers(editor, to.line);
+
         var b = document.createElement('div');
         b.innerHTML = "=";
         editor.setGutterMarker(to.line, 'editor-region', b);
-
-        var lineWidgets = editor.lineInfo(to.line).widgets;
-
-        if(lineWidgets != null) {
-            for(widget in lineWidgets) {
-                widget.clear();
-            }
-        }
 
         var node = document.createElement('div');
         node.className = 'editor-figure';

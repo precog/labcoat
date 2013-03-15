@@ -60,7 +60,7 @@ typedef TextMarker = {
     function getLine(n: Int): String;
     function firstLine(): Int;
     function lastLine(): Int;
-    function lineInfo(line: Int): {line: Int, text: String, widgets: Array<Widget>};
+    function lineInfo(line: Int): {line: Int, text: String, widgets: Array<Widget>, gutterMarkers: Dynamic};
 
     function replaceSelection(text: String, ?collapse: String, ?origin: String): Void;
 }
