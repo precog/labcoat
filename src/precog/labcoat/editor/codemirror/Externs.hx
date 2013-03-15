@@ -38,11 +38,49 @@ typedef TextMarker = {
     getOptions: Bool -> {className: String, atomic: Bool, collapsed: Bool}
 };
 
+typedef Config = {
+    ?gutters: Array<String>,
+    ?lineNumbers: Bool,
+    ?lineWrapping: Bool,
+    ?dragDrop: Bool,
+    ?fixedGutter: Bool,
+    ?pollInterval: Int,
+    ?workDelay: Int,
+    ?workTime: Int,
+    ?viewportMargin: Int,
+    ?mode: String,
+    ?value: String
+};
+
+typedef ParserConfig = {
+    mode: String
+};
+
+typedef StringStream = {
+    start: Int,
+    pos: Int,
+    string: String,
+    tabSize: Int,
+    lastColumnValue: Int,
+    eol: Void -> Bool,
+    sol: Void -> Bool,
+    match: Dynamic -> String,
+    eatSpace: Void -> Bool,
+    skipToEnd: Void -> Void,
+    skipTo: String -> Bool,
+    backUp: Int -> Void,
+    column: Void -> Int,
+    indentation: Void -> Int,
+    current: Void -> String
+};
+
 @:native("CodeMirror") extern class CodeMirror {
     static var keyMap: {
       macDefault: Dynamic,
       pcDefault: Dynamic
     };
+
+    static function defineMode(mode: String, scope: Config -> ParserConfig -> {token: StringStream -> Dynamic -> String}): Void;
 
     @:overload(function(event: String, callback: CodeMirror -> ChangeObj -> Void): Void {})
     function on(event: String, callback: CodeMirror -> Void): Void;
@@ -66,7 +104,7 @@ typedef TextMarker = {
 }
 
 class CodeMirrorFactory {
-    public static function create(elem: Node, ?options: {?lineNumbers: Bool, ?gutters: Array<String>}): CodeMirror untyped {
+    public static function create(elem: Node, ?options: Config): CodeMirror untyped {
         return CodeMirror(elem, options);
     }
 }

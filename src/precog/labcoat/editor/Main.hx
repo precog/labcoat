@@ -5,7 +5,11 @@ import js.Browser.document;
 
 class Main {
     static function main() {
-        var editor = CodeMirrorFactory.create(document.body, {lineNumbers: true, gutters: ['editor-region']});
+        // Load the mode before creating an editor for it to be
+        // implicitly picked up.
+        QuirrelMode.init();
+
+        CodeMirrorFactory.create(document.body, {lineNumbers: true, gutters: ['editor-region']});
         Reflect.setField(CodeMirror.keyMap.macDefault, "Shift-Enter", expandRegion);
         Reflect.setField(CodeMirror.keyMap.pcDefault, "Shift-Enter", expandRegion);
         Reflect.setField(CodeMirror.keyMap.macDefault, "Cmd-Enter", insertRegion);
