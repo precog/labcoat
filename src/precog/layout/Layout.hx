@@ -10,7 +10,6 @@ import thx.react.Observable;
 class Layout
 {
 	
-	public var suspended(default, null) : Bool;
 	public var size(default, null) : MutablePoint;
 	public var boundaries(get_boundaries, null) : Rectangle;
 	public var onpanel(default, null) : {
@@ -22,7 +21,6 @@ class Layout
 	function new(width : Float, height : Float)
 	{
 		this.size = new MutablePoint(width, height);
-		this.suspended = false;
 		this.calculatedBoundaries = new MutableRectangle();
 		this.panels = new LayoutPanels(this);
 		this.onpanel = {
@@ -31,22 +29,10 @@ class Layout
 		};
 	}
 
-	public function suspend()
-	{
-		this.suspended = true;
-	}
-
-	public function resume()
-	{
-		this.suspended = false;
-		update();
-	}
-
 	inline function get_boundaries() return calculatedBoundaries;
 
 	public function update()
 	{
-		if(this.suspended) return;
 		for(panel in panels)
 			updatePanel(panel);
 	}
@@ -77,43 +63,23 @@ class LayoutPanels
 
 	public function addPanel(panel : Panel)
 	{
-		resumer(function() {
-			panel.setLayout(layout);
-			panels.push(panel);
-			observableAdd.notify(panel);
-		});
-		layout.update();
+		panel.setLayout(layout);
+		panels.push(panel);
+		observableAdd.notify(panel);
 	}
 
 	public function removePanel(panel : Panel)
 	{
-		resumer(function() {
-			panel.setLayout(null);
-			panels.remove(panel);
-			observableRemove.notify(panel);
-		});
-		layout.update();
+		panel.setLayout(null);
+		panels.remove(panel);
+		observableRemove.notify(panel);
 	}
 
 	public function clear()
 	{
 		var all = panels.copy();
-		resumer(function() {
-			while(all.length > 0)
-				removePanel(all.shift());
-		});
-		layout.update();
-	}
-
-	function resumer(f : Void -> Void)
-	{
-		if(layout.suspended) {
-			f();
-		} else {
-			layout.suspend();
-			f();
-			layout.resume();
-		}
+		while(all.length > 0)
+			removePanel(all.shift());
 	}
 
 	inline public function iterator()

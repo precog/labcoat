@@ -13,14 +13,14 @@ abstract Extent(ExtentValue)
 		this = v;
 	}
 
-	@:from public static inline function fromFloat(v : Float)
-	{
-		return new Extent(ExtentValue.Percent(v));
-	}
-
 	@:from public static inline function fromInt(v : Int)
 	{
 		return new Extent(ExtentValue.Absolute(v));
+	}
+
+	@:from public static inline function fromFloat(v : Float)
+	{
+		return new Extent(ExtentValue.Percent(v));
 	}
 
 	@:from public static inline function fromExtentValue(v : ExtentValue)
@@ -66,11 +66,4 @@ abstract Extent(ExtentValue)
 			case Percent(v): reference * v;
 		}
 	}
-}
-
-enum ExtentPosition
-{
-	Center(?offset : Extent);
-	Start(?offset : Extent);
-	End(?offset : Extent);
 }

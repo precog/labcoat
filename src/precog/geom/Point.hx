@@ -30,6 +30,9 @@ class Point
 		if(null != _observable)
 			_observable.notify(this);
 	}
+
+	public function toString()
+		return 'Point($x, $y)';
 }
 
 class MutablePoint extends Point
@@ -38,4 +41,7 @@ class MutablePoint extends Point
 	{
 		super.set(x, y);
 	}
+
+	override public function toString()
+		return 'MutablePoint($x, $y)';
 }

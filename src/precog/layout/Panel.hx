@@ -17,9 +17,11 @@ class Panel
 
 	private function setLayout(layout : Layout)
 	{
-		if(null != parentLayout)
-			parentLayout.panels.removePanel(this);
-		parentLayout = layout;
+		(function(oldParent : Layout) {
+			parentLayout = layout;
+			if(null != oldParent)
+				oldParent.panels.removePanel(this);
+		})(parentLayout);
 	}
 
 	public function remove()

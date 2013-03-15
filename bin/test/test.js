@@ -490,7 +490,11 @@ haxe.ds.IntMap.prototype = {
 	,h: null
 	,__class__: haxe.ds.IntMap
 }
-haxe.ds.ObjectMap = function() { }
+haxe.ds.ObjectMap = function(weakKeys) {
+	if(weakKeys == null) weakKeys = false;
+	this.h = { };
+	this.h.__keys__ = { };
+};
 haxe.ds.ObjectMap.__name__ = ["haxe","ds","ObjectMap"];
 haxe.ds.ObjectMap.prototype = {
 	toString: function() {
@@ -973,7 +977,10 @@ precog.geom.Point = function(x,y) {
 };
 precog.geom.Point.__name__ = ["precog","geom","Point"];
 precog.geom.Point.prototype = {
-	set: function(x,y) {
+	toString: function() {
+		return "Point(" + this.x + ", " + this.y + ")";
+	}
+	,set: function(x,y) {
 		if(this.x == x && this.y == y) return;
 		this.x = x;
 		this.y = y;
@@ -997,7 +1004,10 @@ precog.geom.MutablePoint = function(x,y) {
 precog.geom.MutablePoint.__name__ = ["precog","geom","MutablePoint"];
 precog.geom.MutablePoint.__super__ = precog.geom.Point;
 precog.geom.MutablePoint.prototype = $extend(precog.geom.Point.prototype,{
-	set: function(x,y) {
+	toString: function() {
+		return "MutablePoint(" + this.x + ", " + this.y + ")";
+	}
+	,set: function(x,y) {
 		precog.geom.Point.prototype.set.call(this,x,y);
 	}
 	,__class__: precog.geom.MutablePoint
@@ -1012,7 +1022,10 @@ precog.geom.Rectangle = function(x,y,width,height) {
 };
 precog.geom.Rectangle.__name__ = ["precog","geom","Rectangle"];
 precog.geom.Rectangle.prototype = {
-	equals: function(other) {
+	toString: function() {
+		return "Rectangle(" + this.position.x + ", " + this.position.y + ", " + this.size.x + ", " + this.size.y + ")";
+	}
+	,equals: function(other) {
 		return this.position.equals(other.position) && this.size.equals(other.size);
 	}
 	,setPosition: function(x,y) {
@@ -1033,7 +1046,10 @@ precog.geom.MutableRectangle = function(x,y,width,height) {
 precog.geom.MutableRectangle.__name__ = ["precog","geom","MutableRectangle"];
 precog.geom.MutableRectangle.__super__ = precog.geom.Rectangle;
 precog.geom.MutableRectangle.prototype = $extend(precog.geom.Rectangle.prototype,{
-	setPosition: function(x,y) {
+	toString: function() {
+		return "Rectangle(" + this.position.x + ", " + this.position.y + ", " + this.size.x + ", " + this.size.y + ")";
+	}
+	,setPosition: function(x,y) {
 		precog.geom.Rectangle.prototype.setPosition.call(this,x,y);
 	}
 	,setSize: function(width,height) {
@@ -1065,7 +1081,6 @@ precog.geom.TestPoint.prototype = {
 precog.layout = {}
 precog.layout.Layout = function(width,height) {
 	this.size = new precog.geom.MutablePoint(width,height);
-	this.suspended = false;
 	this.calculatedBoundaries = new precog.geom.MutableRectangle();
 	this.panels = new precog.layout.LayoutPanels(this);
 	this.onpanel = { add : this.panels.observableAdd, remove : this.panels.observableRemove};
@@ -1079,7 +1094,6 @@ precog.layout.Layout.prototype = {
 		throw "abstract method, must override";
 	}
 	,update: function() {
-		if(this.suspended) return;
 		var $it0 = HxOverrides.iter(this.panels.panels);
 		while( $it0.hasNext() ) {
 			var panel = $it0.next();
@@ -1089,24 +1103,17 @@ precog.layout.Layout.prototype = {
 	,get_boundaries: function() {
 		return this.calculatedBoundaries;
 	}
-	,resume: function() {
-		this.suspended = false;
-		this.update();
-	}
-	,suspend: function() {
-		this.suspended = true;
-	}
 	,panels: null
 	,calculatedBoundaries: null
 	,onpanel: null
 	,boundaries: null
 	,size: null
-	,suspended: null
 	,__class__: precog.layout.Layout
 }
 precog.layout.CanvasLayout = function(width,height) {
 	var _g = this;
 	precog.layout.Layout.call(this,width,height);
+	this.canvases = new haxe.ds.ObjectMap();
 	thx.react.IObservables.addListener(this.onpanel.remove,function(panel) {
 		_g.canvases.remove(panel);
 	});
@@ -1166,7 +1173,7 @@ precog.layout.CanvasLayout.prototype = $extend(precog.layout.Layout.prototype,{
 		panel.position.set(precog.layout._Extent.ExtentImpl.relativeTo(c.x,this.size.x) + precog.layout.CanvasLayout.anchorX(c.layoutAnchor,this.size.x) - precog.layout.CanvasLayout.anchorX(c.panelAnchor,panel.size.x),precog.layout._Extent.ExtentImpl.relativeTo(c.y,this.size.y) + precog.layout.CanvasLayout.anchorY(c.layoutAnchor,this.size.y) - precog.layout.CanvasLayout.anchorY(c.panelAnchor,panel.size.y));
 	}
 	,addPanel: function(panel) {
-		var canvaspanel = new precog.layout.CanvasPanel(this);
+		var canvaspanel = new precog.layout.CanvasPanel();
 		this.panels.addPanel(panel);
 		this.canvases.set(panel,canvaspanel);
 		return canvaspanel;
@@ -1174,37 +1181,32 @@ precog.layout.CanvasLayout.prototype = $extend(precog.layout.Layout.prototype,{
 	,canvases: null
 	,__class__: precog.layout.CanvasLayout
 });
-precog.layout.CanvasPanel = function(layout) {
-	this.layout = layout;
+precog.layout.CanvasPanel = function() {
 	this.layoutAnchor = precog.layout.CanvasAnchor.TopLeft;
 	this.panelAnchor = precog.layout.CanvasAnchor.TopLeft;
-	this.width = precog.layout.ExtentValue.Percent(0);
-	this.height = precog.layout.ExtentValue.Percent(0);
-	this.x = precog.layout.ExtentValue.Percent(0);
-	this.y = precog.layout.ExtentValue.Percent(0);
+	this.width = precog.layout.ExtentValue.Absolute(0);
+	this.height = precog.layout.ExtentValue.Absolute(0);
+	this.x = precog.layout.ExtentValue.Absolute(0);
+	this.y = precog.layout.ExtentValue.Absolute(0);
 };
 precog.layout.CanvasPanel.__name__ = ["precog","layout","CanvasPanel"];
 precog.layout.CanvasPanel.prototype = {
 	setOffset: function(x,y) {
 		this.x = x;
 		this.y = y;
-		this.layout.update();
 		return this;
 	}
-	,setPoint: function(width,height) {
+	,setSize: function(width,height) {
 		this.width = width;
 		this.height = height;
-		this.layout.update();
 		return this;
 	}
 	,setPanelAnchor: function(anchor) {
 		this.panelAnchor = anchor;
-		this.layout.update();
 		return this;
 	}
 	,setLayoutAnchor: function(anchor) {
 		this.layoutAnchor = anchor;
-		this.layout.update();
 		return this;
 	}
 	,y: null
@@ -1213,7 +1215,6 @@ precog.layout.CanvasPanel.prototype = {
 	,width: null
 	,panelAnchor: null
 	,layoutAnchor: null
-	,layout: null
 	,__class__: precog.layout.CanvasPanel
 }
 precog.layout.CanvasAnchor = { __ename__ : ["precog","layout","CanvasAnchor"], __constructs__ : ["Center","TopLeft","Top","TopRight","Left","Right","BottomLeft","Bottom","BottomRight"] }
@@ -1253,11 +1254,11 @@ precog.layout._Extent.ExtentImpl.__name__ = ["precog","layout","_Extent","Extent
 precog.layout._Extent.ExtentImpl._new = function(v) {
 	return v;
 }
-precog.layout._Extent.ExtentImpl.fromFloat = function(v) {
-	return precog.layout.ExtentValue.Percent(v);
-}
 precog.layout._Extent.ExtentImpl.fromInt = function(v) {
 	return precog.layout.ExtentValue.Absolute(v);
+}
+precog.layout._Extent.ExtentImpl.fromFloat = function(v) {
+	return precog.layout.ExtentValue.Percent(v);
 }
 precog.layout._Extent.ExtentImpl.fromExtentValue = function(v) {
 	return v;
@@ -1332,10 +1333,6 @@ precog.layout._Extent.ExtentImpl.relativeTo = function(this1,reference) {
 		return $r;
 	}(this));
 }
-precog.layout.ExtentPosition = { __ename__ : ["precog","layout","ExtentPosition"], __constructs__ : ["Center","Start","End"] }
-precog.layout.ExtentPosition.Center = function(offset) { var $x = ["Center",0,offset]; $x.__enum__ = precog.layout.ExtentPosition; $x.toString = $estr; return $x; }
-precog.layout.ExtentPosition.Start = function(offset) { var $x = ["Start",1,offset]; $x.__enum__ = precog.layout.ExtentPosition; $x.toString = $estr; return $x; }
-precog.layout.ExtentPosition.End = function(offset) { var $x = ["End",2,offset]; $x.__enum__ = precog.layout.ExtentPosition; $x.toString = $estr; return $x; }
 precog.layout.LayoutPanels = function(layout) {
 	this.layout = layout;
 	this.panels = [];
@@ -1347,38 +1344,19 @@ precog.layout.LayoutPanels.prototype = {
 	iterator: function() {
 		return HxOverrides.iter(this.panels);
 	}
-	,resumer: function(f) {
-		if(this.layout.suspended) f(); else {
-			this.layout.suspend();
-			f();
-			this.layout.resume();
-		}
-	}
 	,clear: function() {
-		var _g = this;
 		var all = this.panels.slice();
-		this.resumer(function() {
-			while(all.length > 0) _g.removePanel(all.shift());
-		});
-		this.layout.update();
+		while(all.length > 0) this.removePanel(all.shift());
 	}
 	,removePanel: function(panel) {
-		var _g = this;
-		this.resumer(function() {
-			panel.setLayout(null);
-			HxOverrides.remove(_g.panels,panel);
-			_g.observableRemove.notify(panel);
-		});
-		this.layout.update();
+		panel.setLayout(null);
+		HxOverrides.remove(this.panels,panel);
+		this.observableRemove.notify(panel);
 	}
 	,addPanel: function(panel) {
-		var _g = this;
-		this.resumer(function() {
-			panel.setLayout(_g.layout);
-			_g.panels.push(panel);
-			_g.observableAdd.notify(panel);
-		});
-		this.layout.update();
+		panel.setLayout(this.layout);
+		this.panels.push(panel);
+		this.observableAdd.notify(panel);
 	}
 	,observableRemove: null
 	,observableAdd: null
@@ -1396,8 +1374,11 @@ precog.layout.Panel.prototype = {
 		this.setLayout(null);
 	}
 	,setLayout: function(layout) {
-		if(null != this.parentLayout) this.parentLayout.panels.removePanel(this);
-		this.parentLayout = layout;
+		var _g = this;
+		(function(oldParent) {
+			_g.parentLayout = layout;
+			if(null != oldParent) oldParent.panels.removePanel(_g);
+		})(this.parentLayout);
 	}
 	,parentLayout: null
 	,size: null
@@ -1409,15 +1390,34 @@ precog.layout.TestCanvasLayout = function() {
 precog.layout.TestCanvasLayout.__name__ = ["precog","layout","TestCanvasLayout"];
 precog.layout.TestCanvasLayout.prototype = {
 	testSize: function() {
+		this.layout.addPanel(this.panel).setSize(precog.layout.ExtentValue.Absolute(100),precog.layout.ExtentValue.Percent(0.5));
+		this.layout.update();
+		var test = new precog.geom.Point(100,50);
+		utest.Assert.isTrue(this.panel.size.equals(test),"expected " + Std.string(test) + " but is " + Std.string(this.panel.size),{ fileName : "TestCanvasLayout.hx", lineNumber : 97, className : "precog.layout.TestCanvasLayout", methodName : "testSize"});
 	}
-	,testAnchorPanel: function() {
+	,testOffset: function() {
+		this.layout.addPanel(this.panel).setSize(precog.layout.ExtentValue.Absolute(20),precog.layout.ExtentValue.Absolute(20)).setPanelAnchor(precog.layout.CanvasAnchor.Center).setLayoutAnchor(precog.layout.CanvasAnchor.Center).setOffset(precog.layout.ExtentValue.Absolute(-10),precog.layout.ExtentValue.Absolute(10));
+		this.layout.update();
+		var test = new precog.geom.Point(80,50);
+		utest.Assert.isTrue(this.panel.position.equals(test),"expected " + Std.string(test) + " but is " + Std.string(this.panel.position) + " for " + Std.string(test),{ fileName : "TestCanvasLayout.hx", lineNumber : 85, className : "precog.layout.TestCanvasLayout", methodName : "testOffset"});
 	}
-	,testAnchorLayout: function() {
+	,testAnchors: function() {
+		var tests = [{ layout : precog.layout.CanvasAnchor.TopLeft, panel : precog.layout.CanvasAnchor.TopLeft, expected : new precog.geom.Point(0,0)},{ layout : precog.layout.CanvasAnchor.TopLeft, panel : precog.layout.CanvasAnchor.Center, expected : new precog.geom.Point(-50,-25)},{ layout : precog.layout.CanvasAnchor.TopLeft, panel : precog.layout.CanvasAnchor.BottomRight, expected : new precog.geom.Point(-100,-50)},{ layout : precog.layout.CanvasAnchor.Center, panel : precog.layout.CanvasAnchor.TopLeft, expected : new precog.geom.Point(100,50)},{ layout : precog.layout.CanvasAnchor.Center, panel : precog.layout.CanvasAnchor.Center, expected : new precog.geom.Point(50,25)},{ layout : precog.layout.CanvasAnchor.Center, panel : precog.layout.CanvasAnchor.BottomRight, expected : new precog.geom.Point(0,0)},{ layout : precog.layout.CanvasAnchor.BottomRight, panel : precog.layout.CanvasAnchor.TopLeft, expected : new precog.geom.Point(200,100)},{ layout : precog.layout.CanvasAnchor.BottomRight, panel : precog.layout.CanvasAnchor.Center, expected : new precog.geom.Point(150,75)},{ layout : precog.layout.CanvasAnchor.BottomRight, panel : precog.layout.CanvasAnchor.BottomRight, expected : new precog.geom.Point(100,50)}];
+		var canv = this.layout.addPanel(this.panel).setSize(precog.layout.ExtentValue.Absolute(100),precog.layout.ExtentValue.Absolute(50));
+		var _g = 0;
+		while(_g < tests.length) {
+			var test = tests[_g];
+			++_g;
+			canv.setLayoutAnchor(test.layout).setPanelAnchor(test.panel);
+			this.layout.update();
+			utest.Assert.isTrue(this.panel.position.equals(test.expected),"expected " + Std.string(test.expected) + " but is " + Std.string(this.panel.position) + " for " + Std.string(test),{ fileName : "TestCanvasLayout.hx", lineNumber : 68, className : "precog.layout.TestCanvasLayout", methodName : "testAnchors"});
+		}
 	}
 	,testDefault: function() {
 		this.layout.addPanel(this.panel);
-		utest.Assert.isTrue(this.panel.size.equals(precog.layout.TestCanvasLayout.point0),null,{ fileName : "TestCanvasLayout.hx", lineNumber : 22, className : "precog.layout.TestCanvasLayout", methodName : "testDefault"});
-		utest.Assert.isTrue(this.panel.position.equals(precog.layout.TestCanvasLayout.point0),null,{ fileName : "TestCanvasLayout.hx", lineNumber : 23, className : "precog.layout.TestCanvasLayout", methodName : "testDefault"});
+		this.layout.update();
+		utest.Assert.isTrue(this.panel.size.equals(precog.layout.TestCanvasLayout.point0),null,{ fileName : "TestCanvasLayout.hx", lineNumber : 25, className : "precog.layout.TestCanvasLayout", methodName : "testDefault"});
+		utest.Assert.isTrue(this.panel.position.equals(precog.layout.TestCanvasLayout.point0),null,{ fileName : "TestCanvasLayout.hx", lineNumber : 26, className : "precog.layout.TestCanvasLayout", methodName : "testDefault"});
 	}
 	,setup: function() {
 		this.layout = new precog.layout.CanvasLayout(200,100);
@@ -1443,24 +1443,11 @@ precog.layout.TestLayout.prototype = $extend(precog.layout.Layout.prototype,{
 	,setup: function() {
 		this.updated = false;
 	}
-	,testSuspendResume: function() {
-		this.suspend();
-		var panel = new precog.layout.Panel();
-		this.panels.addPanel(panel);
-		utest.Assert.isFalse(this.updated,null,{ fileName : "TestLayout.hx", lineNumber : 42, className : "precog.layout.TestLayout", methodName : "testSuspendResume"});
-		this.panels.removePanel(panel);
-		utest.Assert.isTrue(this.updated,null,{ fileName : "TestLayout.hx", lineNumber : 44, className : "precog.layout.TestLayout", methodName : "testSuspendResume"});
-	}
-	,testUpdateOnRemove: function() {
-		var panel = new precog.layout.Panel();
-		this.panels.addPanel(panel);
-		this.updated = false;
-		this.panels.removePanel(panel);
-		utest.Assert.isTrue(this.updated,null,{ fileName : "TestLayout.hx", lineNumber : 34, className : "precog.layout.TestLayout", methodName : "testUpdateOnRemove"});
-	}
-	,testUpdateOnAdd: function() {
+	,testUpdate: function() {
 		this.panels.addPanel(new precog.layout.Panel());
-		utest.Assert.isTrue(this.updated,null,{ fileName : "TestLayout.hx", lineNumber : 25, className : "precog.layout.TestLayout", methodName : "testUpdateOnAdd"});
+		utest.Assert.isFalse(this.updated,null,{ fileName : "TestLayout.hx", lineNumber : 25, className : "precog.layout.TestLayout", methodName : "testUpdate"});
+		this.update();
+		utest.Assert.isTrue(this.updated,null,{ fileName : "TestLayout.hx", lineNumber : 27, className : "precog.layout.TestLayout", methodName : "testUpdate"});
 	}
 	,testAddRemovePanel: function() {
 		var layout = this, panel = new precog.layout.Panel();
@@ -4333,3 +4320,5 @@ utest.TestHandler.POLLING_TIME = 10;
 utest.ui.text.HtmlReport.platform = "javascript";
 TestAll.main();
 })();
+
+//@ sourceMappingURL=test.js.map

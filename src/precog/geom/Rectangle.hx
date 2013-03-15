@@ -25,6 +25,9 @@ class Rectangle
 
 	public function equals(other : Rectangle)
 		return position.equals(other.position) && size.equals(other.size);
+
+	public function toString()
+		return 'Rectangle(${position.x}, ${position.y}, ${size.x}, ${size.y})';
 }
 
 class MutableRectangle extends Rectangle
@@ -33,4 +36,7 @@ class MutableRectangle extends Rectangle
 		super.setSize(width, height);
 	override public function setPosition(x : Float, y : Float)
 		super.setPosition(x, y);
+
+	override public function toString()
+		return 'Rectangle(${position.x}, ${position.y}, ${size.x}, ${size.y})';
 }

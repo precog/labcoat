@@ -19,28 +19,11 @@ class TestLayout extends Layout
 		Assert.isFalse(layout.iterator().hasNext());
 	}
 
-	public function testUpdateOnAdd()
+	public function testUpdate()
 	{
 		panels.addPanel(new Panel());
-		Assert.isTrue(updated);
-	}
-
-	public function testUpdateOnRemove()
-	{
-		var panel = new Panel();
-		panels.addPanel(panel);
-		updated = false;
-		panels.removePanel(panel);
-		Assert.isTrue(updated);
-	}
-
-	public function testSuspendResume()
-	{
-		suspend();
-		var panel = new Panel();
-		panels.addPanel(panel);
 		Assert.isFalse(updated);
-		panels.removePanel(panel);
+		update();
 		Assert.isTrue(updated);
 	}
 

@@ -9,6 +9,7 @@ class CanvasLayout extends Layout
 	public function new(width : Float, height : Float)
 	{
 		super(width, height);
+		canvases = new Map();
 		onpanel.remove.addListener(function(panel) {
 			canvases.remove(panel);
 		});
@@ -16,7 +17,7 @@ class CanvasLayout extends Layout
 
 	public function addPanel(panel : Panel) : CanvasPanel
 	{
-		var canvaspanel = new CanvasPanel(this);
+		var canvaspanel = new CanvasPanel();
 		panels.addPanel(panel);
 		canvases.set(panel, canvaspanel);
 		return canvaspanel;
@@ -62,16 +63,14 @@ class CanvasLayout extends Layout
 
 class CanvasPanel
 {
-	public var layout(default, null) : Layout;
 	public var layoutAnchor(default, null) : CanvasAnchor;
 	public var panelAnchor(default, null) : CanvasAnchor;
 	public var width(default, null) : Extent;
 	public var height(default, null) : Extent;
 	public var x(default, null) : Extent;
 	public var y(default, null) : Extent;
-	public function new(layout : Layout)
+	public function new()
 	{
-		this.layout = layout;
 		this.layoutAnchor = TopLeft;
 		this.panelAnchor = TopLeft;
 		this.width = 0;
@@ -83,22 +82,19 @@ class CanvasPanel
 	public function setLayoutAnchor(anchor : CanvasAnchor)
 	{
 		this.layoutAnchor = anchor;
-		layout.update();
 		return this;
 	}
 
 	public function setPanelAnchor(anchor : CanvasAnchor)
 	{
 		this.panelAnchor = anchor;
-		layout.update();
 		return this;
 	}
 
-	public function setPoint(width : Extent, height : Extent)
+	public function setSize(width : Extent, height : Extent)
 	{
 		this.width = width;
 		this.height = height;
-		layout.update();
 		return this;
 	}
 
@@ -106,7 +102,6 @@ class CanvasPanel
 	{
 		this.x = x;
 		this.y = y;
-		layout.update();
 		return this;
 	}
 }
