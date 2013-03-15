@@ -6,8 +6,8 @@ import js.Browser.document;
 class Main {
     static function main() {
         var editor = CodeMirrorFactory.create(document.body, {lineNumbers: true, gutters: ['editor-region']});
-        Reflect.setField(CodeMirror.keyMap.macDefault, "Shift-Enter", makeOrEvaluateRegion);
-        Reflect.setField(CodeMirror.keyMap.pcDefault, "Shift-Enter", makeOrEvaluateRegion);
+        Reflect.setField(CodeMirror.keyMap.macDefault, "Shift-Enter", expandRegion);
+        Reflect.setField(CodeMirror.keyMap.pcDefault, "Shift-Enter", expandRegion);
         Reflect.setField(CodeMirror.keyMap.macDefault, "Cmd-Enter", insertRegion);
         Reflect.setField(CodeMirror.keyMap.pcDefault, "Ctrl-Enter", insertRegion);
     }
@@ -17,22 +17,60 @@ class Main {
         makeOrEvaluateRegion(editor);
     }
 
+    // Regions don't expand from the right. Entering text after a
+    // region won't expand the region after it. If not in a region,
+    // find the next one and left-expand it to this line.
+    static function expandRegion(editor: CodeMirror) {
+        var current = currentRegion(editor);
+        if(current != null) {
+            var currentPos = current.find();
+            updateOutput(editor, currentPos.from, currentPos.to);
+            return;
+        }
+
+        var next = nextRegion(editor);
+        if(next == null) {
+            makeOrEvaluateRegion(editor);
+            return;
+        }
+
+        var pos = next.find();
+        var line = editor.getCursor().line;
+        moveRegion(editor, next, {line: line, ch: 0}, pos.to);
+        updateOutput(editor, pos.from, pos.to);
+    }
+
+    static function nextRegion(editor: CodeMirror) {
+        var marks = editor.getAllMarks();
+        var line = editor.getCursor().line;
+
+        for(mark in marks) {
+            var pos = mark.find();
+            if(pos.from.line < line) continue;
+
+            return mark;
+        }
+
+        return null;
+    }
+
     static function clearCurrentRegion(editor: CodeMirror) {
         var region = currentRegion(editor);
         var pos = if(region != null) region.find() else null;
         if(region == null || pos == null) return;
 
-        // Delete the current region make a new one from its new start.
+        // Delete the current region. Make new one from its new start.
         var nextLine = editor.getCursor().line + 1;
         if(pos.to.line < nextLine) return;
+        moveRegion(editor, region, {line: nextLine, ch: 0}, pos.to);
+    }
+
+    static function moveRegion(editor: CodeMirror, region: TextMarker, from: Pos, to: Pos) {
         region.clear();
         markText(
             editor,
-            {
-                line: nextLine,
-                ch: 0
-            },
-            pos.to
+            from,
+            to
         );
     }
 
