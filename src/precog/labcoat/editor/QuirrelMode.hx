@@ -30,7 +30,7 @@ class QuirrelMode {
         return {inComment: false};
     }
 
-    static function token(stream: StringStream, state: Dynamic) {
+    static function token(stream: StringStream, state: {inComment: Bool}) {
         if(state.inComment) {
             if(stream.match(commentEnd) != null) {
                 state.inComment = false;
