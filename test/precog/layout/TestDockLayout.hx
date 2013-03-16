@@ -78,4 +78,22 @@ class TestDockLayout
 		layout.update();
 		layout.boundaries.assertEquals(0, 0, 50, 100);
 	}
+
+	public function testMargin()
+	{
+		var p2 = new Panel(),
+			p3 = new Panel(),
+			p4 = new Panel();
+		layout.addPanel(panel).dockLeft(50).setMargin(10);
+		layout.addPanel(p2).dockTop(50).setMargin(0.1);
+		layout.addPanel(p3).setMargin(0.1);
+		layout.addPanel(p4).setMargin(0.1);
+		layout.update();
+
+		panel.frame.assertEquals(0,0,50,100);
+		p2.frame.assertEquals(60,0,140,50);
+		p3.frame.assertEquals(60,60,60,40);
+		p4.frame.assertEquals(140,60,60,40);
+		layout.boundaries.assertEquals(0, 0, 200, 100);
+	}
 }

@@ -6,11 +6,13 @@ class StackLayout extends Layout
 {
 	var items : Map<Panel, StackItem>;
 	public var defaultExtent : Extent;
+	public var defaultMargin : Extent;
 	public var vertical : Bool;
 	public function new(width : Float, height : Float, ?vertical = true)
 	{
 		super(width, height);
 		defaultExtent = 20;
+		defaultMargin = 0;
 		items = new Map();
 		this.vertical = vertical;
 		onpanel.remove.addListener(function(panel) {
@@ -20,7 +22,7 @@ class StackLayout extends Layout
 
 	public function addPanel(panel : Panel) : StackItem
 	{
-		var item = new StackItem(defaultExtent);
+		var item = new StackItem(defaultExtent, defaultMargin);
 		panels.addPanel(panel);
 		items.set(panel, item);
 		return item;
@@ -66,6 +68,7 @@ class StackLayout extends Layout
 				offset
 			);
 		}
+		offset += item.margin.relativeTo(size.y);
 	}
 
 	function updatePanelHorizontal(panel)
@@ -94,20 +97,29 @@ class StackLayout extends Layout
 				measuredBoundaries.height
 			);
 		}
+		offset += item.margin.relativeTo(size.x);
 	}
 }
 
 class StackItem 
 {
 	public var extent(default, null) : Extent;
-	public function new(defaultExtent : Extent)
+	public var margin(default, null) : Extent;
+	public function new(defaultExtent : Extent, defaultMargin : Extent)
 	{
 		extent = defaultExtent;
+		margin = defaultMargin;
 	}
 
 	public function setExtent(extent : Extent)
 	{
 		this.extent = extent;
+		return this;
+	}
+
+	public function setMargin(margin : Extent)
+	{
+		this.margin = margin;
 		return this;
 	}
 }

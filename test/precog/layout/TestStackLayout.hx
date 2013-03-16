@@ -48,4 +48,24 @@ class TestStackLayout
 
 		layout.boundaries.assertEquals(0, 0, 200, 250);
 	}
+
+	public function testMargin()
+	{
+		var layout = new StackLayout(200, 20, false),
+			p1 = new Panel(),
+			p2 = new Panel(),
+			p3 = new Panel();
+
+		layout.defaultExtent = 100;
+		layout.addPanel(p1).setMargin(20);
+		layout.addPanel(p2).setExtent(50).setMargin(10);
+		layout.addPanel(p3).setMargin(5);
+		layout.update();
+
+		p1.frame.assertEquals(0,0,100,20);
+		p2.frame.assertEquals(120,0,50,20);
+		p3.frame.assertEquals(180,0,100,20);
+
+		layout.boundaries.assertEquals(0, 0, 280, 20);
+	}
 }

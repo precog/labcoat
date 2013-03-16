@@ -9,10 +9,12 @@ class DockLayout extends Layout
 {
 	var docks : Map<Panel, Dock>;
 	public var defaultDock(default, null) : DockKind;
+	public var defaultMargin(default, null) : Extent;
 	public function new(width : Float, height : Float)
 	{
 		super(width, height);
 		defaultDock = Fill;
+		defaultMargin = 0;
 		docks = new Map();
 		onpanel.remove.addListener(function(panel) {
 			docks.remove(panel);
@@ -22,7 +24,7 @@ class DockLayout extends Layout
 	public function addPanel(panel : Panel) : Dock
 	{
 		panels.addPanel(panel);
-		var dock = new Dock(defaultDock);
+		var dock = new Dock(defaultDock, defaultMargin);
 		docks.set(panel, dock);
 		return dock;
 	}
@@ -43,15 +45,17 @@ class DockLayout extends Layout
 
 	function measurePanel(panel : Panel)
 	{
-		var fl : Float;
-		switch(docks.get(panel).dock)
+		var dock = docks.get(panel);
+		switch(dock.dock)
 		{
 			case Top(esize), Bottom(esize):
-				fl = esize.relativeTo(size.y);
-				available.set(0, 0, available.width, available.height + fl);
+				var fl = esize.relativeTo(size.y),
+					mg = dock.margin.relativeTo(size.y);
+				available.set(0, 0, available.width, available.height + fl + mg);
 			case Right(esize), Left(esize):
-				fl = esize.relativeTo(size.x);
-				available.set(0, 0, available.width + fl, available.height);
+				var fl = esize.relativeTo(size.x),
+					mg = dock.margin.relativeTo(size.x);
+				available.set(0, 0, available.width + fl + mg, available.height);
 			case Fill:
 				fillqueue.push(panel);
 		}
@@ -74,25 +78,29 @@ class DockLayout extends Layout
 
 	override function updatePanel(panel : Panel)
 	{
-		var fl : Float;
-		switch(docks.get(panel).dock)
+		var dock = docks.get(panel);
+		switch(dock.dock)
 		{
 			case Top(esize):
-				fl = esize.relativeTo(size.y);
+				var fl = esize.relativeTo(size.y),
+					mg = dock.margin.relativeTo(size.y);
 				panel.frame.set(available.x, available.y, available.width, fl);
-				available.set(available.x, available.y + fl, available.width, available.height - fl);
+				available.set(available.x, available.y + fl + mg, available.width, available.height - fl - mg);
 			case Right(esize):
-				fl = esize.relativeTo(size.x);
+				var fl = esize.relativeTo(size.x),
+					mg = dock.margin.relativeTo(size.x);
 				panel.frame.set(available.x + available.width - fl, available.y, fl, available.height);
-				available.set(available.x, available.y, available.width - fl, available.height);
+				available.set(available.x, available.y, available.width - fl -mg, available.height);
 			case Bottom(esize):
-				fl = esize.relativeTo(size.y);
+				var fl = esize.relativeTo(size.y),
+					mg = dock.margin.relativeTo(size.y);
 				panel.frame.set(available.x + available.height - fl, available.y, available.width, fl);
-				available.set(available.x, available.y, available.width, available.height - fl);
+				available.set(available.x, available.y, available.width, available.height - fl - mg);
 			case Left(esize):
-				fl = esize.relativeTo(size.x);
+				var fl = esize.relativeTo(size.x),
+					mg = dock.margin.relativeTo(size.x);
 				panel.frame.set(available.x, available.y, fl, available.height);
-				available.set(available.x + fl, available.y, available.width - fl, available.height);
+				available.set(available.x + fl + mg, available.y, available.width - fl -mg, available.height);
 			case Fill:
 		}
 	}
@@ -100,14 +108,21 @@ class DockLayout extends Layout
 	function afterUpdate() 
 	{
 		if(0 == fillqueue.length) return;
-		var w = available.width / fillqueue.length,
+		var margin = 0.0,
+			margins = [0.0];
+		for(i in 0...fillqueue.length - 1)
+		{
+			margins[i+1] = docks.get(fillqueue[i]).margin.relativeTo(size.x);
+			margin += margins[i+1];
+		}
+		var w = (available.width - margin) / fillqueue.length,
 			h = available.height,
 			x = available.x,
 			y = available.y;
 		for(i in 0...fillqueue.length)
 		{
 			var frame = fillqueue[i].frame;
-			frame.set(x + w * i, y, w, h);
+			frame.set(x + w * i + margins[i], y, w, h);
 		}
 	}
 }
@@ -115,38 +130,54 @@ class DockLayout extends Layout
 class Dock
 {
 	public var dock(default, null) : DockKind;
-	public function new(defaultDock : DockKind)
+	public var margin(default, null) : Extent;
+	public function new(defaultDock : DockKind, defaultMargin)
 	{
 		dock = defaultDock;
+		margin = defaultMargin;
 	}
 
-	public function dockLeft(size : Extent)
+	public function dockLeft(size : Extent, ?margin : Extent)
 	{
 		dock = Left(size);
+		if(null != margin)
+			this.margin = margin;
 		return this;
 	}
 
-	public function dockRight(size : Extent)
+	public function dockRight(size : Extent, ?margin : Extent)
 	{
 		dock = Right(size);
+		if(null != margin)
+			this.margin = margin;
 		return this;
 	}
 
-	public function dockTop(size : Extent)
+	public function dockTop(size : Extent, ?margin : Extent)
 	{
 		dock = Top(size);
+		if(null != margin)
+			this.margin = margin;
 		return this;
 	}
 
-	public function dockBottom(size : Extent)
+	public function dockBottom(size : Extent, ?margin : Extent)
 	{
 		dock = Bottom(size);
+		if(null != margin)
+			this.margin = margin;
 		return this;
 	}
 
 	public function fill()
 	{
 		dock = Fill;
+		return this;
+	}
+
+	public function setMargin(margin : Extent)
+	{
+		this.margin = margin;
 		return this;
 	}
 }
