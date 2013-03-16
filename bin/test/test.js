@@ -1334,7 +1334,7 @@ precog.layout.CanvasLayout.prototype = $extend(precog.layout.Layout.prototype,{
 		this.measuredBoundaries.set(Math.NaN,Math.NaN,Math.NaN,Math.NaN);
 	}
 	,addPanel: function(panel) {
-		var canvaspanel = new precog.layout.CanvasPanel();
+		var canvaspanel = new precog.layout.Canvas();
 		this.panels.addPanel(panel);
 		this.canvases.set(panel,canvaspanel);
 		return canvaspanel;
@@ -1342,7 +1342,7 @@ precog.layout.CanvasLayout.prototype = $extend(precog.layout.Layout.prototype,{
 	,canvases: null
 	,__class__: precog.layout.CanvasLayout
 });
-precog.layout.CanvasPanel = function() {
+precog.layout.Canvas = function() {
 	this.layoutAnchor = precog.layout.CanvasAnchor.TopLeft;
 	this.panelAnchor = precog.layout.CanvasAnchor.TopLeft;
 	this.width = precog.layout.ExtentValue.Absolute(0);
@@ -1350,8 +1350,8 @@ precog.layout.CanvasPanel = function() {
 	this.x = precog.layout.ExtentValue.Absolute(0);
 	this.y = precog.layout.ExtentValue.Absolute(0);
 };
-precog.layout.CanvasPanel.__name__ = ["precog","layout","CanvasPanel"];
-precog.layout.CanvasPanel.prototype = {
+precog.layout.Canvas.__name__ = ["precog","layout","Canvas"];
+precog.layout.Canvas.prototype = {
 	setOffset: function(x,y) {
 		this.x = x;
 		this.y = y;
@@ -1376,7 +1376,7 @@ precog.layout.CanvasPanel.prototype = {
 	,width: null
 	,panelAnchor: null
 	,layoutAnchor: null
-	,__class__: precog.layout.CanvasPanel
+	,__class__: precog.layout.Canvas
 }
 precog.layout.CanvasAnchor = { __ename__ : ["precog","layout","CanvasAnchor"], __constructs__ : ["Center","TopLeft","Top","TopRight","Left","Right","BottomLeft","Bottom","BottomRight"] }
 precog.layout.CanvasAnchor.Center = ["Center",0];
@@ -1409,6 +1409,7 @@ precog.layout.CanvasAnchor.BottomRight.__enum__ = precog.layout.CanvasAnchor;
 precog.layout.DockLayout = function(width,height) {
 	var _g = this;
 	precog.layout.Layout.call(this,width,height);
+	this.defaultDock = precog.layout.DockKind.Fill;
 	this.docks = new haxe.ds.ObjectMap();
 	thx.react.IObservables.addListener(this.onpanel.remove,function(panel) {
 		_g.docks.remove(panel);
@@ -1498,18 +1499,19 @@ precog.layout.DockLayout.prototype = $extend(precog.layout.Layout.prototype,{
 	}
 	,addPanel: function(panel) {
 		this.panels.addPanel(panel);
-		var dock = new precog.layout.DockPanel();
+		var dock = new precog.layout.Dock(this.defaultDock);
 		this.docks.set(panel,dock);
 		return dock;
 	}
+	,defaultDock: null
 	,docks: null
 	,__class__: precog.layout.DockLayout
 });
-precog.layout.DockPanel = function() {
-	this.dock = precog.layout.DockKind.Fill;
+precog.layout.Dock = function(defaultDock) {
+	this.dock = defaultDock;
 };
-precog.layout.DockPanel.__name__ = ["precog","layout","DockPanel"];
-precog.layout.DockPanel.prototype = {
+precog.layout.Dock.__name__ = ["precog","layout","Dock"];
+precog.layout.Dock.prototype = {
 	fill: function() {
 		this.dock = precog.layout.DockKind.Fill;
 	}
@@ -1526,7 +1528,7 @@ precog.layout.DockPanel.prototype = {
 		this.dock = precog.layout.DockKind.Left(size);
 	}
 	,dock: null
-	,__class__: precog.layout.DockPanel
+	,__class__: precog.layout.Dock
 }
 precog.layout.DockKind = { __ename__ : ["precog","layout","DockKind"], __constructs__ : ["Top","Right","Bottom","Left","Fill"] }
 precog.layout.DockKind.Top = function(size) { var $x = ["Top",0,size]; $x.__enum__ = precog.layout.DockKind; $x.toString = $estr; return $x; }

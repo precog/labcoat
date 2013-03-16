@@ -6,7 +6,6 @@ import precog.geom.IRectangleObservable;
 import thx.react.IObservable;
 import thx.react.Observable;
 
-// add added/removed events
 @:access(precog.layout.Panel)
 class Layout
 {

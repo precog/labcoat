@@ -3,10 +3,9 @@ package precog.layout;
 using thx.react.IObservable;
 
 @:access(precog.geom.Point)
-@:access(precog.layout.CanvasPanel)
 class CanvasLayout extends Layout
 {
-	var canvases : Map<Panel, CanvasPanel>;
+	var canvases : Map<Panel, Canvas>;
 	public function new(width : Float, height : Float)
 	{
 		super(width, height);
@@ -16,9 +15,9 @@ class CanvasLayout extends Layout
 		});
 	}
 
-	public function addPanel(panel : Panel) : CanvasPanel
+	public function addPanel(panel : Panel) : Canvas
 	{
-		var canvaspanel = new CanvasPanel();
+		var canvaspanel = new Canvas();
 		panels.addPanel(panel);
 		canvases.set(panel, canvaspanel);
 		return canvaspanel;
@@ -75,7 +74,7 @@ class CanvasLayout extends Layout
 	}
 }
 
-class CanvasPanel
+class Canvas
 {
 	public var layoutAnchor(default, null) : CanvasAnchor;
 	public var panelAnchor(default, null) : CanvasAnchor;
@@ -83,7 +82,7 @@ class CanvasPanel
 	public var height(default, null) : Extent;
 	public var x(default, null) : Extent;
 	public var y(default, null) : Extent;
-	function new()
+	public function new()
 	{
 		this.layoutAnchor = TopLeft;
 		this.panelAnchor = TopLeft;

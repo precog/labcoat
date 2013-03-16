@@ -5,23 +5,24 @@ using precog.geom.Rectangle;
 using precog.layout.Extent;
 
 @:access(precog.geom.Point)
-@:access(precog.layout.DockPanel)
 class DockLayout extends Layout
 {
-	var docks : Map<Panel, DockPanel>;
+	var docks : Map<Panel, Dock>;
+	public var defaultDock(default, null) : DockKind;
 	public function new(width : Float, height : Float)
 	{
 		super(width, height);
+		defaultDock = Fill;
 		docks = new Map();
 		onpanel.remove.addListener(function(panel) {
 			docks.remove(panel);
 		});
 	}
 
-	public function addPanel(panel : Panel) : DockPanel
+	public function addPanel(panel : Panel) : Dock
 	{
 		panels.addPanel(panel);
-		var dock = new DockPanel();
+		var dock = new Dock(defaultDock);
 		docks.set(panel, dock);
 		return dock;
 	}
@@ -111,12 +112,12 @@ class DockLayout extends Layout
 	}
 }
 
-class DockPanel
+class Dock
 {
-	var dock : DockKind;
-	function new()
+	public var dock(default, null) : DockKind;
+	public function new(defaultDock : DockKind)
 	{
-		dock = Fill;
+		dock = defaultDock;
 	}
 
 	public function dockLeft(size : Extent)
