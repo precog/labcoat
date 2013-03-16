@@ -14,6 +14,8 @@ class TestAll
 		runner.addCase(new precog.layout.TestLayout());
 		runner.addCase(new precog.layout.TestCanvasLayout());
 		runner.addCase(new precog.layout.TestDockLayout());
+		runner.addCase(new precog.layout.TestStackLayout());
+		runner.addCase(new precog.layout.TestWrapLayout());
 
 	}
 

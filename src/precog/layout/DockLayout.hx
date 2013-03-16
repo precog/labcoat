@@ -123,26 +123,31 @@ class Dock
 	public function dockLeft(size : Extent)
 	{
 		dock = Left(size);
+		return this;
 	}
 
 	public function dockRight(size : Extent)
 	{
 		dock = Right(size);
+		return this;
 	}
 
 	public function dockTop(size : Extent)
 	{
 		dock = Top(size);
+		return this;
 	}
 
 	public function dockBottom(size : Extent)
 	{
 		dock = Bottom(size);
+		return this;
 	}
 
 	public function fill()
 	{
 		dock = Fill;
+		return this;
 	}
 }
 
