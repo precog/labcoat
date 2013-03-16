@@ -6,6 +6,14 @@ import precog.geom.IRectangleObservable;
 import thx.react.IObservable;
 import thx.react.Observable;
 
+/**
+TODO:
+	- add GridLayout http://wpftutorial.net/GridLayout.html
+	- add UniformGridLayout
+
+quickstart: http://www.codeproject.com/Articles/30904/WPF-Layouts-A-Visual-Quick-Start
+*/
+
 @:access(precog.layout.Panel)
 class Layout
 {
@@ -112,28 +120,3 @@ class LayoutPanels
 	inline public function iterator()
 		return panels.iterator();
 }
-
-/**
-USEFUL RESOURCES
-intro:
-http://wpftutorial.net/LayoutProperties.html
-stack:
-http://wpftutorial.net/StackPanel.html
-grid:
-http://wpftutorial.net/GridLayout.html
-dock:
-http://wpftutorial.net/DockPanel.html
-canvas:
-http://wpftutorial.net/Canvas.html
-wrap:
-http://wpftutorial.net/WrapPanel.html
-viewbox:
-http://wpftutorial.net/ViewBox.html
-
-
-custom:
-http://wpftutorial.net/CustomLayoutPanel.html
-
-quickstart: http://www.codeproject.com/Articles/30904/WPF-Layouts-A-Visual-Quick-Start
-
-*/

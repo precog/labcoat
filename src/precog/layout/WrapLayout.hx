@@ -2,6 +2,11 @@ package precog.layout;
 
 using thx.react.IObservable;
 
+/**
+TODO:
+	- add right-to-left
+	- add bottom-to-top
+*/
 class WrapLayout extends Layout 
 {
 	var items : Map<Panel, WrapItem>;
