@@ -2,6 +2,7 @@ package precog.layout;
 
 import precog.geom.Point;
 import precog.geom.Rectangle;
+import precog.geom.IRectangleObservable;
 import thx.react.IObservable;
 import thx.react.Observable;
 
@@ -10,18 +11,18 @@ import thx.react.Observable;
 class Layout
 {
 	
-	public var size(default, null) : MutablePoint;
-	public var boundaries(get_boundaries, null) : Rectangle;
+	public var size(default, null) : Point;
+	public var boundaries(get_boundaries, null) : IRectangleObservable;
 	public var onpanel(default, null) : {
 		add : IObservable<Panel>,
 		remove : IObservable<Panel>
 	};
-	var calculatedBoundaries : MutableRectangle;
+	var measuredBoundaries : Rectangle;
 	var panels : LayoutPanels;
 	function new(width : Float, height : Float)
 	{
-		this.size = new MutablePoint(width, height);
-		this.calculatedBoundaries = new MutableRectangle();
+		this.size = new Point(width, height);
+		this.measuredBoundaries = new Rectangle();
 		this.panels = new LayoutPanels(this);
 		this.onpanel = {
 			add : panels.observableAdd,
@@ -29,17 +30,44 @@ class Layout
 		};
 	}
 
-	inline function get_boundaries() return calculatedBoundaries;
+	inline function get_boundaries() return measuredBoundaries;
+
+	var updateQueue : Array<Void -> Void>;
+	function createUpdateQueue()
+	{
+		return [panelIteratorFunction(updatePanel)];
+	}
+
+	function panelIteratorFunction(f : Panel -> Void)
+	{
+		return function() {
+			for(panel in panels)
+				f(panel);
+		}
+	}
 
 	public function update()
 	{
-		for(panel in panels)
-			updatePanel(panel);
+		updateQueue = createUpdateQueue();
+		measuredBoundaries.wrapSuspended(function() {
+			for(panel in panels)
+				panel.frame.suspend();
+			resetBoundaries();
+			while(updateQueue.length > 0)
+				updateQueue.shift()();
+			for(panel in panels)
+				panel.frame.resume();
+		});
+	}
+
+	function resetBoundaries()
+	{
+		measuredBoundaries.set(Math.NaN, Math.NaN, Math.NaN, Math.NaN);
 	}
 
 	function updatePanel(panel : Panel)
 	{
-		throw "abstract method, must override";
+
 	}
 
 	public function iterator()

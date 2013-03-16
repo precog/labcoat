@@ -1,42 +1,104 @@
 package precog.geom;
 
+import thx.react.Suspendable;
+
 @:access(precog.geom.Point)
-class Rectangle 
+class Rectangle extends Suspendable<IRectangle> implements IRectangleObservable
 {
-	public var position(default, null) : Point;
-	public var size(default, null) : Point;
-	public function new(x : Float = 0.0, y : Float = 0.0, width : Float = 0.0, height : Float = 0.0)
+	public var x(default, null) : Float;
+	public var y(default, null) : Float;
+	public var width(default, null) : Float;
+	public var height(default, null) : Float;
+	public function new(x = 0.0, y = 0.0, width = 0.0, height = 0.0)
 	{
-		position = new Point(x, y);
-		size = new Point(width, height);
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
 	}
 
-	function setSize(width : Float, height : Float)
-	{
-		if(size.x == width && size.y == height) return;
-		size.set(width, height);
-	}
+	public function clone()
+		return new Rectangle(x, y, width, height);
 
-	function setPosition(x : Float, y : Float)
-	{
-		if(position.x == x && position.y == y) return;
-		position.set(x, y);
-	}
-
-	public function equals(other : Rectangle)
-		return position.equals(other.position) && size.equals(other.size);
+	public function equals(other : IRectangle)
+		return 
+			x == other.x && y == other.y
+			&&
+			width == other.width && height == other.height;
 
 	public function toString()
-		return 'Rectangle(${position.x}, ${position.y}, ${size.x}, ${size.y})';
-}
+		return 'Rectangle($x, $y, $width, $height)';
 
-class MutableRectangle extends Rectangle
-{
-	override public function setSize(width : Float, height : Float)
-		super.setSize(width, height);
-	override public function setPosition(x : Float, y : Float)
-		super.setPosition(x, y);
+		
+	public function set(x : Float, y : Float, width : Float, height : Float)
+	{
+		if(this.x == x && this.y == y
+			&&
+			this.width == width && this.height == height) return;
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
+		notify(true);
+	}
 
-	override public function toString()
-		return 'Rectangle(${position.x}, ${position.y}, ${size.x}, ${size.y})';
+	public function addRectangle(other : IRectangle)
+	{
+		wrapSuspended(function() {
+ 			addPointXY(other.x, other.y);
+			addPointXY(other.x + other.width, other.y + other.height);
+		});
+		return this;
+	}
+
+	public inline function addPoint(point : IPoint)
+	{
+		return addPointXY(point.x, point.y);
+	}
+
+	public function addPointXY(px : Float, py : Float)
+	{
+		var x = this.x,
+			y = this.y,
+			w = this.width,
+			h = this.height;
+		if(px < this.x) {
+			x = px;
+			w = this.x + this.width - x;
+		} else if(px > this.x + this.width) {
+			w = px - this.x;
+		}
+		if(py < this.y) {
+			y = py;
+			h = this.y + this.height - y;
+		} else if(py > this.y + this.height) {
+			h = py - this.y;
+		}
+		set(x, y, w, h);
+		return this;
+	}
+/*
+	var points : Array<Point>
+	function getPoint(index)
+	{
+		if(null == points)
+			points = [];
+		var point = points[index];
+		if(null == point)
+		{
+			points[index] = point = new Point(); // TODO
+			var applyRect  = null,
+				applyPoint = null;
+			switch (index) {
+				case 0: //TL
+					applyRect  = function(r) point.setXY(r.x, r.y);
+					applyPoint = function(p) this.set(p.x, p.y, this.width, this.height);
+			}
+			applRecty(this);
+			addListener(applyRect);
+			point.addListener(applyPoint);
+		}
+		return point;
+	}
+*/
 }

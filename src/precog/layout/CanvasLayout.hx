@@ -3,6 +3,7 @@ package precog.layout;
 using thx.react.IObservable;
 
 @:access(precog.geom.Point)
+@:access(precog.layout.CanvasPanel)
 class CanvasLayout extends Layout
 {
 	var canvases : Map<Panel, CanvasPanel>;
@@ -23,17 +24,30 @@ class CanvasLayout extends Layout
 		return canvaspanel;
 	}
 
+	override function resetBoundaries()
+	{
+		measuredBoundaries.set(Math.NaN, Math.NaN, Math.NaN, Math.NaN);
+	}
+
 	override function updatePanel(panel)
 	{
 		var c = canvases.get(panel);
-		panel.size.set(
+		panel.frame.set(
+			c.x.relativeTo(size.x) + anchorX(c.layoutAnchor, size.x) - anchorX(c.panelAnchor, panel.frame.width),
+			c.y.relativeTo(size.y) + anchorY(c.layoutAnchor, size.y) - anchorY(c.panelAnchor, panel.frame.height),
 			c.width.relativeTo(size.x),
 			c.height.relativeTo(size.y)
 		);
-		panel.position.set(
-			c.x.relativeTo(size.x) + anchorX(c.layoutAnchor, size.x) - anchorX(c.panelAnchor, panel.size.x),
-			c.y.relativeTo(size.y) + anchorY(c.layoutAnchor, size.y) - anchorY(c.panelAnchor, panel.size.y)
-		);
+		if(Math.isNaN(measuredBoundaries.x)) {
+			measuredBoundaries.set(
+				panel.frame.x,
+				panel.frame.y,
+				panel.frame.width,
+				panel.frame.height
+			);
+		} else {
+			measuredBoundaries.addRectangle(panel.frame);
+		}
 	}
 
 	static function anchorX(anchor : CanvasAnchor, width : Float)
@@ -69,7 +83,7 @@ class CanvasPanel
 	public var height(default, null) : Extent;
 	public var x(default, null) : Extent;
 	public var y(default, null) : Extent;
-	public function new()
+	function new()
 	{
 		this.layoutAnchor = TopLeft;
 		this.panelAnchor = TopLeft;
