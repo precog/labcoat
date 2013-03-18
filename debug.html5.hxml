@@ -1,5 +1,13 @@
 -cp src
 -js bin/debug/html5/js/labcoat.js
 -main precog.app.Main
-#-cmd stylus --line-numbers css --out bin/debug/html5/css --use nib/lib/nib
+-D html5
+#LIBS
+-lib thx-core
+-lib thx-react
+
+-D embed_js
+
+# AFTER
 -cmd lessc --verbose css/labcoat.less > bin/debug/html5/css/labcoat.css
+
