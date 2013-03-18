@@ -14,6 +14,7 @@ class LayoutModule extends Module
 	override public function connect(comm : Communicator)
 	{
 		trace("we are live");
+		
 	}
 
 	override public function disconnect(comm : Communicator)
