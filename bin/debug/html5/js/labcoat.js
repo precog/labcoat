@@ -173,6 +173,62 @@ haxe.ds.IntMap.prototype = {
 	}
 	,__class__: haxe.ds.IntMap
 }
+haxe.ds.ObjectMap = function(weakKeys) {
+	if(weakKeys == null) weakKeys = false;
+	this.h = { };
+	this.h.__keys__ = { };
+};
+haxe.ds.ObjectMap.__name__ = ["haxe","ds","ObjectMap"];
+haxe.ds.ObjectMap.prototype = {
+	toString: function() {
+		var s = new StringBuf();
+		s.b += "{";
+		var it = this.keys();
+		while( it.hasNext() ) {
+			var i = it.next();
+			s.b += Std.string(Std.string(i));
+			s.b += " => ";
+			s.b += Std.string(Std.string(this.h[i.__id__]));
+			if(it.hasNext()) s.b += ", ";
+		}
+		s.b += "}";
+		return s.b;
+	}
+	,iterator: function() {
+		return { ref : this.h, it : this.keys(), hasNext : function() {
+			return this.it.hasNext();
+		}, next : function() {
+			var i = this.it.next();
+			return this.ref[i.__id__];
+		}};
+	}
+	,keys: function() {
+		var a = [];
+		for( var key in this.h.__keys__ ) {
+		if(this.h.hasOwnProperty(key)) a.push(this.h.__keys__[key]);
+		}
+		return HxOverrides.iter(a);
+	}
+	,remove: function(key) {
+		var id = key.__id__;
+		if(!this.h.hasOwnProperty(id)) return false;
+		delete(this.h[id]);
+		delete(this.h.__keys__[id]);
+		return true;
+	}
+	,exists: function(key) {
+		return this.h.hasOwnProperty(key.__id__);
+	}
+	,get: function(key) {
+		return this.h[key.__id__];
+	}
+	,set: function(key,value) {
+		var id = key.__id__ != null?key.__id__:key.__id__ = ++haxe.ds.ObjectMap.count;
+		this.h[id] = value;
+		this.h.__keys__[id] = key;
+	}
+	,__class__: haxe.ds.ObjectMap
+}
 haxe.ds.StringMap = function() {
 	this.h = { };
 };
@@ -293,14 +349,16 @@ js.Boot.__string_rec = function(o,s) {
 		return String(o);
 	}
 }
+js.Browser = function() { }
+js.Browser.__name__ = ["js","Browser"];
 var precog = {}
 precog.app = {}
 precog.app.Main = function() { }
 precog.app.Main.__name__ = ["precog","app","Main"];
 precog.app.Main.main = function() {
 	$(this).ready(function(e) {
-		var container = new js.JQuery(".labcoat-container,body").get(0);
-		if(null == container) throw "invalid HTML container for labcoat";
+		var container = new js.JQuery(".labcoat-container").get(0);
+		if(null == container) container = new js.JQuery("<div class=\"labcoat-container\"></div>").appendTo(new js.JQuery("body")).get(0);
 		var manager = new precog.communicator.ModuleManager();
 		manager.addModule(new precog.app.module.LayoutModule(container));
 	});
@@ -320,15 +378,48 @@ precog.communicator.Module.prototype = {
 }
 precog.app.module = {}
 precog.app.module.LayoutModule = function(container) {
-	this.container = container;
+	this.container = new js.JQuery(container);
+	this.container.addClass("labcoat");
+	this.container.css({ 'background-color' : "#f99", width : "100%", height : "100%", position : "absolute", overflow : "hidden"});
 };
 precog.app.module.LayoutModule.__name__ = ["precog","app","module","LayoutModule"];
 precog.app.module.LayoutModule.__super__ = precog.communicator.Module;
 precog.app.module.LayoutModule.prototype = $extend(precog.communicator.Module.prototype,{
 	disconnect: function(comm) {
 	}
+	,getSize: function() {
+		var jq = new js.JQuery(this.container);
+		return { width : jq.innerWidth(), height : jq.outerHeight()};
+	}
 	,connect: function(comm) {
-		console.log("we are live");
+		var _g = this;
+		var size = this.getSize();
+		console.log(size);
+		var bottom = new precog.layout.Panel(), left = new precog.layout.Panel(), right = new precog.layout.Panel(), main = new precog.layout.Panel();
+		var layout = new precog.layout.DockLayout(size.width,size.height);
+		var menu = new precog.layout.Panel();
+		layout.addPanel(menu).dockTop(precog.layout.ExtentValue.Absolute(20));
+		this.createDomPanel(menu);
+		layout.addPanel(bottom).dockBottom(precog.layout.ExtentValue.Absolute(150));
+		this.createDomPanel(bottom);
+		layout.addPanel(left).dockLeft(precog.layout.ExtentValue.Absolute(150));
+		this.createDomPanel(left);
+		layout.addPanel(right).dockRight(precog.layout.ExtentValue.Absolute(150));
+		this.createDomPanel(right);
+		layout.addPanel(main).fill();
+		this.createDomPanel(main);
+		layout.update();
+		new js.JQuery(js.Browser.window).resize(function(_) {
+			var size1 = _g.getSize();
+			layout.size.set(size1.width,size1.height);
+			layout.update();
+		});
+	}
+	,createDomPanel: function(panel) {
+		var el = new js.JQuery("<div class=\"panel\" style=\"position:absolute\"></div>").appendTo(this.container), frame = panel.frame;
+		thx.react.IObservables.addListener(frame,function(rect) {
+			el.css({ top : rect.y + "px", left : rect.x + "px", width : rect.width + "px", height : rect.height + "px"});
+		});
 	}
 	,__class__: precog.app.module.LayoutModule
 });
@@ -422,7 +513,480 @@ precog.communicator.ModuleManager.prototype = {
 	}
 	,__class__: precog.communicator.ModuleManager
 }
+precog.geom = {}
+precog.geom.IPoint = function() { }
+precog.geom.IPoint.__name__ = ["precog","geom","IPoint"];
+precog.geom.IPoint.prototype = {
+	__class__: precog.geom.IPoint
+}
 var thx = {}
+thx.react = {}
+thx.react.IObservable = function() { }
+thx.react.IObservable.__name__ = ["thx","react","IObservable"];
+thx.react.IObservable.prototype = {
+	__class__: thx.react.IObservable
+}
+precog.geom.IPointObservable = function() { }
+precog.geom.IPointObservable.__name__ = ["precog","geom","IPointObservable"];
+precog.geom.IPointObservable.__interfaces__ = [precog.geom.IPoint,thx.react.IObservable];
+precog.geom.IRectangle = function() { }
+precog.geom.IRectangle.__name__ = ["precog","geom","IRectangle"];
+precog.geom.IRectangle.prototype = {
+	__class__: precog.geom.IRectangle
+}
+precog.geom.IRectangleObservable = function() { }
+precog.geom.IRectangleObservable.__name__ = ["precog","geom","IRectangleObservable"];
+precog.geom.IRectangleObservable.__interfaces__ = [precog.geom.IRectangle,thx.react.IObservable];
+thx.react.Suspendable = function() {
+	this.suspended = false;
+	this.dirty = false;
+};
+thx.react.Suspendable.__name__ = ["thx","react","Suspendable"];
+thx.react.Suspendable.__interfaces__ = [thx.react.IObservable];
+thx.react.Suspendable.prototype = {
+	notify: function(setdirty) {
+		if(setdirty == null) setdirty = false;
+		if(setdirty) this.dirty = true;
+		if(this.suspended || !this.dirty) return;
+		this.dirty = false;
+		if(null != this.observable) this.observable.notify(this);
+	}
+	,wrapSuspended: function(f) {
+		if(this.suspended) f(); else {
+			this.suspend();
+			f();
+			this.resume();
+		}
+	}
+	,resume: function() {
+		if(!this.suspended) return;
+		this.suspended = false;
+		this.notify();
+	}
+	,suspend: function() {
+		this.suspended = true;
+	}
+	,detach: function(observer) {
+		if(null != this.observable) this.observable.detach(observer);
+	}
+	,attach: function(observer) {
+		(null == this.observable?this.observable = new thx.react.Observable():this.observable).attach(observer);
+	}
+	,__class__: thx.react.Suspendable
+}
+precog.geom.Point = function(x,y) {
+	if(y == null) y = 0.0;
+	if(x == null) x = 0.0;
+	this.x = x;
+	this.y = y;
+};
+precog.geom.Point.__name__ = ["precog","geom","Point"];
+precog.geom.Point.__interfaces__ = [precog.geom.IPointObservable];
+precog.geom.Point.__super__ = thx.react.Suspendable;
+precog.geom.Point.prototype = $extend(thx.react.Suspendable.prototype,{
+	set: function(x,y) {
+		if(this.x == x && this.y == y) return;
+		this.x = x;
+		this.y = y;
+		this.notify(true);
+	}
+	,toString: function() {
+		return "Point(" + this.x + ", " + this.y + ")";
+	}
+	,equals: function(other) {
+		return this.x == other.x && this.y == other.y;
+	}
+	,__class__: precog.geom.Point
+});
+precog.geom.Rectangle = function(x,y,width,height) {
+	if(height == null) height = 0.0;
+	if(width == null) width = 0.0;
+	if(y == null) y = 0.0;
+	if(x == null) x = 0.0;
+	this.x = x;
+	this.y = y;
+	this.width = width;
+	this.height = height;
+};
+precog.geom.Rectangle.__name__ = ["precog","geom","Rectangle"];
+precog.geom.Rectangle.__interfaces__ = [precog.geom.IRectangleObservable];
+precog.geom.Rectangle.__super__ = thx.react.Suspendable;
+precog.geom.Rectangle.prototype = $extend(thx.react.Suspendable.prototype,{
+	addPointXY: function(px,py) {
+		var x = this.x, y = this.y, w = this.width, h = this.height;
+		if(px < this.x) {
+			x = px;
+			w = this.x + this.width - x;
+		} else if(px > this.x + this.width) w = px - this.x;
+		if(py < this.y) {
+			y = py;
+			h = this.y + this.height - y;
+		} else if(py > this.y + this.height) h = py - this.y;
+		this.set(x,y,w,h);
+		return this;
+	}
+	,addPoint: function(point) {
+		return this.addPointXY(point.x,point.y);
+	}
+	,addRectangle: function(other) {
+		var _g = this;
+		this.wrapSuspended(function() {
+			_g.addPointXY(other.x,other.y);
+			_g.addPointXY(other.x + other.width,other.y + other.height);
+		});
+		return this;
+	}
+	,set: function(x,y,width,height) {
+		if(this.x == x && this.y == y && this.width == width && this.height == height) return;
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
+		this.notify(true);
+	}
+	,toString: function() {
+		return "Rectangle(" + this.x + ", " + this.y + ", " + this.width + ", " + this.height + ")";
+	}
+	,equals: function(other) {
+		return this.x == other.x && this.y == other.y && this.width == other.width && this.height == other.height;
+	}
+	,clone: function() {
+		return new precog.geom.Rectangle(this.x,this.y,this.width,this.height);
+	}
+	,__class__: precog.geom.Rectangle
+});
+precog.layout = {}
+precog.layout.Layout = function(width,height) {
+	this.size = new precog.geom.Point(width,height);
+	this.measuredBoundaries = new precog.geom.Rectangle();
+	this.panels = new precog.layout.LayoutPanels(this);
+	this.onpanel = { add : this.panels.observableAdd, remove : this.panels.observableRemove};
+};
+precog.layout.Layout.__name__ = ["precog","layout","Layout"];
+precog.layout.Layout.prototype = {
+	iterator: function() {
+		return HxOverrides.iter(this.panels.panels);
+	}
+	,updatePanel: function(panel) {
+	}
+	,resetBoundaries: function() {
+		this.measuredBoundaries.set(Math.NaN,Math.NaN,Math.NaN,Math.NaN);
+	}
+	,update: function() {
+		var _g = this;
+		this.updateQueue = this.createUpdateQueue();
+		this.measuredBoundaries.wrapSuspended(function() {
+			var $it0 = HxOverrides.iter(_g.panels.panels);
+			while( $it0.hasNext() ) {
+				var panel = $it0.next();
+				panel.frame.suspend();
+			}
+			_g.resetBoundaries();
+			while(_g.updateQueue.length > 0) (_g.updateQueue.shift())();
+			var $it1 = HxOverrides.iter(_g.panels.panels);
+			while( $it1.hasNext() ) {
+				var panel = $it1.next();
+				panel.frame.resume();
+			}
+		});
+	}
+	,panelIteratorFunction: function(f) {
+		var _g = this;
+		return function() {
+			var $it0 = HxOverrides.iter(_g.panels.panels);
+			while( $it0.hasNext() ) {
+				var panel = $it0.next();
+				f(panel);
+			}
+		};
+	}
+	,createUpdateQueue: function() {
+		return [this.panelIteratorFunction($bind(this,this.updatePanel))];
+	}
+	,get_boundaries: function() {
+		return this.measuredBoundaries;
+	}
+	,__class__: precog.layout.Layout
+}
+precog.layout.DockLayout = function(width,height) {
+	var _g = this;
+	precog.layout.Layout.call(this,width,height);
+	this.defaultDock = precog.layout.DockKind.Fill;
+	this.defaultMargin = precog.layout.ExtentValue.Absolute(0);
+	this.docks = new haxe.ds.ObjectMap();
+	thx.react.IObservables.addListener(this.onpanel.remove,function(panel) {
+		_g.docks.remove(panel);
+	});
+};
+precog.layout.DockLayout.__name__ = ["precog","layout","DockLayout"];
+precog.layout.DockLayout.__super__ = precog.layout.Layout;
+precog.layout.DockLayout.prototype = $extend(precog.layout.Layout.prototype,{
+	afterUpdate: function() {
+		if(0 == this.fillqueue.length) return;
+		var margin = 0.0, margins = [0.0];
+		var _g1 = 0, _g = this.fillqueue.length - 1;
+		while(_g1 < _g) {
+			var i = _g1++;
+			margins[i + 1] = precog.layout._Extent.ExtentImpl.relativeTo(this.docks.h[this.fillqueue[i].__id__].margin,this.size.x);
+			margin += margins[i + 1];
+		}
+		var w = (this.available.width - margin) / this.fillqueue.length, h = this.available.height, x = this.available.x, y = this.available.y;
+		var _g1 = 0, _g = this.fillqueue.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			var frame = this.fillqueue[i].frame;
+			frame.set(x + w * i + margins[i],y,w,h);
+		}
+	}
+	,updatePanel: function(panel) {
+		var dock = this.docks.h[panel.__id__];
+		var $e = (dock.dock);
+		switch( $e[1] ) {
+		case 0:
+			var dock_fdock_eTop_0 = $e[2];
+			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eTop_0,this.size.y), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.size.y);
+			panel.frame.set(this.available.x,this.available.y,this.available.width,fl);
+			this.available.set(this.available.x,this.available.y + fl + mg,this.available.width,this.available.height - fl - mg);
+			break;
+		case 1:
+			var dock_fdock_eRight_0 = $e[2];
+			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eRight_0,this.size.x), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.size.x);
+			panel.frame.set(this.available.x + this.available.width - fl,this.available.y,fl,this.available.height);
+			this.available.set(this.available.x,this.available.y,this.available.width - fl - mg,this.available.height);
+			break;
+		case 2:
+			var dock_fdock_eBottom_0 = $e[2];
+			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eBottom_0,this.size.y), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.size.y);
+			panel.frame.set(this.available.x,this.available.y + this.available.height - fl,this.available.width,fl);
+			this.available.set(this.available.x,this.available.y,this.available.width,this.available.height - fl - mg);
+			break;
+		case 3:
+			var dock_fdock_eLeft_0 = $e[2];
+			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eLeft_0,this.size.x), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.size.x);
+			panel.frame.set(this.available.x,this.available.y,fl,this.available.height);
+			this.available.set(this.available.x + fl + mg,this.available.y,this.available.width - fl - mg,this.available.height);
+			break;
+		case 4:
+			break;
+		}
+	}
+	,afterMeasure: function() {
+		var w = this.available.width > this.size.x?this.available.width:this.size.x, h = this.available.height > this.size.y?this.available.height:this.size.y;
+		if(this.fillqueue.length > 0) this.measuredBoundaries.set(0,0,w,h); else if(this.available.width > 0 || this.available.height > 0) this.measuredBoundaries.set(0,0,this.available.width == 0?this.size.x:this.available.width,this.available.height == 0?this.size.y:this.available.height);
+		this.available.set(0,0,w,h);
+	}
+	,measurePanel: function(panel) {
+		var dock = this.docks.h[panel.__id__];
+		var $e = (dock.dock);
+		switch( $e[1] ) {
+		case 0:
+		case 2:
+			var dock_fdock_eTop_0 = $e[2];
+			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eTop_0,this.size.y), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.size.y);
+			this.available.set(0,0,this.available.width,this.available.height + fl + mg);
+			break;
+		case 1:
+		case 3:
+			var dock_fdock_eRight_0 = $e[2];
+			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eRight_0,this.size.x), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.size.x);
+			this.available.set(0,0,this.available.width + fl + mg,this.available.height);
+			break;
+		case 4:
+			this.fillqueue.push(panel);
+			break;
+		}
+	}
+	,beforeUpdate: function() {
+		this.available = new precog.geom.Rectangle(0,0,0,0);
+		this.fillqueue = [];
+	}
+	,createUpdateQueue: function() {
+		return [$bind(this,this.beforeUpdate),this.panelIteratorFunction($bind(this,this.measurePanel)),$bind(this,this.afterMeasure),this.panelIteratorFunction($bind(this,this.updatePanel)),$bind(this,this.afterUpdate)];
+	}
+	,addPanel: function(panel) {
+		this.panels.addPanel(panel);
+		var dock = new precog.layout.Dock(this.defaultDock,this.defaultMargin);
+		this.docks.set(panel,dock);
+		return dock;
+	}
+	,__class__: precog.layout.DockLayout
+});
+precog.layout.Dock = function(defaultDock,defaultMargin) {
+	this.dock = defaultDock;
+	this.margin = defaultMargin;
+};
+precog.layout.Dock.__name__ = ["precog","layout","Dock"];
+precog.layout.Dock.prototype = {
+	setMargin: function(margin) {
+		this.margin = margin;
+		return this;
+	}
+	,fill: function() {
+		this.dock = precog.layout.DockKind.Fill;
+		return this;
+	}
+	,dockBottom: function(size,margin) {
+		this.dock = precog.layout.DockKind.Bottom(size);
+		if(null != margin) this.margin = margin;
+		return this;
+	}
+	,dockTop: function(size,margin) {
+		this.dock = precog.layout.DockKind.Top(size);
+		if(null != margin) this.margin = margin;
+		return this;
+	}
+	,dockRight: function(size,margin) {
+		this.dock = precog.layout.DockKind.Right(size);
+		if(null != margin) this.margin = margin;
+		return this;
+	}
+	,dockLeft: function(size,margin) {
+		this.dock = precog.layout.DockKind.Left(size);
+		if(null != margin) this.margin = margin;
+		return this;
+	}
+	,__class__: precog.layout.Dock
+}
+precog.layout.DockKind = { __ename__ : ["precog","layout","DockKind"], __constructs__ : ["Top","Right","Bottom","Left","Fill"] }
+precog.layout.DockKind.Top = function(size) { var $x = ["Top",0,size]; $x.__enum__ = precog.layout.DockKind; $x.toString = $estr; return $x; }
+precog.layout.DockKind.Right = function(size) { var $x = ["Right",1,size]; $x.__enum__ = precog.layout.DockKind; $x.toString = $estr; return $x; }
+precog.layout.DockKind.Bottom = function(size) { var $x = ["Bottom",2,size]; $x.__enum__ = precog.layout.DockKind; $x.toString = $estr; return $x; }
+precog.layout.DockKind.Left = function(size) { var $x = ["Left",3,size]; $x.__enum__ = precog.layout.DockKind; $x.toString = $estr; return $x; }
+precog.layout.DockKind.Fill = ["Fill",4];
+precog.layout.DockKind.Fill.toString = $estr;
+precog.layout.DockKind.Fill.__enum__ = precog.layout.DockKind;
+precog.layout.ExtentValue = { __ename__ : ["precog","layout","ExtentValue"], __constructs__ : ["Percent","Absolute"] }
+precog.layout.ExtentValue.Percent = function(value) { var $x = ["Percent",0,value]; $x.__enum__ = precog.layout.ExtentValue; $x.toString = $estr; return $x; }
+precog.layout.ExtentValue.Absolute = function(value) { var $x = ["Absolute",1,value]; $x.__enum__ = precog.layout.ExtentValue; $x.toString = $estr; return $x; }
+precog.layout._Extent = {}
+precog.layout._Extent.ExtentImpl = function() { }
+precog.layout._Extent.ExtentImpl.__name__ = ["precog","layout","_Extent","ExtentImpl"];
+precog.layout._Extent.ExtentImpl._new = function(v) {
+	return v;
+}
+precog.layout._Extent.ExtentImpl.fromInt = function(v) {
+	return precog.layout.ExtentValue.Absolute(v);
+}
+precog.layout._Extent.ExtentImpl.fromFloat = function(v) {
+	return precog.layout.ExtentValue.Percent(v);
+}
+precog.layout._Extent.ExtentImpl.fromExtentValue = function(v) {
+	return v;
+}
+precog.layout._Extent.ExtentImpl.isPercent = function(this1) {
+	return (function($this) {
+		var $r;
+		switch( (this1)[1] ) {
+		case 0:
+			$r = true;
+			break;
+		default:
+			$r = false;
+		}
+		return $r;
+	}(this));
+}
+precog.layout._Extent.ExtentImpl.isAbsolute = function(this1) {
+	return (function($this) {
+		var $r;
+		switch( (this1)[1] ) {
+		case 1:
+			$r = true;
+			break;
+		default:
+			$r = false;
+		}
+		return $r;
+	}(this));
+}
+precog.layout._Extent.ExtentImpl.isAuto = function(this1) {
+	return (function($this) {
+		var $r;
+		switch( (this1)[1] ) {
+		case 0:
+			$r = true;
+			break;
+		default:
+			$r = false;
+		}
+		return $r;
+	}(this));
+}
+precog.layout._Extent.ExtentImpl.value = function(this1) {
+	return (function($this) {
+		var $r;
+		var $e = (this1);
+		switch( $e[1] ) {
+		case 0:
+		case 1:
+			var this_ePercent_0 = $e[2];
+			$r = this_ePercent_0;
+			break;
+		}
+		return $r;
+	}(this));
+}
+precog.layout._Extent.ExtentImpl.relativeTo = function(this1,reference) {
+	return (function($this) {
+		var $r;
+		var $e = (this1);
+		switch( $e[1] ) {
+		case 1:
+			var this_eAbsolute_0 = $e[2];
+			$r = this_eAbsolute_0;
+			break;
+		case 0:
+			var this_ePercent_0 = $e[2];
+			$r = reference * this_ePercent_0;
+			break;
+		}
+		return $r;
+	}(this));
+}
+precog.layout.LayoutPanels = function(layout) {
+	this.layout = layout;
+	this.panels = [];
+	this.observableAdd = new thx.react.Observable();
+	this.observableRemove = new thx.react.Observable();
+};
+precog.layout.LayoutPanels.__name__ = ["precog","layout","LayoutPanels"];
+precog.layout.LayoutPanels.prototype = {
+	iterator: function() {
+		return HxOverrides.iter(this.panels);
+	}
+	,clear: function() {
+		var all = this.panels.slice();
+		while(all.length > 0) this.removePanel(all.shift());
+	}
+	,removePanel: function(panel) {
+		panel.setLayout(null);
+		HxOverrides.remove(this.panels,panel);
+		this.observableRemove.notify(panel);
+	}
+	,addPanel: function(panel) {
+		panel.setLayout(this.layout);
+		this.panels.push(panel);
+		this.observableAdd.notify(panel);
+	}
+	,__class__: precog.layout.LayoutPanels
+}
+precog.layout.Panel = function() {
+	this.frame = new precog.geom.Rectangle(0,0,0,0);
+};
+precog.layout.Panel.__name__ = ["precog","layout","Panel"];
+precog.layout.Panel.prototype = {
+	remove: function() {
+		this.setLayout(null);
+	}
+	,setLayout: function(layout) {
+		var _g = this;
+		(function(oldParent) {
+			_g.parentLayout = layout;
+			if(null != oldParent) oldParent.panels.removePanel(_g);
+		})(this.parentLayout);
+	}
+	,__class__: precog.layout.Panel
+}
 thx.core = {}
 thx.core.Arrays = function() { }
 thx.core.Arrays.__name__ = ["thx","core","Arrays"];
@@ -647,7 +1211,6 @@ thx.core.ValueTypes.typeInheritance = function(type) {
 		return $r;
 	}(this));
 }
-thx.react = {}
 thx.react.Binder = function() {
 	this.map = new haxe.ds.StringMap();
 };
@@ -752,6 +1315,107 @@ thx.react.Dispatcher.prototype = {
 		if(null != type) this.binder.clear(Type.getClassName(type)); else if(null != name) this.binder.clear(name); else this.binder.clear();
 	}
 	,__class__: thx.react.Dispatcher
+}
+thx.react.IObservable0 = function() { }
+thx.react.IObservable0.__name__ = ["thx","react","IObservable0"];
+thx.react.IObservable0.prototype = {
+	__class__: thx.react.IObservable0
+}
+thx.react.IObservables = function() { }
+thx.react.IObservables.__name__ = ["thx","react","IObservables"];
+thx.react.IObservables.addListener = function(observable,listener) {
+	var observer = new thx.react.ObserverFunction(listener);
+	observable.attach(observer);
+	return observer;
+}
+thx.react.IObservables0 = function() { }
+thx.react.IObservables0.__name__ = ["thx","react","IObservables0"];
+thx.react.IObservables0.addListener = function(observable,listener) {
+	var observer = new thx.react.ObserverFunction0(listener);
+	observable.attach(observer);
+	return observer;
+}
+thx.react.IObserver = function() { }
+thx.react.IObserver.__name__ = ["thx","react","IObserver"];
+thx.react.IObserver.prototype = {
+	__class__: thx.react.IObserver
+}
+thx.react.IObserver0 = function() { }
+thx.react.IObserver0.__name__ = ["thx","react","IObserver0"];
+thx.react.IObserver0.prototype = {
+	__class__: thx.react.IObserver0
+}
+thx.react.Observable = function() {
+	this.observers = [];
+};
+thx.react.Observable.__name__ = ["thx","react","Observable"];
+thx.react.Observable.__interfaces__ = [thx.react.IObservable];
+thx.react.Observable.prototype = {
+	notify: function(payload) {
+		var _g = 0, _g1 = this.observers;
+		while(_g < _g1.length) {
+			var observer = _g1[_g];
+			++_g;
+			observer.update(payload);
+		}
+	}
+	,clear: function() {
+		this.observers = [];
+	}
+	,detach: function(observer) {
+		HxOverrides.remove(this.observers,observer);
+	}
+	,attach: function(observer) {
+		this.observers.push(observer);
+	}
+	,__class__: thx.react.Observable
+}
+thx.react.Observable0 = function() {
+	this.observers = [];
+};
+thx.react.Observable0.__name__ = ["thx","react","Observable0"];
+thx.react.Observable0.__interfaces__ = [thx.react.IObservable0];
+thx.react.Observable0.prototype = {
+	notify: function() {
+		var _g = 0, _g1 = this.observers;
+		while(_g < _g1.length) {
+			var observer = _g1[_g];
+			++_g;
+			observer.update();
+		}
+	}
+	,clear: function() {
+		this.observers = [];
+	}
+	,detach: function(observer) {
+		HxOverrides.remove(this.observers,observer);
+	}
+	,attach: function(observer) {
+		this.observers.push(observer);
+	}
+	,__class__: thx.react.Observable0
+}
+thx.react.ObserverFunction = function(handler) {
+	this.handler = handler;
+};
+thx.react.ObserverFunction.__name__ = ["thx","react","ObserverFunction"];
+thx.react.ObserverFunction.__interfaces__ = [thx.react.IObserver];
+thx.react.ObserverFunction.prototype = {
+	update: function(payload) {
+		this.handler(payload);
+	}
+	,__class__: thx.react.ObserverFunction
+}
+thx.react.ObserverFunction0 = function(handler) {
+	this.handler = handler;
+};
+thx.react.ObserverFunction0.__name__ = ["thx","react","ObserverFunction0"];
+thx.react.ObserverFunction0.__interfaces__ = [thx.react.IObserver0];
+thx.react.ObserverFunction0.prototype = {
+	update: function() {
+		this.handler();
+	}
+	,__class__: thx.react.ObserverFunction0
 }
 thx.react.Promise = function() {
 	this.state = thx.react.PromiseState.Idle;
@@ -1401,6 +2065,8 @@ t[h]}if(f.isEmptyObject(t)){var u=s.handle;u&&(u.elem=null),delete s.events,dele
 }
 var q = window.jQuery;
 js.JQuery = q;
+haxe.ds.ObjectMap.count = 0;
+js.Browser.window = typeof window != "undefined" ? window : null;
 thx.react.Binder.KEY_SEPARATOR = " ";
 thx.react.Dispatcher.TYPE_SEPARATOR = ";";
 thx.react.Propagation.instance = new thx.react.Propagation();
@@ -1408,3 +2074,5 @@ thx.react.Responder.SEPARATOR = ":";
 thx.react.ds.ProcedureList.iterator_id = 0;
 precog.app.Main.main();
 })();
+
+//@ sourceMappingURL=labcoat.js.map

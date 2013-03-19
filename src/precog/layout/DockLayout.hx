@@ -94,7 +94,7 @@ class DockLayout extends Layout
 			case Bottom(esize):
 				var fl = esize.relativeTo(size.y),
 					mg = dock.margin.relativeTo(size.y);
-				panel.frame.set(available.x + available.height - fl, available.y, available.width, fl);
+				panel.frame.set(available.x, available.y + available.height - fl, available.width, fl);
 				available.set(available.x, available.y, available.width, available.height - fl - mg);
 			case Left(esize):
 				var fl = esize.relativeTo(size.x),

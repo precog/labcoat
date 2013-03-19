@@ -8,9 +8,9 @@ class Main
 	static function main()
 	{
 		JQuery.cur.ready(function(e) {
-			var container = new JQuery(".labcoat-container,body").get(0);
+			var container = new JQuery(".labcoat-container").get(0);
 			if(null == container)
-				throw "invalid HTML container for labcoat";
+				container = new JQuery('<div class="labcoat-container"></div>').appendTo(new JQuery("body")).get(0);
 			var manager = new ModuleManager();
 			manager.addModule(new precog.app.module.LayoutModule(container));
 		});

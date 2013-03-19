@@ -5836,8 +5836,13 @@ a.badge:focus {
 .affix {
   position: fixed;
 }
-body {
+.labcoat,
+.labcoat * {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
+}
+.labcoat .panel {
+  border: 1px solid red;
+  background-color: #eee;
 }

@@ -2,9 +2,10 @@
 -cp test
 -js bin/debug/html5/js/labcoat.js
 -main precog.app.Main
+-debug
+#DEFS
 -D html5
+-D embed_js
 #LIBS
 -lib thx-core
 -lib thx-react
-
--D embed_js
