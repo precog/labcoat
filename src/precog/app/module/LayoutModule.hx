@@ -40,7 +40,6 @@ class LayoutModule extends Module
 	override public function connect(comm : Communicator)
 	{
 		var size = getSize();
-trace(size);
 
 		var bottom = new Panel(),
 			left   = new Panel(),
@@ -53,7 +52,7 @@ trace(size);
 		layout.addPanel(menu).dockTop(20);
 		createDomPanel(menu);
 #end
-		layout.addPanel(bottom).dockBottom(150);
+		layout.addPanel(bottom).dockBottom(100);
 		createDomPanel(bottom);
 		layout.addPanel(left).dockLeft(150);
 		createDomPanel(left);

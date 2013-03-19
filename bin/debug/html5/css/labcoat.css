@@ -5843,6 +5843,6 @@ a.badge:focus {
   box-sizing: border-box;
 }
 .labcoat .panel {
-  border: 1px solid red;
-  background-color: #eee;
+  border: 1px solid #e6e6e3;
+  background-color: #f6f6f3;
 }

@@ -394,13 +394,12 @@ precog.app.module.LayoutModule.prototype = $extend(precog.communicator.Module.pr
 	,connect: function(comm) {
 		var _g = this;
 		var size = this.getSize();
-		console.log(size);
 		var bottom = new precog.layout.Panel(), left = new precog.layout.Panel(), right = new precog.layout.Panel(), main = new precog.layout.Panel();
 		var layout = new precog.layout.DockLayout(size.width,size.height);
 		var menu = new precog.layout.Panel();
 		layout.addPanel(menu).dockTop(precog.layout.ExtentValue.Absolute(20));
 		this.createDomPanel(menu);
-		layout.addPanel(bottom).dockBottom(precog.layout.ExtentValue.Absolute(150));
+		layout.addPanel(bottom).dockBottom(precog.layout.ExtentValue.Absolute(100));
 		this.createDomPanel(bottom);
 		layout.addPanel(left).dockLeft(precog.layout.ExtentValue.Absolute(150));
 		this.createDomPanel(left);
