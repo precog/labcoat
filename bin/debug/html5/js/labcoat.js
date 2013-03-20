@@ -443,10 +443,7 @@ precog.app.module.view.LayoutModule = function() {
 precog.app.module.view.LayoutModule.__name__ = ["precog","app","module","view","LayoutModule"];
 precog.app.module.view.LayoutModule.__super__ = precog.communicator.Module;
 precog.app.module.view.LayoutModule.prototype = $extend(precog.communicator.Module.prototype,{
-	getSize: function() {
-		return { width : this.container.innerWidth(), height : this.container.innerHeight()};
-	}
-	,connect: function(comm) {
+	connect: function(comm) {
 		comm.demand(precog.app.message.HtmlApplicationContainerMessage).then($bind(this,this.oncontainer));
 	}
 	,oncontainer: function(message) {
@@ -471,7 +468,7 @@ precog.app.module.view.LayoutModule.prototype = $extend(precog.communicator.Modu
 		});
 	}
 	,updateLayouts: function() {
-		var size = this.getSize(), vertical = size.width < size.height;
+		var size = precog.html.JQuerys.getInnerSize(this.container), vertical = size.width < size.height;
 		this.layouts.main.clear();
 		this.layouts.context.clear();
 		this.layouts.main.rectangle.set(0,0,size.width,size.height);
@@ -727,6 +724,14 @@ precog.html.HtmlPanel.prototype = {
 		this.element.css({ top : rect.y + "px", left : rect.x + "px", width : rect.width + "px", height : rect.height + "px"});
 	}
 	,__class__: precog.html.HtmlPanel
+}
+precog.html.JQuerys = function() { }
+precog.html.JQuerys.__name__ = ["precog","html","JQuerys"];
+precog.html.JQuerys.getInnerSize = function(o) {
+	return { width : o.innerWidth(), height : o.innerHeight()};
+}
+precog.html.JQuerys.getOuterSize = function(o) {
+	return { width : o.outerWidth(), height : o.outerHeight()};
 }
 precog.layout = {}
 precog.layout.Layout = function(width,height) {

@@ -1,15 +1,14 @@
 package precog.app.module.view;
 
 import precog.communicator.*;
-import js.html.Element;
 import js.Browser;
 import js.JQuery;
 import precog.layout.DockLayout;
 import precog.layout.Panel;
-import precog.geom.IRectangleObservable;
-using thx.react.IObservable;
 import precog.html.HtmlPanel;
 import precog.app.message.HtmlApplicationContainerMessage;
+using precog.html.JQuerys;
+using thx.react.IObservable;
 
 class LayoutModule extends Module
 {
@@ -31,7 +30,7 @@ class LayoutModule extends Module
 
 	function updateLayouts()
 	{
-		var size = getSize(),
+		var size = container.getInnerSize(),
 			vertical = size.width < size.height;
 		// TODO, this should not be required but it is :(
 		layouts.main.clear();
@@ -93,13 +92,5 @@ class LayoutModule extends Module
 	{
 		comm.demand(HtmlApplicationContainerMessage)
 			.then(oncontainer);
-	}
-
-	function getSize()
-	{
-		return {
-			width : container.innerWidth(),
-			height : container.innerHeight()
-		};
 	}
 }
