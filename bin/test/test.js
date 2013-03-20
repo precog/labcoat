@@ -754,6 +754,27 @@ js.Boot.__instanceof = function(o,cl) {
 js.Browser = function() { }
 js.Browser.__name__ = ["js","Browser"];
 var precog = {}
+precog.app = {}
+precog.app.message = {}
+precog.app.message.Message = function(value) {
+	this.value = value;
+};
+precog.app.message.Message.__name__ = ["precog","app","message","Message"];
+precog.app.message.Message.prototype = {
+	toString: function() {
+		return "" + Type.getClassName(Type.getClass(this)).split(".").pop() + " (" + Std.string(this.value) + ")";
+	}
+	,value: null
+	,__class__: precog.app.message.Message
+}
+precog.app.message.HtmlApplicationContainerMessage = function(value) {
+	precog.app.message.Message.call(this,value);
+};
+precog.app.message.HtmlApplicationContainerMessage.__name__ = ["precog","app","message","HtmlApplicationContainerMessage"];
+precog.app.message.HtmlApplicationContainerMessage.__super__ = precog.app.message.Message;
+precog.app.message.HtmlApplicationContainerMessage.prototype = $extend(precog.app.message.Message.prototype,{
+	__class__: precog.app.message.HtmlApplicationContainerMessage
+});
 precog.communicator = {}
 precog.communicator.Communicator = function() {
 	this.provider = new thx.react.Provider();
@@ -783,7 +804,8 @@ precog.communicator.Communicator.prototype = {
 	,provider: null
 	,__class__: precog.communicator.Communicator
 }
-precog.communicator.Module = function() { }
+precog.communicator.Module = function() {
+};
 precog.communicator.Module.__name__ = ["precog","communicator","Module"];
 precog.communicator.Module.prototype = {
 	disconnect: function(comm) {
@@ -867,10 +889,18 @@ precog.communicator.TestCommunicator = function() {
 };
 precog.communicator.TestCommunicator.__name__ = ["precog","communicator","TestCommunicator"];
 precog.communicator.TestCommunicator.prototype = {
-	testRequestRespond: function() {
+	testDemandProvideInstance: function() {
+		var comm = new precog.communicator.Communicator();
+		comm.provide(new precog.app.message.HtmlApplicationContainerMessage(null));
+		comm.demand(precog.app.message.HtmlApplicationContainerMessage).then(function(o) {
+			utest.Assert.notNull(o,null,{ fileName : "TestCommunicator.hx", lineNumber : 42, className : "precog.communicator.TestCommunicator", methodName : "testDemandProvideInstance"});
+			utest.Assert["is"](o,precog.app.message.HtmlApplicationContainerMessage,null,{ fileName : "TestCommunicator.hx", lineNumber : 43, className : "precog.communicator.TestCommunicator", methodName : "testDemandProvideInstance"});
+		});
+	}
+	,testRequestRespond: function() {
 		var comm = new precog.communicator.Communicator();
 		comm.request("haxe",String).then(function(s) {
-			utest.Assert.equals("HAXE",s,null,{ fileName : "TestCommunicator.hx", lineNumber : 29, className : "precog.communicator.TestCommunicator", methodName : "testRequestRespond"});
+			utest.Assert.equals("HAXE",s,null,{ fileName : "TestCommunicator.hx", lineNumber : 30, className : "precog.communicator.TestCommunicator", methodName : "testRequestRespond"});
 		});
 		comm.respond(function(s) {
 			return new thx.react.Deferred().resolve(s.toUpperCase());
@@ -879,14 +909,14 @@ precog.communicator.TestCommunicator.prototype = {
 	,testDemandProvide: function() {
 		var comm = new precog.communicator.Communicator();
 		comm.demand(String).then(function(s) {
-			utest.Assert.equals("Haxe",s,null,{ fileName : "TestCommunicator.hx", lineNumber : 22, className : "precog.communicator.TestCommunicator", methodName : "testDemandProvide"});
+			utest.Assert.equals("Haxe",s,null,{ fileName : "TestCommunicator.hx", lineNumber : 23, className : "precog.communicator.TestCommunicator", methodName : "testDemandProvide"});
 		});
 		comm.provide("Haxe");
 	}
 	,testOnTrigger: function() {
 		var comm = new precog.communicator.Communicator();
 		comm.dispatcher.binder.bind("String",{ fun : function(msg) {
-			utest.Assert.equals("Haxe",msg,null,{ fileName : "TestCommunicator.hx", lineNumber : 14, className : "precog.communicator.TestCommunicator", methodName : "testOnTrigger"});
+			utest.Assert.equals("Haxe",msg,null,{ fileName : "TestCommunicator.hx", lineNumber : 15, className : "precog.communicator.TestCommunicator", methodName : "testOnTrigger"});
 		}, arity : 1});
 		comm;
 		comm.dispatcher.binder.dispatch("String Dynamic",["Haxe"]);
@@ -901,37 +931,38 @@ precog.communicator.TestModuleManager.prototype = {
 	testModuleEvents: function() {
 		var manager = new precog.communicator.ModuleManager(), module = new precog.communicator.SampleModule(), monitor = new precog.communicator.EventCounterModule(module);
 		manager.addModule(monitor);
-		utest.Assert.equals(0,monitor.connecting,null,{ fileName : "TestModuleManager.hx", lineNumber : 38, className : "precog.communicator.TestModuleManager", methodName : "testModuleEvents"});
-		utest.Assert.equals(0,monitor.connected,null,{ fileName : "TestModuleManager.hx", lineNumber : 39, className : "precog.communicator.TestModuleManager", methodName : "testModuleEvents"});
+		utest.Assert.equals(0,monitor.connecting,null,{ fileName : "TestModuleManager.hx", lineNumber : 37, className : "precog.communicator.TestModuleManager", methodName : "testModuleEvents"});
+		utest.Assert.equals(0,monitor.connected,null,{ fileName : "TestModuleManager.hx", lineNumber : 38, className : "precog.communicator.TestModuleManager", methodName : "testModuleEvents"});
 		manager.addModule(module);
-		utest.Assert.equals(1,monitor.connecting,null,{ fileName : "TestModuleManager.hx", lineNumber : 41, className : "precog.communicator.TestModuleManager", methodName : "testModuleEvents"});
-		utest.Assert.equals(1,monitor.connected,null,{ fileName : "TestModuleManager.hx", lineNumber : 42, className : "precog.communicator.TestModuleManager", methodName : "testModuleEvents"});
-		utest.Assert.equals(0,monitor.disconnecting,null,{ fileName : "TestModuleManager.hx", lineNumber : 44, className : "precog.communicator.TestModuleManager", methodName : "testModuleEvents"});
-		utest.Assert.equals(0,monitor.disconnected,null,{ fileName : "TestModuleManager.hx", lineNumber : 45, className : "precog.communicator.TestModuleManager", methodName : "testModuleEvents"});
+		utest.Assert.equals(1,monitor.connecting,null,{ fileName : "TestModuleManager.hx", lineNumber : 40, className : "precog.communicator.TestModuleManager", methodName : "testModuleEvents"});
+		utest.Assert.equals(1,monitor.connected,null,{ fileName : "TestModuleManager.hx", lineNumber : 41, className : "precog.communicator.TestModuleManager", methodName : "testModuleEvents"});
+		utest.Assert.equals(0,monitor.disconnecting,null,{ fileName : "TestModuleManager.hx", lineNumber : 43, className : "precog.communicator.TestModuleManager", methodName : "testModuleEvents"});
+		utest.Assert.equals(0,monitor.disconnected,null,{ fileName : "TestModuleManager.hx", lineNumber : 44, className : "precog.communicator.TestModuleManager", methodName : "testModuleEvents"});
 		manager.removeModule(module);
-		utest.Assert.equals(1,monitor.disconnecting,null,{ fileName : "TestModuleManager.hx", lineNumber : 47, className : "precog.communicator.TestModuleManager", methodName : "testModuleEvents"});
-		utest.Assert.equals(1,monitor.disconnected,null,{ fileName : "TestModuleManager.hx", lineNumber : 48, className : "precog.communicator.TestModuleManager", methodName : "testModuleEvents"});
+		utest.Assert.equals(1,monitor.disconnecting,null,{ fileName : "TestModuleManager.hx", lineNumber : 46, className : "precog.communicator.TestModuleManager", methodName : "testModuleEvents"});
+		utest.Assert.equals(1,monitor.disconnected,null,{ fileName : "TestModuleManager.hx", lineNumber : 47, className : "precog.communicator.TestModuleManager", methodName : "testModuleEvents"});
 	}
 	,testProvideManager: function() {
 		var manager = new precog.communicator.ModuleManager(), module = new precog.communicator.SampleModule();
-		utest.Assert.isNull(module.manager,null,{ fileName : "TestModuleManager.hx", lineNumber : 27, className : "precog.communicator.TestModuleManager", methodName : "testProvideManager"});
+		utest.Assert.isNull(module.manager,null,{ fileName : "TestModuleManager.hx", lineNumber : 26, className : "precog.communicator.TestModuleManager", methodName : "testProvideManager"});
 		manager.addModule(module);
-		utest.Assert.equals(manager,module.manager,null,{ fileName : "TestModuleManager.hx", lineNumber : 29, className : "precog.communicator.TestModuleManager", methodName : "testProvideManager"});
+		utest.Assert.equals(manager,module.manager,null,{ fileName : "TestModuleManager.hx", lineNumber : 28, className : "precog.communicator.TestModuleManager", methodName : "testProvideManager"});
 	}
 	,testConnectDisconnect: function() {
 		var manager = new precog.communicator.ModuleManager(), module = new precog.communicator.SampleModule();
-		utest.Assert.isFalse(module.connected,null,{ fileName : "TestModuleManager.hx", lineNumber : 15, className : "precog.communicator.TestModuleManager", methodName : "testConnectDisconnect"});
+		utest.Assert.isFalse(module.connected,null,{ fileName : "TestModuleManager.hx", lineNumber : 14, className : "precog.communicator.TestModuleManager", methodName : "testConnectDisconnect"});
 		manager.addModule(module);
-		utest.Assert.isTrue(module.connected,null,{ fileName : "TestModuleManager.hx", lineNumber : 17, className : "precog.communicator.TestModuleManager", methodName : "testConnectDisconnect"});
-		utest.Assert.isFalse(module.disconnected,null,{ fileName : "TestModuleManager.hx", lineNumber : 18, className : "precog.communicator.TestModuleManager", methodName : "testConnectDisconnect"});
+		utest.Assert.isTrue(module.connected,null,{ fileName : "TestModuleManager.hx", lineNumber : 16, className : "precog.communicator.TestModuleManager", methodName : "testConnectDisconnect"});
+		utest.Assert.isFalse(module.disconnected,null,{ fileName : "TestModuleManager.hx", lineNumber : 17, className : "precog.communicator.TestModuleManager", methodName : "testConnectDisconnect"});
 		manager.removeModule(module);
-		utest.Assert.isTrue(module.disconnected,null,{ fileName : "TestModuleManager.hx", lineNumber : 20, className : "precog.communicator.TestModuleManager", methodName : "testConnectDisconnect"});
+		utest.Assert.isTrue(module.disconnected,null,{ fileName : "TestModuleManager.hx", lineNumber : 19, className : "precog.communicator.TestModuleManager", methodName : "testConnectDisconnect"});
 	}
 	,__class__: precog.communicator.TestModuleManager
 }
 precog.communicator.SampleModule = function() {
 	this.disconnected = false;
 	this.connected = false;
+	precog.communicator.Module.call(this);
 };
 precog.communicator.SampleModule.__name__ = ["precog","communicator","SampleModule"];
 precog.communicator.SampleModule.__super__ = precog.communicator.Module;
@@ -956,6 +987,7 @@ precog.communicator.EventCounterModule = function(identity) {
 	this.disconnecting = 0;
 	this.connected = 0;
 	this.connecting = 0;
+	precog.communicator.Module.call(this);
 	this.identity = identity;
 };
 precog.communicator.EventCounterModule.__name__ = ["precog","communicator","EventCounterModule"];
@@ -965,23 +997,23 @@ precog.communicator.EventCounterModule.prototype = $extend(precog.communicator.M
 		var _g = this;
 		comm.dispatcher.binder.bind("precog.communicator.ModuleConnecting",{ fun : function(e) {
 			_g.connecting++;
-			utest.Assert.equals(_g.identity,e.module,null,{ fileName : "TestModuleManager.hx", lineNumber : 91, className : "precog.communicator.EventCounterModule", methodName : "connect"});
+			utest.Assert.equals(_g.identity,e.module,null,{ fileName : "TestModuleManager.hx", lineNumber : 90, className : "precog.communicator.EventCounterModule", methodName : "connect"});
 		}, arity : 1});
 		comm;
 		comm.dispatcher.binder.bind("precog.communicator.ModuleConnected",{ fun : function(e) {
 			if(e.module == _g) return;
 			_g.connected++;
-			utest.Assert.equals(_g.identity,e.module,null,{ fileName : "TestModuleManager.hx", lineNumber : 97, className : "precog.communicator.EventCounterModule", methodName : "connect"});
+			utest.Assert.equals(_g.identity,e.module,null,{ fileName : "TestModuleManager.hx", lineNumber : 96, className : "precog.communicator.EventCounterModule", methodName : "connect"});
 		}, arity : 1});
 		comm;
 		comm.dispatcher.binder.bind("precog.communicator.ModuleDisconnecting",{ fun : function(e) {
 			_g.disconnecting++;
-			utest.Assert.equals(_g.identity,e.module,null,{ fileName : "TestModuleManager.hx", lineNumber : 101, className : "precog.communicator.EventCounterModule", methodName : "connect"});
+			utest.Assert.equals(_g.identity,e.module,null,{ fileName : "TestModuleManager.hx", lineNumber : 100, className : "precog.communicator.EventCounterModule", methodName : "connect"});
 		}, arity : 1});
 		comm;
 		comm.dispatcher.binder.bind("precog.communicator.ModuleDisconnected",{ fun : function(e) {
 			_g.disconnected++;
-			utest.Assert.equals(_g.identity,e.module,null,{ fileName : "TestModuleManager.hx", lineNumber : 105, className : "precog.communicator.EventCounterModule", methodName : "connect"});
+			utest.Assert.equals(_g.identity,e.module,null,{ fileName : "TestModuleManager.hx", lineNumber : 104, className : "precog.communicator.EventCounterModule", methodName : "connect"});
 		}, arity : 1});
 		comm;
 	}
@@ -5022,6 +5054,8 @@ var Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = { __name__ : ["Class"]};
 var Enum = { };
+var q = window.jQuery;
+js.JQuery = q;
 haxe.ds.ObjectMap.count = 0;
 js.Browser.document = typeof window != "undefined" ? window.document : null;
 precog.layout.TestCanvasLayout.point0 = new precog.geom.Point(0,0);

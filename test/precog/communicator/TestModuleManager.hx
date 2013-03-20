@@ -7,7 +7,6 @@ import precog.communicator.Module;
 class TestModuleManager
 {
 	public function new() { }
-
 	public function testConnectDisconnect()
 	{
 		var manager = new ModuleManager(),
@@ -54,7 +53,6 @@ class SampleModule extends Module
 	public var connected : Bool = false;
 	public var disconnected : Bool = false;
 	public var manager : ModuleManager;
-	public function new()  { }
 
 	override public function connect(comm : Communicator)
 	{
@@ -81,6 +79,7 @@ class EventCounterModule extends Module
 
 	public function new(identity : Module)
 	{
+		super();
 		this.identity = identity;
 	}
 

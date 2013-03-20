@@ -382,15 +382,32 @@ precog.app = {}
 precog.app.Main = function() { }
 precog.app.Main.__name__ = ["precog","app","Main"];
 precog.app.Main.main = function() {
-	$(this).ready(function(e) {
-		var container = new js.JQuery(".labcoat-container").get(0);
-		if(null == container) container = new js.JQuery("<div class=\"labcoat-container\"></div>").appendTo(new js.JQuery("body")).get(0);
-		var manager = new precog.communicator.ModuleManager();
-		manager.addModule(new precog.app.module.LayoutModule(container));
-	});
+	var manager = new precog.communicator.ModuleManager();
+	manager.addModule(new precog.app.module.view.ContainerModule());
+	manager.addModule(new precog.app.module.view.LayoutModule());
 }
+precog.app.message = {}
+precog.app.message.Message = function(value) {
+	this.value = value;
+};
+precog.app.message.Message.__name__ = ["precog","app","message","Message"];
+precog.app.message.Message.prototype = {
+	toString: function() {
+		return "" + Type.getClassName(Type.getClass(this)).split(".").pop() + " (" + Std.string(this.value) + ")";
+	}
+	,__class__: precog.app.message.Message
+}
+precog.app.message.HtmlApplicationContainerMessage = function(value) {
+	precog.app.message.Message.call(this,value);
+};
+precog.app.message.HtmlApplicationContainerMessage.__name__ = ["precog","app","message","HtmlApplicationContainerMessage"];
+precog.app.message.HtmlApplicationContainerMessage.__super__ = precog.app.message.Message;
+precog.app.message.HtmlApplicationContainerMessage.prototype = $extend(precog.app.message.Message.prototype,{
+	__class__: precog.app.message.HtmlApplicationContainerMessage
+});
 precog.communicator = {}
-precog.communicator.Module = function() { }
+precog.communicator.Module = function() {
+};
 precog.communicator.Module.__name__ = ["precog","communicator","Module"];
 precog.communicator.Module.prototype = {
 	disconnect: function(comm) {
@@ -403,25 +420,38 @@ precog.communicator.Module.prototype = {
 	,__class__: precog.communicator.Module
 }
 precog.app.module = {}
-precog.app.module.LayoutModule = function(container) {
-	this.panelMargin = 3;
-	this.container = new js.JQuery(container);
+precog.app.module.view = {}
+precog.app.module.view.ContainerModule = function() {
+	precog.communicator.Module.call(this);
 };
-precog.app.module.LayoutModule.__name__ = ["precog","app","module","LayoutModule"];
-precog.app.module.LayoutModule.__super__ = precog.communicator.Module;
-precog.app.module.LayoutModule.prototype = $extend(precog.communicator.Module.prototype,{
-	disconnect: function(comm) {
+precog.app.module.view.ContainerModule.__name__ = ["precog","app","module","view","ContainerModule"];
+precog.app.module.view.ContainerModule.__super__ = precog.communicator.Module;
+precog.app.module.view.ContainerModule.prototype = $extend(precog.communicator.Module.prototype,{
+	connect: function(comm) {
+		$(this).ready(function(_) {
+			var container = new js.JQuery(".labcoat-container");
+			if(null == container.get(0)) container = new js.JQuery("<div class=\"labcoat-container\"></div>").appendTo(js.Browser.document.body);
+			comm.provide(new precog.app.message.HtmlApplicationContainerMessage(container));
+		});
 	}
-	,getSize: function() {
-		var jq = new js.JQuery(this.container);
-		return { width : jq.innerWidth(), height : jq.outerHeight()};
-	}
-	,reduce: function(handler) {
-		if(null != this.timer) this.timer.stop();
-		this.timer = haxe.Timer.delay(handler,50);
+	,__class__: precog.app.module.view.ContainerModule
+});
+precog.app.module.view.LayoutModule = function() {
+	this.panelMargin = 3;
+	precog.communicator.Module.call(this);
+};
+precog.app.module.view.LayoutModule.__name__ = ["precog","app","module","view","LayoutModule"];
+precog.app.module.view.LayoutModule.__super__ = precog.communicator.Module;
+precog.app.module.view.LayoutModule.prototype = $extend(precog.communicator.Module.prototype,{
+	getSize: function() {
+		return { width : this.container.innerWidth(), height : this.container.innerHeight()};
 	}
 	,connect: function(comm) {
+		comm.demand(precog.app.message.HtmlApplicationContainerMessage).then($bind(this,this.oncontainer));
+	}
+	,oncontainer: function(message) {
 		var _g = this;
+		this.container = message.value;
 		this.container.addClass("labcoat");
 		this.context = new precog.layout.Panel();
 		this.menu = new precog.html.HtmlPanel("menu",this.container);
@@ -459,7 +489,7 @@ precog.app.module.LayoutModule.prototype = $extend(precog.communicator.Module.pr
 		this.layouts.main.update();
 		this.layouts.context.update();
 	}
-	,__class__: precog.app.module.LayoutModule
+	,__class__: precog.app.module.view.LayoutModule
 });
 precog.communicator.Communicator = function() {
 	this.provider = new thx.react.Provider();
@@ -2133,6 +2163,7 @@ var q = window.jQuery;
 js.JQuery = q;
 haxe.ds.ObjectMap.count = 0;
 js.Browser.window = typeof window != "undefined" ? window : null;
+js.Browser.document = typeof window != "undefined" ? window.document : null;
 thx.react.Binder.KEY_SEPARATOR = " ";
 thx.react.Dispatcher.TYPE_SEPARATOR = ";";
 thx.react.Propagation.instance = new thx.react.Propagation();

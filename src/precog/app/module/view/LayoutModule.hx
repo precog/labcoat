@@ -1,4 +1,4 @@
-package precog.app.module;
+package precog.app.module.view;
 
 import precog.communicator.*;
 import js.html.Element;
@@ -9,6 +9,7 @@ import precog.layout.Panel;
 import precog.geom.IRectangleObservable;
 using thx.react.IObservable;
 import precog.html.HtmlPanel;
+import precog.app.message.HtmlApplicationContainerMessage;
 
 class LayoutModule extends Module
 {
@@ -28,16 +29,10 @@ class LayoutModule extends Module
 	var tools   : HtmlPanel;
 	var context : Panel;
 
-	public function new(container : Element)
-	{
-		this.container = new JQuery(container);
-	}
-
 	function updateLayouts()
 	{
 		var size = getSize(),
 			vertical = size.width < size.height;
-
 		// TODO, this should not be required but it is :(
 		layouts.main.clear();
 		layouts.context.clear();
@@ -51,7 +46,6 @@ class LayoutModule extends Module
 		layouts.main.addPanel(context).dockLeft(200);
 
 		if(vertical) {
-
 			layouts.context.addPanel(system.panel).dockTop(0.5);
 			layouts.context.addPanel(support.panel).fill();
 		} else {
@@ -65,17 +59,18 @@ class LayoutModule extends Module
 		layouts.context.update();
 	}
 
-	override public function connect(comm : Communicator)
+	function oncontainer(message : HtmlApplicationContainerMessage)
 	{
+		container = message.value;
 		container.addClass("labcoat");
 		context = new Panel();
 #if (html5 || cordova)
-		menu = new HtmlPanel("menu", container);
+		menu    = new HtmlPanel("menu", container);
 #end
-		main = new HtmlPanel("main", container);
-		system = new HtmlPanel("system", container);
+		main    = new HtmlPanel("main", container);
+		system  = new HtmlPanel("system", container);
 		support = new HtmlPanel("support", container);
-		tools = new HtmlPanel("tools", container);
+		tools   = new HtmlPanel("tools", container);
 
 		layouts = {
 			main    : new DockLayout(0, 0),
@@ -94,25 +89,17 @@ class LayoutModule extends Module
 		});
 	}
 
-	var timer : haxe.Timer;
-	function reduce(handler : Void -> Void)
+	override public function connect(comm : Communicator)
 	{
-		if(null != timer)
-			timer.stop();
-		timer = haxe.Timer.delay(handler, 50);
+		comm.demand(HtmlApplicationContainerMessage)
+			.then(oncontainer);
 	}
 
 	function getSize()
 	{
-		var jq = new JQuery(container);
 		return {
-			width : jq.innerWidth(),
-			height : jq.outerHeight()
+			width : container.innerWidth(),
+			height : container.innerHeight()
 		};
-	}
-
-	override public function disconnect(comm : Communicator)
-	{
-
 	}
 }
