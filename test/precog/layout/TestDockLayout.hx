@@ -18,12 +18,35 @@ class TestDockLayout
 		panel  = new Panel();
 	}
 
+	public function testAddAdd() 
+	{
+		layout.addPanel(panel);
+		layout.addPanel(panel).dockLeft(0.5);
+		layout.update();
+		panel.rectangle.assertEquals(0, 0, 100, 100);
+	}
+
+	public function testAddAddToOther() 
+	{
+		layout.addPanel(panel);
+		layout.update();
+		panel.rectangle.assertEquals(0, 0, 200, 100);
+		var layout2 = new DockLayout(100, 50);
+		layout2.addPanel(panel).dockLeft(0.5);
+		layout.update();
+		layout2.update();
+
+		Assert.isFalse(layout.iterator().hasNext());
+
+		panel.rectangle.assertEquals(0, 0, 50, 50);
+	}
+
 	public function testSimple()
 	{
 		layout.addPanel(panel).dockLeft(0.2);
 		layout.update();
 
-		panel.frame.assertEquals(0,0,40,100);
+		panel.rectangle.assertEquals(0,0,40,100);
 	}
 
 	public function testComplex()
@@ -40,18 +63,18 @@ class TestDockLayout
 		layout.addPanel(p5);
 		layout.update();
 
-		p1.frame.assertEquals(  0,  0,  40, 100);
-		p2.frame.assertEquals(160,  0,  40, 100);
-		p3.frame.assertEquals( 40,  0, 120,  20);
-		p4.frame.assertEquals( 40, 20,  20,  80);
-		p5.frame.assertEquals( 60, 20, 100,  80);
+		p1.rectangle.assertEquals(  0,  0,  40, 100);
+		p2.rectangle.assertEquals(160,  0,  40, 100);
+		p3.rectangle.assertEquals( 40,  0, 120,  20);
+		p4.rectangle.assertEquals( 40, 20,  20,  80);
+		p5.rectangle.assertEquals( 60, 20, 100,  80);
 	}
 
 	public function testFill()
 	{
 		layout.addPanel(panel);
 		layout.update();
-		panel.frame.assertEquals(0,0,200,100);
+		panel.rectangle.assertEquals(0,0,200,100);
 	}
 
 	public function testFill2()
@@ -60,8 +83,8 @@ class TestDockLayout
 		layout.addPanel(panel);
 		layout.addPanel(panel2);
 		layout.update();
-		panel.frame.assertEquals(0,0,100,100);
-		panel2.frame.assertEquals(100,0,100,100);
+		panel.rectangle.assertEquals(0,0,100,100);
+		panel2.rectangle.assertEquals(100,0,100,100);
 	}
 
 	public function testExceededBoundaries()
@@ -90,10 +113,10 @@ class TestDockLayout
 		layout.addPanel(p4).setMargin(0.1);
 		layout.update();
 
-		panel.frame.assertEquals(0,0,50,100);
-		p2.frame.assertEquals(60,0,140,50);
-		p3.frame.assertEquals(60,60,60,40);
-		p4.frame.assertEquals(140,60,60,40);
+		panel.rectangle.assertEquals(0,0,50,100);
+		p2.rectangle.assertEquals(60,0,140,50);
+		p3.rectangle.assertEquals(60,60,60,40);
+		p4.rectangle.assertEquals(140,60,60,40);
 		layout.boundaries.assertEquals(0, 0, 200, 100);
 	}
 }

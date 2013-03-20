@@ -50,19 +50,19 @@ class StackLayout extends Layout
 	function updatePanelVertical(panel)
 	{
 		var item = items.get(panel),
-			height = item.extent.relativeTo(size.y);
-		panel.frame.set(
-			0,
-			offset,
-			size.x,
+			height = item.extent.relativeTo(rectangle.height);
+		panel.rectangle.set(
+			rectangle.x,
+			rectangle.y + offset,
+			rectangle.width,
 			height
 		);
 		offset += height;
 		if(Math.isNaN(measuredBoundaries.x)) {
 			measuredBoundaries.set(
-				0,
-				0,
-				size.x,
+				rectangle.x,
+				rectangle.y,
+				rectangle.width,
 				height
 			);
 		} else {
@@ -73,26 +73,26 @@ class StackLayout extends Layout
 				offset
 			);
 		}
-		offset += item.margin.relativeTo(size.y);
+		offset += item.margin.relativeTo(rectangle.height);
 	}
 
 	function updatePanelHorizontal(panel)
 	{
 		var item = items.get(panel),
-			width = item.extent.relativeTo(size.x);
-		panel.frame.set(
-			offset,
-			0,
+			width = item.extent.relativeTo(rectangle.width);
+		panel.rectangle.set(
+			rectangle.x + offset,
+			rectangle.y,
 			width,
-			size.y
+			rectangle.height
 		);
 		offset += width;
 		if(Math.isNaN(measuredBoundaries.x)) {
 			measuredBoundaries.set(
-				0,
-				0,
+				rectangle.x,
+				rectangle.y,
 				width,
-				size.y
+				rectangle.height
 			);
 		} else {
 			measuredBoundaries.set(
@@ -102,7 +102,7 @@ class StackLayout extends Layout
 				measuredBoundaries.height
 			);
 		}
-		offset += item.margin.relativeTo(size.x);
+		offset += item.margin.relativeTo(rectangle.width);
 	}
 }
 

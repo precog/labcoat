@@ -1213,15 +1213,28 @@ precog.geom.TestRectangle.prototype = {
 }
 precog.layout = {}
 precog.layout.Layout = function(width,height) {
-	this.size = new precog.geom.Point(width,height);
+	this.rectangle = new precog.geom.Rectangle(0,0,width,height);
 	this.measuredBoundaries = new precog.geom.Rectangle();
 	this.panels = new precog.layout.LayoutPanels(this);
 	this.onpanel = { add : this.panels.observableAdd, remove : this.panels.observableRemove};
 };
 precog.layout.Layout.__name__ = ["precog","layout","Layout"];
 precog.layout.Layout.prototype = {
-	iterator: function() {
-		return HxOverrides.iter(this.panels.panels);
+	toString: function() {
+		return Type.getClassName(Type.getClass(this)).split(".").pop() + ("(" + this.count() + " children)");
+	}
+	,count: function() {
+		return this.panels.count();
+	}
+	,clear: function() {
+		var $it0 = HxOverrides.iter(this.panels.panels.slice());
+		while( $it0.hasNext() ) {
+			var panel = $it0.next();
+			panel.remove();
+		}
+	}
+	,iterator: function() {
+		return HxOverrides.iter(this.panels.panels.slice());
 	}
 	,updatePanel: function(panel) {
 	}
@@ -1232,24 +1245,24 @@ precog.layout.Layout.prototype = {
 		var _g = this;
 		this.updateQueue = this.createUpdateQueue();
 		this.measuredBoundaries.wrapSuspended(function() {
-			var $it0 = HxOverrides.iter(_g.panels.panels);
+			var $it0 = HxOverrides.iter(_g.panels.panels.slice());
 			while( $it0.hasNext() ) {
 				var panel = $it0.next();
-				panel.frame.suspend();
+				panel.rectangle.suspend();
 			}
 			_g.resetBoundaries();
 			while(_g.updateQueue.length > 0) (_g.updateQueue.shift())();
-			var $it1 = HxOverrides.iter(_g.panels.panels);
+			var $it1 = HxOverrides.iter(_g.panels.panels.slice());
 			while( $it1.hasNext() ) {
 				var panel = $it1.next();
-				panel.frame.resume();
+				panel.rectangle.resume();
 			}
 		});
 	}
 	,panelIteratorFunction: function(f) {
 		var _g = this;
 		return function() {
-			var $it0 = HxOverrides.iter(_g.panels.panels);
+			var $it0 = HxOverrides.iter(_g.panels.panels.slice());
 			while( $it0.hasNext() ) {
 				var panel = $it0.next();
 				f(panel);
@@ -1267,7 +1280,7 @@ precog.layout.Layout.prototype = {
 	,measuredBoundaries: null
 	,onpanel: null
 	,boundaries: null
-	,size: null
+	,rectangle: null
 	,__class__: precog.layout.Layout
 }
 precog.layout.CanvasLayout = function(width,height) {
@@ -1329,8 +1342,8 @@ precog.layout.CanvasLayout.__super__ = precog.layout.Layout;
 precog.layout.CanvasLayout.prototype = $extend(precog.layout.Layout.prototype,{
 	updatePanel: function(panel) {
 		var c = this.canvases.h[panel.__id__];
-		panel.frame.set(precog.layout._Extent.ExtentImpl.relativeTo(c.x,this.size.x) + precog.layout.CanvasLayout.anchorX(c.layoutAnchor,this.size.x) - precog.layout.CanvasLayout.anchorX(c.panelAnchor,panel.frame.width),precog.layout._Extent.ExtentImpl.relativeTo(c.y,this.size.y) + precog.layout.CanvasLayout.anchorY(c.layoutAnchor,this.size.y) - precog.layout.CanvasLayout.anchorY(c.panelAnchor,panel.frame.height),precog.layout._Extent.ExtentImpl.relativeTo(c.width,this.size.x),precog.layout._Extent.ExtentImpl.relativeTo(c.height,this.size.y));
-		if(Math.isNaN(this.measuredBoundaries.x)) this.measuredBoundaries.set(panel.frame.x,panel.frame.y,panel.frame.width,panel.frame.height); else this.measuredBoundaries.addRectangle(panel.frame);
+		panel.rectangle.set(this.rectangle.x + precog.layout._Extent.ExtentImpl.relativeTo(c.x,this.rectangle.width) + precog.layout.CanvasLayout.anchorX(c.layoutAnchor,this.rectangle.width) - precog.layout.CanvasLayout.anchorX(c.panelAnchor,panel.rectangle.width),this.rectangle.y + precog.layout._Extent.ExtentImpl.relativeTo(c.y,this.rectangle.height) + precog.layout.CanvasLayout.anchorY(c.layoutAnchor,this.rectangle.height) - precog.layout.CanvasLayout.anchorY(c.panelAnchor,panel.rectangle.height),precog.layout._Extent.ExtentImpl.relativeTo(c.width,this.rectangle.width),precog.layout._Extent.ExtentImpl.relativeTo(c.height,this.rectangle.height));
+		if(Math.isNaN(this.measuredBoundaries.x)) this.measuredBoundaries.set(panel.rectangle.x,panel.rectangle.y,panel.rectangle.width,panel.rectangle.height); else this.measuredBoundaries.addRectangle(panel.rectangle);
 	}
 	,resetBoundaries: function() {
 		this.measuredBoundaries.set(Math.NaN,Math.NaN,Math.NaN,Math.NaN);
@@ -1427,15 +1440,15 @@ precog.layout.DockLayout.prototype = $extend(precog.layout.Layout.prototype,{
 		var _g1 = 0, _g = this.fillqueue.length - 1;
 		while(_g1 < _g) {
 			var i = _g1++;
-			margins[i + 1] = precog.layout._Extent.ExtentImpl.relativeTo(this.docks.h[this.fillqueue[i].__id__].margin,this.size.x);
+			margins[i + 1] = precog.layout._Extent.ExtentImpl.relativeTo(this.docks.h[this.fillqueue[i].__id__].margin,this.rectangle.width);
 			margin += margins[i + 1];
 		}
 		var w = (this.available.width - margin) / this.fillqueue.length, h = this.available.height, x = this.available.x, y = this.available.y;
 		var _g1 = 0, _g = this.fillqueue.length;
 		while(_g1 < _g) {
 			var i = _g1++;
-			var frame = this.fillqueue[i].frame;
-			frame.set(x + w * i + margins[i],y,w,h);
+			var rectangle = this.fillqueue[i].rectangle;
+			rectangle.set(x + w * i + margins[i],y,w,h);
 		}
 	}
 	,updatePanel: function(panel) {
@@ -1444,26 +1457,26 @@ precog.layout.DockLayout.prototype = $extend(precog.layout.Layout.prototype,{
 		switch( $e[1] ) {
 		case 0:
 			var dock_fdock_eTop_0 = $e[2];
-			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eTop_0,this.size.y), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.size.y);
-			panel.frame.set(this.available.x,this.available.y,this.available.width,fl);
+			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eTop_0,this.rectangle.height), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.rectangle.height);
+			panel.rectangle.set(this.available.x,this.available.y,this.available.width,fl);
 			this.available.set(this.available.x,this.available.y + fl + mg,this.available.width,this.available.height - fl - mg);
 			break;
 		case 1:
 			var dock_fdock_eRight_0 = $e[2];
-			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eRight_0,this.size.x), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.size.x);
-			panel.frame.set(this.available.x + this.available.width - fl,this.available.y,fl,this.available.height);
+			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eRight_0,this.rectangle.width), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.rectangle.width);
+			panel.rectangle.set(this.available.x + this.available.width - fl,this.available.y,fl,this.available.height);
 			this.available.set(this.available.x,this.available.y,this.available.width - fl - mg,this.available.height);
 			break;
 		case 2:
 			var dock_fdock_eBottom_0 = $e[2];
-			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eBottom_0,this.size.y), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.size.y);
-			panel.frame.set(this.available.x + this.available.height - fl,this.available.y,this.available.width,fl);
+			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eBottom_0,this.rectangle.height), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.rectangle.height);
+			panel.rectangle.set(this.available.x,this.available.y + this.available.height - fl,this.available.width,fl);
 			this.available.set(this.available.x,this.available.y,this.available.width,this.available.height - fl - mg);
 			break;
 		case 3:
 			var dock_fdock_eLeft_0 = $e[2];
-			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eLeft_0,this.size.x), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.size.x);
-			panel.frame.set(this.available.x,this.available.y,fl,this.available.height);
+			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eLeft_0,this.rectangle.width), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.rectangle.width);
+			panel.rectangle.set(this.available.x,this.available.y,fl,this.available.height);
 			this.available.set(this.available.x + fl + mg,this.available.y,this.available.width - fl - mg,this.available.height);
 			break;
 		case 4:
@@ -1471,25 +1484,26 @@ precog.layout.DockLayout.prototype = $extend(precog.layout.Layout.prototype,{
 		}
 	}
 	,afterMeasure: function() {
-		var w = this.available.width > this.size.x?this.available.width:this.size.x, h = this.available.height > this.size.y?this.available.height:this.size.y;
-		if(this.fillqueue.length > 0) this.measuredBoundaries.set(0,0,w,h); else if(this.available.width > 0 || this.available.height > 0) this.measuredBoundaries.set(0,0,this.available.width == 0?this.size.x:this.available.width,this.available.height == 0?this.size.y:this.available.height);
-		this.available.set(0,0,w,h);
+		var w = this.available.width > this.rectangle.width?this.available.width:this.rectangle.width, h = this.available.height > this.rectangle.height?this.available.height:this.rectangle.height;
+		if(this.fillqueue.length > 0) this.measuredBoundaries.set(this.rectangle.x,this.rectangle.y,w,h); else if(this.available.width > 0 || this.available.height > 0) this.measuredBoundaries.set(this.rectangle.x,this.rectangle.y,this.available.width == 0?this.rectangle.width:this.available.width,this.available.height == 0?this.rectangle.height:this.available.height);
+		this.available.set(this.rectangle.x,this.rectangle.y,w,h);
 	}
 	,measurePanel: function(panel) {
 		var dock = this.docks.h[panel.__id__];
+		if(null == dock) haxe.Log.trace("dock null for " + Std.string(panel),{ fileName : "DockLayout.hx", lineNumber : 50, className : "precog.layout.DockLayout", methodName : "measurePanel"});
 		var $e = (dock.dock);
 		switch( $e[1] ) {
 		case 0:
 		case 2:
 			var dock_fdock_eTop_0 = $e[2];
-			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eTop_0,this.size.y), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.size.y);
-			this.available.set(0,0,this.available.width,this.available.height + fl + mg);
+			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eTop_0,this.rectangle.height), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.rectangle.height);
+			this.available.set(this.rectangle.x,this.rectangle.y,this.available.width,this.available.height + fl + mg);
 			break;
 		case 1:
 		case 3:
 			var dock_fdock_eRight_0 = $e[2];
-			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eRight_0,this.size.x), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.size.x);
-			this.available.set(0,0,this.available.width + fl + mg,this.available.height);
+			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eRight_0,this.rectangle.width), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.rectangle.width);
+			this.available.set(this.rectangle.x,this.rectangle.y,this.available.width + fl + mg,this.available.height);
 			break;
 		case 4:
 			this.fillqueue.push(panel);
@@ -1659,11 +1673,14 @@ precog.layout.LayoutPanels = function(layout) {
 precog.layout.LayoutPanels.__name__ = ["precog","layout","LayoutPanels"];
 precog.layout.LayoutPanels.prototype = {
 	iterator: function() {
-		return HxOverrides.iter(this.panels);
+		return HxOverrides.iter(this.panels.slice());
 	}
 	,clear: function() {
 		var all = this.panels.slice();
 		while(all.length > 0) this.removePanel(all.shift());
+	}
+	,count: function() {
+		return this.panels.length;
 	}
 	,removePanel: function(panel) {
 		panel.setLayout(null);
@@ -1682,11 +1699,14 @@ precog.layout.LayoutPanels.prototype = {
 	,__class__: precog.layout.LayoutPanels
 }
 precog.layout.Panel = function() {
-	this.frame = new precog.geom.Rectangle(0,0,0,0);
+	this.rectangle = new precog.geom.Rectangle(0,0,0,0);
 };
 precog.layout.Panel.__name__ = ["precog","layout","Panel"];
 precog.layout.Panel.prototype = {
-	remove: function() {
+	toString: function() {
+		return "Panel(" + this.rectangle.x + ", " + this.rectangle.y + ", " + this.rectangle.width + ", " + this.rectangle.height + ", layout: " + Std.string(this.parentLayout) + ")";
+	}
+	,remove: function() {
 		this.setLayout(null);
 	}
 	,setLayout: function(layout) {
@@ -1697,7 +1717,7 @@ precog.layout.Panel.prototype = {
 		})(this.parentLayout);
 	}
 	,parentLayout: null
-	,frame: null
+	,rectangle: null
 	,__class__: precog.layout.Panel
 }
 precog.layout.StackLayout = function(width,height,vertical) {
@@ -1716,18 +1736,18 @@ precog.layout.StackLayout.__name__ = ["precog","layout","StackLayout"];
 precog.layout.StackLayout.__super__ = precog.layout.Layout;
 precog.layout.StackLayout.prototype = $extend(precog.layout.Layout.prototype,{
 	updatePanelHorizontal: function(panel) {
-		var item = this.items.h[panel.__id__], width = precog.layout._Extent.ExtentImpl.relativeTo(item.extent,this.size.x);
-		panel.frame.set(this.offset,0,width,this.size.y);
+		var item = this.items.h[panel.__id__], width = precog.layout._Extent.ExtentImpl.relativeTo(item.extent,this.rectangle.width);
+		panel.rectangle.set(this.rectangle.x + this.offset,this.rectangle.y,width,this.rectangle.height);
 		this.offset += width;
-		if(Math.isNaN(this.measuredBoundaries.x)) this.measuredBoundaries.set(0,0,width,this.size.y); else this.measuredBoundaries.set(this.measuredBoundaries.x,this.measuredBoundaries.y,this.offset,this.measuredBoundaries.height);
-		this.offset += precog.layout._Extent.ExtentImpl.relativeTo(item.margin,this.size.x);
+		if(Math.isNaN(this.measuredBoundaries.x)) this.measuredBoundaries.set(this.rectangle.x,this.rectangle.y,width,this.rectangle.height); else this.measuredBoundaries.set(this.measuredBoundaries.x,this.measuredBoundaries.y,this.offset,this.measuredBoundaries.height);
+		this.offset += precog.layout._Extent.ExtentImpl.relativeTo(item.margin,this.rectangle.width);
 	}
 	,updatePanelVertical: function(panel) {
-		var item = this.items.h[panel.__id__], height = precog.layout._Extent.ExtentImpl.relativeTo(item.extent,this.size.y);
-		panel.frame.set(0,this.offset,this.size.x,height);
+		var item = this.items.h[panel.__id__], height = precog.layout._Extent.ExtentImpl.relativeTo(item.extent,this.rectangle.height);
+		panel.rectangle.set(this.rectangle.x,this.rectangle.y + this.offset,this.rectangle.width,height);
 		this.offset += height;
-		if(Math.isNaN(this.measuredBoundaries.x)) this.measuredBoundaries.set(0,0,this.size.x,height); else this.measuredBoundaries.set(this.measuredBoundaries.x,this.measuredBoundaries.y,this.measuredBoundaries.width,this.offset);
-		this.offset += precog.layout._Extent.ExtentImpl.relativeTo(item.margin,this.size.y);
+		if(Math.isNaN(this.measuredBoundaries.x)) this.measuredBoundaries.set(this.rectangle.x,this.rectangle.y,this.rectangle.width,height); else this.measuredBoundaries.set(this.measuredBoundaries.x,this.measuredBoundaries.y,this.measuredBoundaries.width,this.offset);
+		this.offset += precog.layout._Extent.ExtentImpl.relativeTo(item.margin,this.rectangle.height);
 	}
 	,resetBoundaries: function() {
 		this.measuredBoundaries.set(Math.NaN,Math.NaN,Math.NaN,Math.NaN);
@@ -1784,13 +1804,13 @@ precog.layout.TestCanvasLayout.prototype = {
 		this.layout.addPanel(this.panel).setSize(precog.layout.ExtentValue.Absolute(100),precog.layout.ExtentValue.Percent(0.5));
 		this.layout.update();
 		var test = new precog.geom.Rectangle(0,0,100,50);
-		utest.Assert.isTrue(this.panel.frame.equals(test),"expected " + Std.string(test) + " but is " + Std.string(this.panel.frame),{ fileName : "TestCanvasLayout.hx", lineNumber : 97, className : "precog.layout.TestCanvasLayout", methodName : "testSize"});
+		utest.Assert.isTrue(this.panel.rectangle.equals(test),"expected " + Std.string(test) + " but is " + Std.string(this.panel.rectangle),{ fileName : "TestCanvasLayout.hx", lineNumber : 97, className : "precog.layout.TestCanvasLayout", methodName : "testSize"});
 	}
 	,testOffset: function() {
 		this.layout.addPanel(this.panel).setPanelAnchor(precog.layout.CanvasAnchor.Center).setLayoutAnchor(precog.layout.CanvasAnchor.Center).setOffset(precog.layout.ExtentValue.Absolute(-10),precog.layout.ExtentValue.Absolute(10)).setSize(precog.layout.ExtentValue.Absolute(20),precog.layout.ExtentValue.Absolute(20));
 		this.layout.update();
 		var test = new precog.geom.Rectangle(90,60,20,20);
-		utest.Assert.isTrue(this.panel.frame.equals(test),"expected " + Std.string(test) + " but is " + Std.string(this.panel.frame),{ fileName : "TestCanvasLayout.hx", lineNumber : 86, className : "precog.layout.TestCanvasLayout", methodName : "testOffset"});
+		utest.Assert.isTrue(this.panel.rectangle.equals(test),"expected " + Std.string(test) + " but is " + Std.string(this.panel.rectangle),{ fileName : "TestCanvasLayout.hx", lineNumber : 86, className : "precog.layout.TestCanvasLayout", methodName : "testOffset"});
 	}
 	,testAnchors: function() {
 		var tests = [{ layout : precog.layout.CanvasAnchor.TopLeft, panel : precog.layout.CanvasAnchor.TopLeft, expected : new precog.geom.Rectangle(0,0,80,40)},{ layout : precog.layout.CanvasAnchor.TopLeft, panel : precog.layout.CanvasAnchor.Center, expected : new precog.geom.Rectangle(-40,-20,80,40)},{ layout : precog.layout.CanvasAnchor.TopLeft, panel : precog.layout.CanvasAnchor.BottomRight, expected : new precog.geom.Rectangle(-80,-40,80,40)},{ layout : precog.layout.CanvasAnchor.Center, panel : precog.layout.CanvasAnchor.TopLeft, expected : new precog.geom.Rectangle(100,50,80,40)},{ layout : precog.layout.CanvasAnchor.Center, panel : precog.layout.CanvasAnchor.Center, expected : new precog.geom.Rectangle(60,30,80,40)},{ layout : precog.layout.CanvasAnchor.Center, panel : precog.layout.CanvasAnchor.BottomRight, expected : new precog.geom.Rectangle(20,10,80,40)},{ layout : precog.layout.CanvasAnchor.BottomRight, panel : precog.layout.CanvasAnchor.TopLeft, expected : new precog.geom.Rectangle(200,100,80,40)},{ layout : precog.layout.CanvasAnchor.BottomRight, panel : precog.layout.CanvasAnchor.Center, expected : new precog.geom.Rectangle(160,80,80,40)},{ layout : precog.layout.CanvasAnchor.BottomRight, panel : precog.layout.CanvasAnchor.BottomRight, expected : new precog.geom.Rectangle(120,60,80,40)}];
@@ -1801,13 +1821,13 @@ precog.layout.TestCanvasLayout.prototype = {
 			++_g;
 			canv.setLayoutAnchor(test.layout).setPanelAnchor(test.panel);
 			this.layout.update();
-			utest.Assert.isTrue(this.panel.frame.equals(test.expected),"expected " + Std.string(test.expected) + " but is " + Std.string(this.panel.frame) + " for " + Std.string(test),{ fileName : "TestCanvasLayout.hx", lineNumber : 69, className : "precog.layout.TestCanvasLayout", methodName : "testAnchors"});
+			utest.Assert.isTrue(this.panel.rectangle.equals(test.expected),"expected " + Std.string(test.expected) + " but is " + Std.string(this.panel.rectangle) + " for " + Std.string(test),{ fileName : "TestCanvasLayout.hx", lineNumber : 69, className : "precog.layout.TestCanvasLayout", methodName : "testAnchors"});
 		}
 	}
 	,testDefault: function() {
 		this.layout.addPanel(this.panel);
 		this.layout.update();
-		AssertRectangles2.assertEquals(this.panel.frame,0.0,0.0,0.0,0.0,{ fileName : "TestCanvasLayout.hx", lineNumber : 27, className : "precog.layout.TestCanvasLayout", methodName : "testDefault"});
+		AssertRectangles2.assertEquals(this.panel.rectangle,0.0,0.0,0.0,0.0,{ fileName : "TestCanvasLayout.hx", lineNumber : 27, className : "precog.layout.TestCanvasLayout", methodName : "testDefault"});
 	}
 	,setup: function() {
 		this.layout = new precog.layout.CanvasLayout(200,100);
@@ -1828,35 +1848,35 @@ precog.layout.TestDockLayout.prototype = {
 		this.layout.addPanel(p3).setMargin(precog.layout.ExtentValue.Percent(0.1));
 		this.layout.addPanel(p4).setMargin(precog.layout.ExtentValue.Percent(0.1));
 		this.layout.update();
-		AssertRectangles2.assertEquals(this.panel.frame,0,0,50,100,{ fileName : "TestDockLayout.hx", lineNumber : 93, className : "precog.layout.TestDockLayout", methodName : "testMargin"});
-		AssertRectangles2.assertEquals(p2.frame,60,0,140,50,{ fileName : "TestDockLayout.hx", lineNumber : 94, className : "precog.layout.TestDockLayout", methodName : "testMargin"});
-		AssertRectangles2.assertEquals(p3.frame,60,60,60,40,{ fileName : "TestDockLayout.hx", lineNumber : 95, className : "precog.layout.TestDockLayout", methodName : "testMargin"});
-		AssertRectangles2.assertEquals(p4.frame,140,60,60,40,{ fileName : "TestDockLayout.hx", lineNumber : 96, className : "precog.layout.TestDockLayout", methodName : "testMargin"});
-		AssertRectangles2.assertEquals(this.layout.measuredBoundaries,0,0,200,100,{ fileName : "TestDockLayout.hx", lineNumber : 97, className : "precog.layout.TestDockLayout", methodName : "testMargin"});
+		AssertRectangles2.assertEquals(this.panel.rectangle,0,0,50,100,{ fileName : "TestDockLayout.hx", lineNumber : 116, className : "precog.layout.TestDockLayout", methodName : "testMargin"});
+		AssertRectangles2.assertEquals(p2.rectangle,60,0,140,50,{ fileName : "TestDockLayout.hx", lineNumber : 117, className : "precog.layout.TestDockLayout", methodName : "testMargin"});
+		AssertRectangles2.assertEquals(p3.rectangle,60,60,60,40,{ fileName : "TestDockLayout.hx", lineNumber : 118, className : "precog.layout.TestDockLayout", methodName : "testMargin"});
+		AssertRectangles2.assertEquals(p4.rectangle,140,60,60,40,{ fileName : "TestDockLayout.hx", lineNumber : 119, className : "precog.layout.TestDockLayout", methodName : "testMargin"});
+		AssertRectangles2.assertEquals(this.layout.measuredBoundaries,0,0,200,100,{ fileName : "TestDockLayout.hx", lineNumber : 120, className : "precog.layout.TestDockLayout", methodName : "testMargin"});
 	}
 	,testExceededBoundaries: function() {
 		this.layout.update();
-		utest.Assert.isTrue(Math.isNaN(this.layout.measuredBoundaries.width),null,{ fileName : "TestDockLayout.hx", lineNumber : 70, className : "precog.layout.TestDockLayout", methodName : "testExceededBoundaries"});
-		utest.Assert.isTrue(Math.isNaN(this.layout.measuredBoundaries.height),null,{ fileName : "TestDockLayout.hx", lineNumber : 71, className : "precog.layout.TestDockLayout", methodName : "testExceededBoundaries"});
+		utest.Assert.isTrue(Math.isNaN(this.layout.measuredBoundaries.width),null,{ fileName : "TestDockLayout.hx", lineNumber : 93, className : "precog.layout.TestDockLayout", methodName : "testExceededBoundaries"});
+		utest.Assert.isTrue(Math.isNaN(this.layout.measuredBoundaries.height),null,{ fileName : "TestDockLayout.hx", lineNumber : 94, className : "precog.layout.TestDockLayout", methodName : "testExceededBoundaries"});
 		var dock = this.layout.addPanel(this.panel);
 		this.layout.update();
-		AssertRectangles2.assertEquals(this.layout.measuredBoundaries,0,0,200,100,{ fileName : "TestDockLayout.hx", lineNumber : 75, className : "precog.layout.TestDockLayout", methodName : "testExceededBoundaries"});
+		AssertRectangles2.assertEquals(this.layout.measuredBoundaries,0,0,200,100,{ fileName : "TestDockLayout.hx", lineNumber : 98, className : "precog.layout.TestDockLayout", methodName : "testExceededBoundaries"});
 		dock.dockLeft(precog.layout.ExtentValue.Absolute(50));
 		this.layout.update();
-		AssertRectangles2.assertEquals(this.layout.measuredBoundaries,0,0,50,100,{ fileName : "TestDockLayout.hx", lineNumber : 79, className : "precog.layout.TestDockLayout", methodName : "testExceededBoundaries"});
+		AssertRectangles2.assertEquals(this.layout.measuredBoundaries,0,0,50,100,{ fileName : "TestDockLayout.hx", lineNumber : 102, className : "precog.layout.TestDockLayout", methodName : "testExceededBoundaries"});
 	}
 	,testFill2: function() {
 		var panel2 = new precog.layout.Panel();
 		this.layout.addPanel(this.panel);
 		this.layout.addPanel(panel2);
 		this.layout.update();
-		AssertRectangles2.assertEquals(this.panel.frame,0,0,100,100,{ fileName : "TestDockLayout.hx", lineNumber : 63, className : "precog.layout.TestDockLayout", methodName : "testFill2"});
-		AssertRectangles2.assertEquals(panel2.frame,100,0,100,100,{ fileName : "TestDockLayout.hx", lineNumber : 64, className : "precog.layout.TestDockLayout", methodName : "testFill2"});
+		AssertRectangles2.assertEquals(this.panel.rectangle,0,0,100,100,{ fileName : "TestDockLayout.hx", lineNumber : 86, className : "precog.layout.TestDockLayout", methodName : "testFill2"});
+		AssertRectangles2.assertEquals(panel2.rectangle,100,0,100,100,{ fileName : "TestDockLayout.hx", lineNumber : 87, className : "precog.layout.TestDockLayout", methodName : "testFill2"});
 	}
 	,testFill: function() {
 		this.layout.addPanel(this.panel);
 		this.layout.update();
-		AssertRectangles2.assertEquals(this.panel.frame,0,0,200,100,{ fileName : "TestDockLayout.hx", lineNumber : 54, className : "precog.layout.TestDockLayout", methodName : "testFill"});
+		AssertRectangles2.assertEquals(this.panel.rectangle,0,0,200,100,{ fileName : "TestDockLayout.hx", lineNumber : 77, className : "precog.layout.TestDockLayout", methodName : "testFill"});
 	}
 	,testComplex: function() {
 		var p1 = new precog.layout.Panel(), p2 = new precog.layout.Panel(), p3 = new precog.layout.Panel(), p4 = new precog.layout.Panel(), p5 = new precog.layout.Panel();
@@ -1866,16 +1886,33 @@ precog.layout.TestDockLayout.prototype = {
 		this.layout.addPanel(p4).dockLeft(precog.layout.ExtentValue.Percent(0.1));
 		this.layout.addPanel(p5);
 		this.layout.update();
-		AssertRectangles2.assertEquals(p1.frame,0,0,40,100,{ fileName : "TestDockLayout.hx", lineNumber : 43, className : "precog.layout.TestDockLayout", methodName : "testComplex"});
-		AssertRectangles2.assertEquals(p2.frame,160,0,40,100,{ fileName : "TestDockLayout.hx", lineNumber : 44, className : "precog.layout.TestDockLayout", methodName : "testComplex"});
-		AssertRectangles2.assertEquals(p3.frame,40,0,120,20,{ fileName : "TestDockLayout.hx", lineNumber : 45, className : "precog.layout.TestDockLayout", methodName : "testComplex"});
-		AssertRectangles2.assertEquals(p4.frame,40,20,20,80,{ fileName : "TestDockLayout.hx", lineNumber : 46, className : "precog.layout.TestDockLayout", methodName : "testComplex"});
-		AssertRectangles2.assertEquals(p5.frame,60,20,100,80,{ fileName : "TestDockLayout.hx", lineNumber : 47, className : "precog.layout.TestDockLayout", methodName : "testComplex"});
+		AssertRectangles2.assertEquals(p1.rectangle,0,0,40,100,{ fileName : "TestDockLayout.hx", lineNumber : 66, className : "precog.layout.TestDockLayout", methodName : "testComplex"});
+		AssertRectangles2.assertEquals(p2.rectangle,160,0,40,100,{ fileName : "TestDockLayout.hx", lineNumber : 67, className : "precog.layout.TestDockLayout", methodName : "testComplex"});
+		AssertRectangles2.assertEquals(p3.rectangle,40,0,120,20,{ fileName : "TestDockLayout.hx", lineNumber : 68, className : "precog.layout.TestDockLayout", methodName : "testComplex"});
+		AssertRectangles2.assertEquals(p4.rectangle,40,20,20,80,{ fileName : "TestDockLayout.hx", lineNumber : 69, className : "precog.layout.TestDockLayout", methodName : "testComplex"});
+		AssertRectangles2.assertEquals(p5.rectangle,60,20,100,80,{ fileName : "TestDockLayout.hx", lineNumber : 70, className : "precog.layout.TestDockLayout", methodName : "testComplex"});
 	}
 	,testSimple: function() {
 		this.layout.addPanel(this.panel).dockLeft(precog.layout.ExtentValue.Percent(0.2));
 		this.layout.update();
-		AssertRectangles2.assertEquals(this.panel.frame,0,0,40,100,{ fileName : "TestDockLayout.hx", lineNumber : 26, className : "precog.layout.TestDockLayout", methodName : "testSimple"});
+		AssertRectangles2.assertEquals(this.panel.rectangle,0,0,40,100,{ fileName : "TestDockLayout.hx", lineNumber : 49, className : "precog.layout.TestDockLayout", methodName : "testSimple"});
+	}
+	,testAddAddToOther: function() {
+		this.layout.addPanel(this.panel);
+		this.layout.update();
+		AssertRectangles2.assertEquals(this.panel.rectangle,0,0,200,100,{ fileName : "TestDockLayout.hx", lineNumber : 33, className : "precog.layout.TestDockLayout", methodName : "testAddAddToOther"});
+		var layout2 = new precog.layout.DockLayout(100,50);
+		layout2.addPanel(this.panel).dockLeft(precog.layout.ExtentValue.Percent(0.5));
+		this.layout.update();
+		layout2.update();
+		utest.Assert.isFalse(this.layout.iterator().hasNext(),null,{ fileName : "TestDockLayout.hx", lineNumber : 39, className : "precog.layout.TestDockLayout", methodName : "testAddAddToOther"});
+		AssertRectangles2.assertEquals(this.panel.rectangle,0,0,50,50,{ fileName : "TestDockLayout.hx", lineNumber : 41, className : "precog.layout.TestDockLayout", methodName : "testAddAddToOther"});
+	}
+	,testAddAdd: function() {
+		this.layout.addPanel(this.panel);
+		this.layout.addPanel(this.panel).dockLeft(precog.layout.ExtentValue.Percent(0.5));
+		this.layout.update();
+		AssertRectangles2.assertEquals(this.panel.rectangle,0,0,100,100,{ fileName : "TestDockLayout.hx", lineNumber : 26, className : "precog.layout.TestDockLayout", methodName : "testAddAdd"});
 	}
 	,setup: function() {
 		this.layout = new precog.layout.DockLayout(200,100);
@@ -1928,9 +1965,9 @@ precog.layout.TestStackLayout.prototype = {
 		layout.addPanel(p2).setExtent(precog.layout.ExtentValue.Absolute(50)).setMargin(precog.layout.ExtentValue.Absolute(10));
 		layout.addPanel(p3).setMargin(precog.layout.ExtentValue.Absolute(5));
 		layout.update();
-		AssertRectangles2.assertEquals(p1.frame,0,0,100,20,{ fileName : "TestStackLayout.hx", lineNumber : 65, className : "precog.layout.TestStackLayout", methodName : "testMargin"});
-		AssertRectangles2.assertEquals(p2.frame,120,0,50,20,{ fileName : "TestStackLayout.hx", lineNumber : 66, className : "precog.layout.TestStackLayout", methodName : "testMargin"});
-		AssertRectangles2.assertEquals(p3.frame,180,0,100,20,{ fileName : "TestStackLayout.hx", lineNumber : 67, className : "precog.layout.TestStackLayout", methodName : "testMargin"});
+		AssertRectangles2.assertEquals(p1.rectangle,0,0,100,20,{ fileName : "TestStackLayout.hx", lineNumber : 65, className : "precog.layout.TestStackLayout", methodName : "testMargin"});
+		AssertRectangles2.assertEquals(p2.rectangle,120,0,50,20,{ fileName : "TestStackLayout.hx", lineNumber : 66, className : "precog.layout.TestStackLayout", methodName : "testMargin"});
+		AssertRectangles2.assertEquals(p3.rectangle,180,0,100,20,{ fileName : "TestStackLayout.hx", lineNumber : 67, className : "precog.layout.TestStackLayout", methodName : "testMargin"});
 		AssertRectangles2.assertEquals(layout.measuredBoundaries,0,0,280,20,{ fileName : "TestStackLayout.hx", lineNumber : 69, className : "precog.layout.TestStackLayout", methodName : "testMargin"});
 	}
 	,testVertical: function() {
@@ -1940,9 +1977,9 @@ precog.layout.TestStackLayout.prototype = {
 		layout.addPanel(p2).setExtent(precog.layout.ExtentValue.Absolute(50));
 		layout.addPanel(p3);
 		layout.update();
-		AssertRectangles2.assertEquals(p1.frame,0,0,200,100,{ fileName : "TestStackLayout.hx", lineNumber : 45, className : "precog.layout.TestStackLayout", methodName : "testVertical"});
-		AssertRectangles2.assertEquals(p2.frame,0,100,200,50,{ fileName : "TestStackLayout.hx", lineNumber : 46, className : "precog.layout.TestStackLayout", methodName : "testVertical"});
-		AssertRectangles2.assertEquals(p3.frame,0,150,200,100,{ fileName : "TestStackLayout.hx", lineNumber : 47, className : "precog.layout.TestStackLayout", methodName : "testVertical"});
+		AssertRectangles2.assertEquals(p1.rectangle,0,0,200,100,{ fileName : "TestStackLayout.hx", lineNumber : 45, className : "precog.layout.TestStackLayout", methodName : "testVertical"});
+		AssertRectangles2.assertEquals(p2.rectangle,0,100,200,50,{ fileName : "TestStackLayout.hx", lineNumber : 46, className : "precog.layout.TestStackLayout", methodName : "testVertical"});
+		AssertRectangles2.assertEquals(p3.rectangle,0,150,200,100,{ fileName : "TestStackLayout.hx", lineNumber : 47, className : "precog.layout.TestStackLayout", methodName : "testVertical"});
 		AssertRectangles2.assertEquals(layout.measuredBoundaries,0,0,200,250,{ fileName : "TestStackLayout.hx", lineNumber : 49, className : "precog.layout.TestStackLayout", methodName : "testVertical"});
 	}
 	,testHorizontal: function() {
@@ -1952,9 +1989,9 @@ precog.layout.TestStackLayout.prototype = {
 		layout.addPanel(p2).setExtent(precog.layout.ExtentValue.Absolute(50));
 		layout.addPanel(p3);
 		layout.update();
-		AssertRectangles2.assertEquals(p1.frame,0,0,100,20,{ fileName : "TestStackLayout.hx", lineNumber : 25, className : "precog.layout.TestStackLayout", methodName : "testHorizontal"});
-		AssertRectangles2.assertEquals(p2.frame,100,0,50,20,{ fileName : "TestStackLayout.hx", lineNumber : 26, className : "precog.layout.TestStackLayout", methodName : "testHorizontal"});
-		AssertRectangles2.assertEquals(p3.frame,150,0,100,20,{ fileName : "TestStackLayout.hx", lineNumber : 27, className : "precog.layout.TestStackLayout", methodName : "testHorizontal"});
+		AssertRectangles2.assertEquals(p1.rectangle,0,0,100,20,{ fileName : "TestStackLayout.hx", lineNumber : 25, className : "precog.layout.TestStackLayout", methodName : "testHorizontal"});
+		AssertRectangles2.assertEquals(p2.rectangle,100,0,50,20,{ fileName : "TestStackLayout.hx", lineNumber : 26, className : "precog.layout.TestStackLayout", methodName : "testHorizontal"});
+		AssertRectangles2.assertEquals(p3.rectangle,150,0,100,20,{ fileName : "TestStackLayout.hx", lineNumber : 27, className : "precog.layout.TestStackLayout", methodName : "testHorizontal"});
 		AssertRectangles2.assertEquals(layout.measuredBoundaries,0,0,250,20,{ fileName : "TestStackLayout.hx", lineNumber : 29, className : "precog.layout.TestStackLayout", methodName : "testHorizontal"});
 	}
 	,__class__: precog.layout.TestStackLayout
@@ -1971,9 +2008,9 @@ precog.layout.TestWrapLayout.prototype = {
 		layout.addPanel(p2).setWidth(precog.layout.ExtentValue.Absolute(50)).setHeight(precog.layout.ExtentValue.Absolute(200)).setMarginHeight(precog.layout.ExtentValue.Absolute(5));
 		layout.addPanel(p3).setMarginWidth(precog.layout.ExtentValue.Absolute(20)).setMarginHeight(precog.layout.ExtentValue.Absolute(10));
 		layout.update();
-		AssertRectangles2.assertEquals(p1.frame,0,0,120,50,{ fileName : "TestWrapLayout.hx", lineNumber : 68, className : "precog.layout.TestWrapLayout", methodName : "testMargin"});
-		AssertRectangles2.assertEquals(p2.frame,130,0,50,200,{ fileName : "TestWrapLayout.hx", lineNumber : 69, className : "precog.layout.TestWrapLayout", methodName : "testMargin"});
-		AssertRectangles2.assertEquals(p3.frame,0,205,120,50,{ fileName : "TestWrapLayout.hx", lineNumber : 70, className : "precog.layout.TestWrapLayout", methodName : "testMargin"});
+		AssertRectangles2.assertEquals(p1.rectangle,0,0,120,50,{ fileName : "TestWrapLayout.hx", lineNumber : 68, className : "precog.layout.TestWrapLayout", methodName : "testMargin"});
+		AssertRectangles2.assertEquals(p2.rectangle,130,0,50,200,{ fileName : "TestWrapLayout.hx", lineNumber : 69, className : "precog.layout.TestWrapLayout", methodName : "testMargin"});
+		AssertRectangles2.assertEquals(p3.rectangle,0,205,120,50,{ fileName : "TestWrapLayout.hx", lineNumber : 70, className : "precog.layout.TestWrapLayout", methodName : "testMargin"});
 		AssertRectangles2.assertEquals(layout.measuredBoundaries,0,0,180,255,{ fileName : "TestWrapLayout.hx", lineNumber : 72, className : "precog.layout.TestWrapLayout", methodName : "testMargin"});
 	}
 	,testVertical: function() {
@@ -1984,9 +2021,9 @@ precog.layout.TestWrapLayout.prototype = {
 		layout.addPanel(p2).setWidth(precog.layout.ExtentValue.Absolute(100)).setHeight(precog.layout.ExtentValue.Absolute(40));
 		layout.addPanel(p3);
 		layout.update();
-		AssertRectangles2.assertEquals(p1.frame,0,0,30,30,{ fileName : "TestWrapLayout.hx", lineNumber : 47, className : "precog.layout.TestWrapLayout", methodName : "testVertical"});
-		AssertRectangles2.assertEquals(p2.frame,0,30,100,40,{ fileName : "TestWrapLayout.hx", lineNumber : 48, className : "precog.layout.TestWrapLayout", methodName : "testVertical"});
-		AssertRectangles2.assertEquals(p3.frame,0,70,30,30,{ fileName : "TestWrapLayout.hx", lineNumber : 49, className : "precog.layout.TestWrapLayout", methodName : "testVertical"});
+		AssertRectangles2.assertEquals(p1.rectangle,0,0,30,30,{ fileName : "TestWrapLayout.hx", lineNumber : 47, className : "precog.layout.TestWrapLayout", methodName : "testVertical"});
+		AssertRectangles2.assertEquals(p2.rectangle,0,30,100,40,{ fileName : "TestWrapLayout.hx", lineNumber : 48, className : "precog.layout.TestWrapLayout", methodName : "testVertical"});
+		AssertRectangles2.assertEquals(p3.rectangle,0,70,30,30,{ fileName : "TestWrapLayout.hx", lineNumber : 49, className : "precog.layout.TestWrapLayout", methodName : "testVertical"});
 		AssertRectangles2.assertEquals(layout.measuredBoundaries,0,0,100,100,{ fileName : "TestWrapLayout.hx", lineNumber : 51, className : "precog.layout.TestWrapLayout", methodName : "testVertical"});
 	}
 	,testHorizontal: function() {
@@ -1997,9 +2034,9 @@ precog.layout.TestWrapLayout.prototype = {
 		layout.addPanel(p2).setWidth(precog.layout.ExtentValue.Absolute(50)).setHeight(precog.layout.ExtentValue.Absolute(200));
 		layout.addPanel(p3);
 		layout.update();
-		AssertRectangles2.assertEquals(p1.frame,0,0,120,50,{ fileName : "TestWrapLayout.hx", lineNumber : 26, className : "precog.layout.TestWrapLayout", methodName : "testHorizontal"});
-		AssertRectangles2.assertEquals(p2.frame,120,0,50,200,{ fileName : "TestWrapLayout.hx", lineNumber : 27, className : "precog.layout.TestWrapLayout", methodName : "testHorizontal"});
-		AssertRectangles2.assertEquals(p3.frame,0,200,120,50,{ fileName : "TestWrapLayout.hx", lineNumber : 28, className : "precog.layout.TestWrapLayout", methodName : "testHorizontal"});
+		AssertRectangles2.assertEquals(p1.rectangle,0,0,120,50,{ fileName : "TestWrapLayout.hx", lineNumber : 26, className : "precog.layout.TestWrapLayout", methodName : "testHorizontal"});
+		AssertRectangles2.assertEquals(p2.rectangle,120,0,50,200,{ fileName : "TestWrapLayout.hx", lineNumber : 27, className : "precog.layout.TestWrapLayout", methodName : "testHorizontal"});
+		AssertRectangles2.assertEquals(p3.rectangle,0,200,120,50,{ fileName : "TestWrapLayout.hx", lineNumber : 28, className : "precog.layout.TestWrapLayout", methodName : "testHorizontal"});
 		AssertRectangles2.assertEquals(layout.measuredBoundaries,0,0,170,250,{ fileName : "TestWrapLayout.hx", lineNumber : 30, className : "precog.layout.TestWrapLayout", methodName : "testHorizontal"});
 	}
 	,__class__: precog.layout.TestWrapLayout
@@ -2032,7 +2069,7 @@ precog.layout.WrapLayout.prototype = $extend(precog.layout.Layout.prototype,{
 			while(_g2 < _g3.length) {
 				var item = _g3[_g2];
 				++_g2;
-				item.panel.frame.set(ox,oy,item.width,item.height);
+				item.panel.rectangle.set(this.rectangle.x + ox,this.rectangle.y + oy,item.width,item.height);
 				oy += item.height + item.margin;
 				margin = item.margin;
 			}
@@ -2042,11 +2079,11 @@ precog.layout.WrapLayout.prototype = $extend(precog.layout.Layout.prototype,{
 			mx = line.margin;
 		}
 		ox -= mx;
-		if(ox > 0 || bh > 0) this.measuredBoundaries.set(0,0,ox,bh);
+		if(ox > 0 || bh > 0) this.measuredBoundaries.set(this.rectangle.x,this.rectangle.y,ox,bh);
 	}
 	,assignToLineVertical: function(panel) {
-		var item = this.items.h[panel.__id__], width = precog.layout._Extent.ExtentImpl.relativeTo(item.width,this.size.x), height = precog.layout._Extent.ExtentImpl.relativeTo(item.height,this.size.y), marginWidth = precog.layout._Extent.ExtentImpl.relativeTo(item.marginWidth,this.size.x), marginHeight = precog.layout._Extent.ExtentImpl.relativeTo(item.marginHeight,this.size.y);
-		if(this.offset + height + marginHeight > this.size.y) {
+		var item = this.items.h[panel.__id__], width = precog.layout._Extent.ExtentImpl.relativeTo(item.width,this.rectangle.width), height = precog.layout._Extent.ExtentImpl.relativeTo(item.height,this.rectangle.height), marginWidth = precog.layout._Extent.ExtentImpl.relativeTo(item.marginWidth,this.rectangle.width), marginHeight = precog.layout._Extent.ExtentImpl.relativeTo(item.marginHeight,this.rectangle.height);
+		if(this.offset + height + marginHeight > this.rectangle.height) {
 			this.current = { max : 0.0, margin : 0.0, panels : []};
 			this.lines.push(this.current);
 		} else this.offset += height + marginHeight;
@@ -2067,7 +2104,7 @@ precog.layout.WrapLayout.prototype = $extend(precog.layout.Layout.prototype,{
 			while(_g2 < _g3.length) {
 				var item = _g3[_g2];
 				++_g2;
-				item.panel.frame.set(ox,oy,item.width,item.height);
+				item.panel.rectangle.set(this.rectangle.x + ox,this.rectangle.y + oy,item.width,item.height);
 				ox += item.width + item.margin;
 				margin = item.margin;
 			}
@@ -2077,11 +2114,11 @@ precog.layout.WrapLayout.prototype = $extend(precog.layout.Layout.prototype,{
 			my = line.margin;
 		}
 		oy -= my;
-		if(bw > 0 || oy > 0) this.measuredBoundaries.set(0,0,bw,oy);
+		if(bw > 0 || oy > 0) this.measuredBoundaries.set(this.rectangle.x,this.rectangle.y,bw,oy);
 	}
 	,assignToLineHorizontal: function(panel) {
-		var item = this.items.h[panel.__id__], width = precog.layout._Extent.ExtentImpl.relativeTo(item.width,this.size.x), height = precog.layout._Extent.ExtentImpl.relativeTo(item.height,this.size.y), marginWidth = precog.layout._Extent.ExtentImpl.relativeTo(item.marginWidth,this.size.x), marginHeight = precog.layout._Extent.ExtentImpl.relativeTo(item.marginHeight,this.size.y);
-		if(this.offset + width + marginWidth > this.size.x) {
+		var item = this.items.h[panel.__id__], width = precog.layout._Extent.ExtentImpl.relativeTo(item.width,this.rectangle.width), height = precog.layout._Extent.ExtentImpl.relativeTo(item.height,this.rectangle.height), marginWidth = precog.layout._Extent.ExtentImpl.relativeTo(item.marginWidth,this.rectangle.width), marginHeight = precog.layout._Extent.ExtentImpl.relativeTo(item.marginHeight,this.rectangle.height);
+		if(this.offset + width + marginWidth > this.rectangle.width) {
 			this.current = { max : 0.0, margin : 0.0, panels : []};
 			this.lines.push(this.current);
 		} else this.offset += width + marginWidth;

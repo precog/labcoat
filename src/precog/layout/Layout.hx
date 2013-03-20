@@ -1,6 +1,5 @@
 package precog.layout;
 
-import precog.geom.Point;
 import precog.geom.Rectangle;
 import precog.geom.IRectangleObservable;
 import thx.react.IObservable;
@@ -18,7 +17,7 @@ quickstart: http://www.codeproject.com/Articles/30904/WPF-Layouts-A-Visual-Quick
 class Layout
 {
 	
-	public var size(default, null) : Point;
+	public var rectangle(default, null) : Rectangle;
 	public var boundaries(get_boundaries, null) : IRectangleObservable;
 	public var onpanel(default, null) : {
 		add : IObservable<Panel>,
@@ -28,7 +27,7 @@ class Layout
 	var panels : LayoutPanels;
 	function new(width : Float, height : Float)
 	{
-		this.size = new Point(width, height);
+		this.rectangle = new Rectangle(0, 0, width, height);
 		this.measuredBoundaries = new Rectangle();
 		this.panels = new LayoutPanels(this);
 		this.onpanel = {
@@ -58,12 +57,12 @@ class Layout
 		updateQueue = createUpdateQueue();
 		measuredBoundaries.wrapSuspended(function() {
 			for(panel in panels)
-				panel.frame.suspend();
+				panel.rectangle.suspend();
 			resetBoundaries();
 			while(updateQueue.length > 0)
 				updateQueue.shift()();
 			for(panel in panels)
-				panel.frame.resume();
+				panel.rectangle.resume();
 		});
 	}
 
@@ -79,6 +78,16 @@ class Layout
 
 	public function iterator()
 		return panels.iterator();
+
+	public function clear()
+		for(panel in panels)
+			panel.remove();
+
+	public function count() 
+		return panels.count();
+
+	public function toString()
+		return Type.getClassName(Type.getClass(this)).split(".").pop() + '(${count()} children)';
 }
 
 @:access(precog.layout.Panel.setLayout)
@@ -110,6 +119,9 @@ class LayoutPanels
 		observableRemove.notify(panel);
 	}
 
+	public function count()
+		return panels.length;
+
 	public function clear()
 	{
 		var all = panels.copy();
@@ -118,5 +130,5 @@ class LayoutPanels
 	}
 
 	inline public function iterator()
-		return panels.iterator();
+		return panels.copy().iterator();
 }

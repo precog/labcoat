@@ -122,6 +122,32 @@ Type["typeof"] = function(v) {
 	}
 }
 var haxe = {}
+haxe.Timer = function(time_ms) {
+	var me = this;
+	this.id = setInterval(function() {
+		me.run();
+	},time_ms);
+};
+haxe.Timer.__name__ = ["haxe","Timer"];
+haxe.Timer.delay = function(f,time_ms) {
+	var t = new haxe.Timer(time_ms);
+	t.run = function() {
+		t.stop();
+		f();
+	};
+	return t;
+}
+haxe.Timer.prototype = {
+	run: function() {
+		console.log("run");
+	}
+	,stop: function() {
+		if(this.id == null) return;
+		clearInterval(this.id);
+		this.id = null;
+	}
+	,__class__: haxe.Timer
+}
 haxe.ds = {}
 haxe.ds.IntMap = function() {
 	this.h = { };
@@ -378,9 +404,8 @@ precog.communicator.Module.prototype = {
 }
 precog.app.module = {}
 precog.app.module.LayoutModule = function(container) {
+	this.panelMargin = 3;
 	this.container = new js.JQuery(container);
-	this.container.addClass("labcoat");
-	this.container.css({ 'background-color' : "#f99", width : "100%", height : "100%", position : "absolute", overflow : "hidden"});
 };
 precog.app.module.LayoutModule.__name__ = ["precog","app","module","LayoutModule"];
 precog.app.module.LayoutModule.__super__ = precog.communicator.Module;
@@ -391,34 +416,48 @@ precog.app.module.LayoutModule.prototype = $extend(precog.communicator.Module.pr
 		var jq = new js.JQuery(this.container);
 		return { width : jq.innerWidth(), height : jq.outerHeight()};
 	}
+	,reduce: function(handler) {
+		if(null != this.timer) this.timer.stop();
+		this.timer = haxe.Timer.delay(handler,50);
+	}
 	,connect: function(comm) {
 		var _g = this;
-		var size = this.getSize();
-		var bottom = new precog.layout.Panel(), left = new precog.layout.Panel(), right = new precog.layout.Panel(), main = new precog.layout.Panel();
-		var layout = new precog.layout.DockLayout(size.width,size.height);
-		var menu = new precog.layout.Panel();
-		layout.addPanel(menu).dockTop(precog.layout.ExtentValue.Absolute(20));
-		this.createDomPanel(menu);
-		layout.addPanel(bottom).dockBottom(precog.layout.ExtentValue.Absolute(100));
-		this.createDomPanel(bottom);
-		layout.addPanel(left).dockLeft(precog.layout.ExtentValue.Absolute(150));
-		this.createDomPanel(left);
-		layout.addPanel(right).dockRight(precog.layout.ExtentValue.Absolute(150));
-		this.createDomPanel(right);
-		layout.addPanel(main).fill();
-		this.createDomPanel(main);
-		layout.update();
+		this.container.addClass("labcoat");
+		this.context = new precog.layout.Panel();
+		this.menu = new precog.html.HtmlPanel("menu",this.container);
+		this.main = new precog.html.HtmlPanel("main",this.container);
+		this.system = new precog.html.HtmlPanel("system",this.container);
+		this.support = new precog.html.HtmlPanel("support",this.container);
+		this.tools = new precog.html.HtmlPanel("tools",this.container);
+		this.layouts = { main : new precog.layout.DockLayout(0,0), context : new precog.layout.DockLayout(0,0)};
+		this.layouts.main.defaultMargin = precog.layout.ExtentValue.Absolute(this.panelMargin);
+		this.layouts.context.defaultMargin = precog.layout.ExtentValue.Absolute(this.panelMargin);
+		thx.react.IObservables.addListener(this.context.rectangle,function(rect) {
+			_g.layouts.context.rectangle.set(rect.x,rect.y,rect.width,rect.height);
+		});
+		this.updateLayouts();
 		new js.JQuery(js.Browser.window).resize(function(_) {
-			var size1 = _g.getSize();
-			layout.size.set(size1.width,size1.height);
-			layout.update();
+			_g.updateLayouts();
 		});
 	}
-	,createDomPanel: function(panel) {
-		var el = new js.JQuery("<div class=\"panel\" style=\"position:absolute\"></div>").appendTo(this.container), frame = panel.frame;
-		thx.react.IObservables.addListener(frame,function(rect) {
-			el.css({ top : rect.y + "px", left : rect.x + "px", width : rect.width + "px", height : rect.height + "px"});
-		});
+	,updateLayouts: function() {
+		var size = this.getSize(), vertical = size.width < size.height;
+		this.layouts.main.clear();
+		this.layouts.context.clear();
+		this.layouts.main.rectangle.set(0,0,size.width,size.height);
+		this.layouts.main.addPanel(this.menu.panel).dockTop(precog.layout.ExtentValue.Absolute(20));
+		this.layouts.main.addPanel(this.tools.panel).dockBottom(precog.layout.ExtentValue.Absolute(100));
+		this.layouts.main.addPanel(this.context).dockLeft(precog.layout.ExtentValue.Absolute(200));
+		if(vertical) {
+			this.layouts.context.addPanel(this.system.panel).dockTop(precog.layout.ExtentValue.Percent(0.5));
+			this.layouts.context.addPanel(this.support.panel).fill();
+		} else {
+			this.layouts.main.addPanel(this.support.panel).dockRight(precog.layout.ExtentValue.Absolute(250));
+			this.layouts.context.addPanel(this.system.panel).fill();
+		}
+		this.layouts.main.addPanel(this.main.panel).fill();
+		this.layouts.main.update();
+		this.layouts.context.update();
 	}
 	,__class__: precog.app.module.LayoutModule
 });
@@ -518,20 +557,17 @@ precog.geom.IPoint.__name__ = ["precog","geom","IPoint"];
 precog.geom.IPoint.prototype = {
 	__class__: precog.geom.IPoint
 }
+precog.geom.IRectangle = function() { }
+precog.geom.IRectangle.__name__ = ["precog","geom","IRectangle"];
+precog.geom.IRectangle.prototype = {
+	__class__: precog.geom.IRectangle
+}
 var thx = {}
 thx.react = {}
 thx.react.IObservable = function() { }
 thx.react.IObservable.__name__ = ["thx","react","IObservable"];
 thx.react.IObservable.prototype = {
 	__class__: thx.react.IObservable
-}
-precog.geom.IPointObservable = function() { }
-precog.geom.IPointObservable.__name__ = ["precog","geom","IPointObservable"];
-precog.geom.IPointObservable.__interfaces__ = [precog.geom.IPoint,thx.react.IObservable];
-precog.geom.IRectangle = function() { }
-precog.geom.IRectangle.__name__ = ["precog","geom","IRectangle"];
-precog.geom.IRectangle.prototype = {
-	__class__: precog.geom.IRectangle
 }
 precog.geom.IRectangleObservable = function() { }
 precog.geom.IRectangleObservable.__name__ = ["precog","geom","IRectangleObservable"];
@@ -573,30 +609,6 @@ thx.react.Suspendable.prototype = {
 	}
 	,__class__: thx.react.Suspendable
 }
-precog.geom.Point = function(x,y) {
-	if(y == null) y = 0.0;
-	if(x == null) x = 0.0;
-	this.x = x;
-	this.y = y;
-};
-precog.geom.Point.__name__ = ["precog","geom","Point"];
-precog.geom.Point.__interfaces__ = [precog.geom.IPointObservable];
-precog.geom.Point.__super__ = thx.react.Suspendable;
-precog.geom.Point.prototype = $extend(thx.react.Suspendable.prototype,{
-	set: function(x,y) {
-		if(this.x == x && this.y == y) return;
-		this.x = x;
-		this.y = y;
-		this.notify(true);
-	}
-	,toString: function() {
-		return "Point(" + this.x + ", " + this.y + ")";
-	}
-	,equals: function(other) {
-		return this.x == other.x && this.y == other.y;
-	}
-	,__class__: precog.geom.Point
-});
 precog.geom.Rectangle = function(x,y,width,height) {
 	if(height == null) height = 0.0;
 	if(width == null) width = 0.0;
@@ -654,17 +666,62 @@ precog.geom.Rectangle.prototype = $extend(thx.react.Suspendable.prototype,{
 	}
 	,__class__: precog.geom.Rectangle
 });
+thx.react.IObserver = function() { }
+thx.react.IObserver.__name__ = ["thx","react","IObserver"];
+thx.react.IObserver.prototype = {
+	__class__: thx.react.IObserver
+}
+precog.html = {}
+precog.html.HtmlPanel = function(cls,container) {
+	if(cls == null) cls = "";
+	this.panel = new precog.layout.Panel();
+	this.element = new js.JQuery("<div class=\"panel " + cls + "\" style=\"position:absolute\"></div>");
+	thx.react.promise.Timer.delay(0).then((function(f,a1) {
+		return function() {
+			return f(a1);
+		};
+	})(($_=this.element,$bind($_,$_.addClass)),"animate-all"));
+	this.panel.rectangle.attach(this);
+	if(null != container) this.element.appendTo(container);
+};
+precog.html.HtmlPanel.__name__ = ["precog","html","HtmlPanel"];
+precog.html.HtmlPanel.__interfaces__ = [thx.react.IObserver];
+precog.html.HtmlPanel.prototype = {
+	destroy: function() {
+		this.panel.rectangle.detach(this);
+		this.element.remove();
+		this.panel = null;
+		this.element = null;
+	}
+	,update: function(rect) {
+		this.element.css({ top : rect.y + "px", left : rect.x + "px", width : rect.width + "px", height : rect.height + "px"});
+	}
+	,__class__: precog.html.HtmlPanel
+}
 precog.layout = {}
 precog.layout.Layout = function(width,height) {
-	this.size = new precog.geom.Point(width,height);
+	this.rectangle = new precog.geom.Rectangle(0,0,width,height);
 	this.measuredBoundaries = new precog.geom.Rectangle();
 	this.panels = new precog.layout.LayoutPanels(this);
 	this.onpanel = { add : this.panels.observableAdd, remove : this.panels.observableRemove};
 };
 precog.layout.Layout.__name__ = ["precog","layout","Layout"];
 precog.layout.Layout.prototype = {
-	iterator: function() {
-		return HxOverrides.iter(this.panels.panels);
+	toString: function() {
+		return Type.getClassName(Type.getClass(this)).split(".").pop() + ("(" + this.count() + " children)");
+	}
+	,count: function() {
+		return this.panels.count();
+	}
+	,clear: function() {
+		var $it0 = HxOverrides.iter(this.panels.panels.slice());
+		while( $it0.hasNext() ) {
+			var panel = $it0.next();
+			panel.remove();
+		}
+	}
+	,iterator: function() {
+		return HxOverrides.iter(this.panels.panels.slice());
 	}
 	,updatePanel: function(panel) {
 	}
@@ -675,24 +732,24 @@ precog.layout.Layout.prototype = {
 		var _g = this;
 		this.updateQueue = this.createUpdateQueue();
 		this.measuredBoundaries.wrapSuspended(function() {
-			var $it0 = HxOverrides.iter(_g.panels.panels);
+			var $it0 = HxOverrides.iter(_g.panels.panels.slice());
 			while( $it0.hasNext() ) {
 				var panel = $it0.next();
-				panel.frame.suspend();
+				panel.rectangle.suspend();
 			}
 			_g.resetBoundaries();
 			while(_g.updateQueue.length > 0) (_g.updateQueue.shift())();
-			var $it1 = HxOverrides.iter(_g.panels.panels);
+			var $it1 = HxOverrides.iter(_g.panels.panels.slice());
 			while( $it1.hasNext() ) {
 				var panel = $it1.next();
-				panel.frame.resume();
+				panel.rectangle.resume();
 			}
 		});
 	}
 	,panelIteratorFunction: function(f) {
 		var _g = this;
 		return function() {
-			var $it0 = HxOverrides.iter(_g.panels.panels);
+			var $it0 = HxOverrides.iter(_g.panels.panels.slice());
 			while( $it0.hasNext() ) {
 				var panel = $it0.next();
 				f(panel);
@@ -726,15 +783,15 @@ precog.layout.DockLayout.prototype = $extend(precog.layout.Layout.prototype,{
 		var _g1 = 0, _g = this.fillqueue.length - 1;
 		while(_g1 < _g) {
 			var i = _g1++;
-			margins[i + 1] = precog.layout._Extent.ExtentImpl.relativeTo(this.docks.h[this.fillqueue[i].__id__].margin,this.size.x);
+			margins[i + 1] = precog.layout._Extent.ExtentImpl.relativeTo(this.docks.h[this.fillqueue[i].__id__].margin,this.rectangle.width);
 			margin += margins[i + 1];
 		}
 		var w = (this.available.width - margin) / this.fillqueue.length, h = this.available.height, x = this.available.x, y = this.available.y;
 		var _g1 = 0, _g = this.fillqueue.length;
 		while(_g1 < _g) {
 			var i = _g1++;
-			var frame = this.fillqueue[i].frame;
-			frame.set(x + w * i + margins[i],y,w,h);
+			var rectangle = this.fillqueue[i].rectangle;
+			rectangle.set(x + w * i + margins[i],y,w,h);
 		}
 	}
 	,updatePanel: function(panel) {
@@ -743,26 +800,26 @@ precog.layout.DockLayout.prototype = $extend(precog.layout.Layout.prototype,{
 		switch( $e[1] ) {
 		case 0:
 			var dock_fdock_eTop_0 = $e[2];
-			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eTop_0,this.size.y), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.size.y);
-			panel.frame.set(this.available.x,this.available.y,this.available.width,fl);
+			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eTop_0,this.rectangle.height), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.rectangle.height);
+			panel.rectangle.set(this.available.x,this.available.y,this.available.width,fl);
 			this.available.set(this.available.x,this.available.y + fl + mg,this.available.width,this.available.height - fl - mg);
 			break;
 		case 1:
 			var dock_fdock_eRight_0 = $e[2];
-			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eRight_0,this.size.x), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.size.x);
-			panel.frame.set(this.available.x + this.available.width - fl,this.available.y,fl,this.available.height);
+			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eRight_0,this.rectangle.width), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.rectangle.width);
+			panel.rectangle.set(this.available.x + this.available.width - fl,this.available.y,fl,this.available.height);
 			this.available.set(this.available.x,this.available.y,this.available.width - fl - mg,this.available.height);
 			break;
 		case 2:
 			var dock_fdock_eBottom_0 = $e[2];
-			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eBottom_0,this.size.y), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.size.y);
-			panel.frame.set(this.available.x,this.available.y + this.available.height - fl,this.available.width,fl);
+			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eBottom_0,this.rectangle.height), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.rectangle.height);
+			panel.rectangle.set(this.available.x,this.available.y + this.available.height - fl,this.available.width,fl);
 			this.available.set(this.available.x,this.available.y,this.available.width,this.available.height - fl - mg);
 			break;
 		case 3:
 			var dock_fdock_eLeft_0 = $e[2];
-			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eLeft_0,this.size.x), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.size.x);
-			panel.frame.set(this.available.x,this.available.y,fl,this.available.height);
+			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eLeft_0,this.rectangle.width), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.rectangle.width);
+			panel.rectangle.set(this.available.x,this.available.y,fl,this.available.height);
 			this.available.set(this.available.x + fl + mg,this.available.y,this.available.width - fl - mg,this.available.height);
 			break;
 		case 4:
@@ -770,25 +827,26 @@ precog.layout.DockLayout.prototype = $extend(precog.layout.Layout.prototype,{
 		}
 	}
 	,afterMeasure: function() {
-		var w = this.available.width > this.size.x?this.available.width:this.size.x, h = this.available.height > this.size.y?this.available.height:this.size.y;
-		if(this.fillqueue.length > 0) this.measuredBoundaries.set(0,0,w,h); else if(this.available.width > 0 || this.available.height > 0) this.measuredBoundaries.set(0,0,this.available.width == 0?this.size.x:this.available.width,this.available.height == 0?this.size.y:this.available.height);
-		this.available.set(0,0,w,h);
+		var w = this.available.width > this.rectangle.width?this.available.width:this.rectangle.width, h = this.available.height > this.rectangle.height?this.available.height:this.rectangle.height;
+		if(this.fillqueue.length > 0) this.measuredBoundaries.set(this.rectangle.x,this.rectangle.y,w,h); else if(this.available.width > 0 || this.available.height > 0) this.measuredBoundaries.set(this.rectangle.x,this.rectangle.y,this.available.width == 0?this.rectangle.width:this.available.width,this.available.height == 0?this.rectangle.height:this.available.height);
+		this.available.set(this.rectangle.x,this.rectangle.y,w,h);
 	}
 	,measurePanel: function(panel) {
 		var dock = this.docks.h[panel.__id__];
+		if(null == dock) console.log("dock null for " + Std.string(panel));
 		var $e = (dock.dock);
 		switch( $e[1] ) {
 		case 0:
 		case 2:
 			var dock_fdock_eTop_0 = $e[2];
-			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eTop_0,this.size.y), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.size.y);
-			this.available.set(0,0,this.available.width,this.available.height + fl + mg);
+			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eTop_0,this.rectangle.height), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.rectangle.height);
+			this.available.set(this.rectangle.x,this.rectangle.y,this.available.width,this.available.height + fl + mg);
 			break;
 		case 1:
 		case 3:
 			var dock_fdock_eRight_0 = $e[2];
-			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eRight_0,this.size.x), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.size.x);
-			this.available.set(0,0,this.available.width + fl + mg,this.available.height);
+			var fl = precog.layout._Extent.ExtentImpl.relativeTo(dock_fdock_eRight_0,this.rectangle.width), mg = precog.layout._Extent.ExtentImpl.relativeTo(dock.margin,this.rectangle.width);
+			this.available.set(this.rectangle.x,this.rectangle.y,this.available.width + fl + mg,this.available.height);
 			break;
 		case 4:
 			this.fillqueue.push(panel);
@@ -951,11 +1009,14 @@ precog.layout.LayoutPanels = function(layout) {
 precog.layout.LayoutPanels.__name__ = ["precog","layout","LayoutPanels"];
 precog.layout.LayoutPanels.prototype = {
 	iterator: function() {
-		return HxOverrides.iter(this.panels);
+		return HxOverrides.iter(this.panels.slice());
 	}
 	,clear: function() {
 		var all = this.panels.slice();
 		while(all.length > 0) this.removePanel(all.shift());
+	}
+	,count: function() {
+		return this.panels.length;
 	}
 	,removePanel: function(panel) {
 		panel.setLayout(null);
@@ -970,11 +1031,14 @@ precog.layout.LayoutPanels.prototype = {
 	,__class__: precog.layout.LayoutPanels
 }
 precog.layout.Panel = function() {
-	this.frame = new precog.geom.Rectangle(0,0,0,0);
+	this.rectangle = new precog.geom.Rectangle(0,0,0,0);
 };
 precog.layout.Panel.__name__ = ["precog","layout","Panel"];
 precog.layout.Panel.prototype = {
-	remove: function() {
+	toString: function() {
+		return "Panel(" + this.rectangle.x + ", " + this.rectangle.y + ", " + this.rectangle.width + ", " + this.rectangle.height + ", layout: " + Std.string(this.parentLayout) + ")";
+	}
+	,remove: function() {
 		this.setLayout(null);
 	}
 	,setLayout: function(layout) {
@@ -1333,11 +1397,6 @@ thx.react.IObservables0.addListener = function(observable,listener) {
 	var observer = new thx.react.ObserverFunction0(listener);
 	observable.attach(observer);
 	return observer;
-}
-thx.react.IObserver = function() { }
-thx.react.IObserver.__name__ = ["thx","react","IObserver"];
-thx.react.IObserver.prototype = {
-	__class__: thx.react.IObserver
 }
 thx.react.IObserver0 = function() { }
 thx.react.IObserver0.__name__ = ["thx","react","IObserver0"];
@@ -2032,6 +2091,14 @@ thx.react.ds.ProcedureList.prototype = {
 		this.a.push(item);
 	}
 	,__class__: thx.react.ds.ProcedureList
+}
+thx.react.promise = {}
+thx.react.promise.Timer = function() { }
+thx.react.promise.Timer.__name__ = ["thx","react","promise","Timer"];
+thx.react.promise.Timer.delay = function(millis) {
+	var deferred = new thx.react.Deferred0();
+	haxe.Timer.delay($bind(deferred,deferred.resolve),millis);
+	return deferred.promise;
 }
 function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; };
 var $_;

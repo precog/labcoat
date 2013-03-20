@@ -31,21 +31,21 @@ class CanvasLayout extends Layout
 	override function updatePanel(panel)
 	{
 		var c = canvases.get(panel);
-		panel.frame.set(
-			c.x.relativeTo(size.x) + anchorX(c.layoutAnchor, size.x) - anchorX(c.panelAnchor, panel.frame.width),
-			c.y.relativeTo(size.y) + anchorY(c.layoutAnchor, size.y) - anchorY(c.panelAnchor, panel.frame.height),
-			c.width.relativeTo(size.x),
-			c.height.relativeTo(size.y)
+		panel.rectangle.set(
+			rectangle.x + c.x.relativeTo(rectangle.width) + anchorX(c.layoutAnchor, rectangle.width) - anchorX(c.panelAnchor, panel.rectangle.width),
+			rectangle.y + c.y.relativeTo(rectangle.height) + anchorY(c.layoutAnchor, rectangle.height) - anchorY(c.panelAnchor, panel.rectangle.height),
+			c.width.relativeTo(rectangle.width),
+			c.height.relativeTo(rectangle.height)
 		);
 		if(Math.isNaN(measuredBoundaries.x)) {
 			measuredBoundaries.set(
-				panel.frame.x,
-				panel.frame.y,
-				panel.frame.width,
-				panel.frame.height
+				panel.rectangle.x,
+				panel.rectangle.y,
+				panel.rectangle.width,
+				panel.rectangle.height
 			);
 		} else {
-			measuredBoundaries.addRectangle(panel.frame);
+			measuredBoundaries.addRectangle(panel.rectangle);
 		}
 	}
 

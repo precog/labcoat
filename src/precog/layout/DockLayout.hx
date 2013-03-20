@@ -8,8 +8,8 @@ using precog.layout.Extent;
 class DockLayout extends Layout
 {
 	var docks : Map<Panel, Dock>;
-	public var defaultDock(default, null) : DockKind;
-	public var defaultMargin(default, null) : Extent;
+	public var defaultDock : DockKind;
+	public var defaultMargin : Extent;
 	public function new(width : Float, height : Float)
 	{
 		super(width, height);
@@ -46,16 +46,18 @@ class DockLayout extends Layout
 	function measurePanel(panel : Panel)
 	{
 		var dock = docks.get(panel);
+		if(null == dock)
+			trace('dock null for $panel');
 		switch(dock.dock)
 		{
 			case Top(esize), Bottom(esize):
-				var fl = esize.relativeTo(size.y),
-					mg = dock.margin.relativeTo(size.y);
-				available.set(0, 0, available.width, available.height + fl + mg);
+				var fl = esize.relativeTo(rectangle.height),
+					mg = dock.margin.relativeTo(rectangle.height);
+				available.set(rectangle.x, rectangle.y, available.width, available.height + fl + mg);
 			case Right(esize), Left(esize):
-				var fl = esize.relativeTo(size.x),
-					mg = dock.margin.relativeTo(size.x);
-				available.set(0, 0, available.width + fl + mg, available.height);
+				var fl = esize.relativeTo(rectangle.width),
+					mg = dock.margin.relativeTo(rectangle.width);
+				available.set(rectangle.x, rectangle.y, available.width + fl + mg, available.height);
 			case Fill:
 				fillqueue.push(panel);
 		}
@@ -63,17 +65,17 @@ class DockLayout extends Layout
 
 	function afterMeasure() 
 	{
-		var w = available.width > size.x ? available.width : size.x,
-			h = available.height > size.y ? available.height : size.y;
+		var w = available.width > rectangle.width ? available.width : rectangle.width,
+			h = available.height > rectangle.height ? available.height : rectangle.height;
 		if(fillqueue.length > 0)
 		{
-			measuredBoundaries.set(0, 0, w, h);
+			measuredBoundaries.set(rectangle.x, rectangle.y, w, h);
 		} else if(available.width > 0 || available.height > 0) {
-			measuredBoundaries.set(0, 0, 
-				available.width == 0 ? size.x : available.width,
-				available.height == 0 ? size.y : available.height);
+			measuredBoundaries.set(rectangle.x, rectangle.y, 
+				available.width == 0 ? rectangle.width : available.width,
+				available.height == 0 ? rectangle.height : available.height);
 		}
-		available.set(0, 0, w, h);
+		available.set(rectangle.x, rectangle.y, w, h);
 	}
 
 	override function updatePanel(panel : Panel)
@@ -82,24 +84,24 @@ class DockLayout extends Layout
 		switch(dock.dock)
 		{
 			case Top(esize):
-				var fl = esize.relativeTo(size.y),
-					mg = dock.margin.relativeTo(size.y);
-				panel.frame.set(available.x, available.y, available.width, fl);
+				var fl = esize.relativeTo(rectangle.height),
+					mg = dock.margin.relativeTo(rectangle.height);
+				panel.rectangle.set(available.x, available.y, available.width, fl);
 				available.set(available.x, available.y + fl + mg, available.width, available.height - fl - mg);
 			case Right(esize):
-				var fl = esize.relativeTo(size.x),
-					mg = dock.margin.relativeTo(size.x);
-				panel.frame.set(available.x + available.width - fl, available.y, fl, available.height);
+				var fl = esize.relativeTo(rectangle.width),
+					mg = dock.margin.relativeTo(rectangle.width);
+				panel.rectangle.set(available.x + available.width - fl, available.y, fl, available.height);
 				available.set(available.x, available.y, available.width - fl -mg, available.height);
 			case Bottom(esize):
-				var fl = esize.relativeTo(size.y),
-					mg = dock.margin.relativeTo(size.y);
-				panel.frame.set(available.x, available.y + available.height - fl, available.width, fl);
+				var fl = esize.relativeTo(rectangle.height),
+					mg = dock.margin.relativeTo(rectangle.height);
+				panel.rectangle.set(available.x, available.y + available.height - fl, available.width, fl);
 				available.set(available.x, available.y, available.width, available.height - fl - mg);
 			case Left(esize):
-				var fl = esize.relativeTo(size.x),
-					mg = dock.margin.relativeTo(size.x);
-				panel.frame.set(available.x, available.y, fl, available.height);
+				var fl = esize.relativeTo(rectangle.width),
+					mg = dock.margin.relativeTo(rectangle.width);
+				panel.rectangle.set(available.x, available.y, fl, available.height);
 				available.set(available.x + fl + mg, available.y, available.width - fl -mg, available.height);
 			case Fill:
 		}
@@ -112,7 +114,7 @@ class DockLayout extends Layout
 			margins = [0.0];
 		for(i in 0...fillqueue.length - 1)
 		{
-			margins[i+1] = docks.get(fillqueue[i]).margin.relativeTo(size.x);
+			margins[i+1] = docks.get(fillqueue[i]).margin.relativeTo(rectangle.width);
 			margin += margins[i+1];
 		}
 		var w = (available.width - margin) / fillqueue.length,
@@ -121,8 +123,8 @@ class DockLayout extends Layout
 			y = available.y;
 		for(i in 0...fillqueue.length)
 		{
-			var frame = fillqueue[i].frame;
-			frame.set(x + w * i + margins[i], y, w, h);
+			var rectangle = fillqueue[i].rectangle;
+			rectangle.set(x + w * i + margins[i], y, w, h);
 		}
 	}
 }

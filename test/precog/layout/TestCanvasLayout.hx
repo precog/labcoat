@@ -24,7 +24,7 @@ class TestCanvasLayout
 	{
 		layout.addPanel(panel);
 		layout.update();
-		panel.frame.assertEquals(0.0,0.0,0.0,0.0);
+		panel.rectangle.assertEquals(0.0,0.0,0.0,0.0);
 	}
 
 	public function testAnchors()
@@ -67,8 +67,8 @@ class TestCanvasLayout
 				.setPanelAnchor(test.panel);
 			layout.update();
 			Assert.isTrue(
-				panel.frame.equals(test.expected),
-				'expected ${test.expected} but is ${panel.frame} for $test'
+				panel.rectangle.equals(test.expected),
+				'expected ${test.expected} but is ${panel.rectangle} for $test'
 			);
 		}
 
@@ -84,8 +84,8 @@ class TestCanvasLayout
 		layout.update();
 		var test = new Rectangle(90, 60, 20, 20);
 		Assert.isTrue(
-			panel.frame.equals(test),
-			'expected ${test} but is ${panel.frame}'
+			panel.rectangle.equals(test),
+			'expected ${test} but is ${panel.rectangle}'
 		);
 	}
 	public function testSize()
@@ -95,8 +95,8 @@ class TestCanvasLayout
 		layout.update();
 		var test = new Rectangle(0, 0, 100, 50);
 		Assert.isTrue(
-			panel.frame.equals(test),
-			'expected $test but is ${panel.frame}'
+			panel.rectangle.equals(test),
+			'expected $test but is ${panel.rectangle}'
 		);
 	}
 

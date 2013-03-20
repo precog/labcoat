@@ -58,11 +58,11 @@ class WrapLayout extends Layout
 	function assignToLineHorizontal(panel)
 	{
 		var item   = items.get(panel),
-			width  = item.width.relativeTo(size.x),
-			height = item.height.relativeTo(size.y),
-			marginWidth  = item.marginWidth.relativeTo(size.x),
-			marginHeight = item.marginHeight.relativeTo(size.y);
-		if(offset + width + marginWidth > size.x)
+			width  = item.width.relativeTo(rectangle.width),
+			height = item.height.relativeTo(rectangle.height),
+			marginWidth  = item.marginWidth.relativeTo(rectangle.width),
+			marginHeight = item.marginHeight.relativeTo(rectangle.height);
+		if(offset + width + marginWidth > rectangle.width)
 		{
 			current = { max : 0.0, margin : 0.0, panels : [] };
 			lines.push(current);
@@ -88,9 +88,9 @@ class WrapLayout extends Layout
 				margin = 0.0;
 			for(item in line.panels)
 			{
-				item.panel.frame.set(
-					ox,
-					oy,
+				item.panel.rectangle.set(
+					rectangle.x + ox,
+					rectangle.y + oy,
 					item.width,
 					item.height
 				);
@@ -107,8 +107,8 @@ class WrapLayout extends Layout
 		if(bw > 0 || oy > 0)
 		{
 			measuredBoundaries.set(
-				0,
-				0,
+				rectangle.x,
+				rectangle.y,
 				bw,
 				oy
 			);
@@ -118,11 +118,11 @@ class WrapLayout extends Layout
 	function assignToLineVertical(panel)
 	{
 		var item   = items.get(panel),
-			width  = item.width.relativeTo(size.x),
-			height = item.height.relativeTo(size.y),
-			marginWidth  = item.marginWidth.relativeTo(size.x),
-			marginHeight = item.marginHeight.relativeTo(size.y);
-		if(offset + height + marginHeight > size.y)
+			width  = item.width.relativeTo(rectangle.width),
+			height = item.height.relativeTo(rectangle.height),
+			marginWidth  = item.marginWidth.relativeTo(rectangle.width),
+			marginHeight = item.marginHeight.relativeTo(rectangle.height);
+		if(offset + height + marginHeight > rectangle.height)
 		{
 			current = { max : 0.0, margin : 0.0, panels : [] };
 			lines.push(current);
@@ -148,9 +148,9 @@ class WrapLayout extends Layout
 				margin = 0.0;
 			for(item in line.panels)
 			{
-				item.panel.frame.set(
-					ox,
-					oy,
+				item.panel.rectangle.set(
+					rectangle.x + ox,
+					rectangle.y + oy,
 					item.width,
 					item.height
 				);
@@ -167,8 +167,8 @@ class WrapLayout extends Layout
 		if(ox > 0 || bh > 0)
 		{
 			measuredBoundaries.set(
-				0,
-				0,
+				rectangle.x,
+				rectangle.y,
 				ox,
 				bh
 			);

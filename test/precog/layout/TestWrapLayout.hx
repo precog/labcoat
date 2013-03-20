@@ -23,9 +23,9 @@ class TestWrapLayout
 		layout.addPanel(p3);
 		layout.update();
 
-		p1.frame.assertEquals(0,0,120,50);
-		p2.frame.assertEquals(120,0,50,200);
-		p3.frame.assertEquals(0,200,120,50);
+		p1.rectangle.assertEquals(0,0,120,50);
+		p2.rectangle.assertEquals(120,0,50,200);
+		p3.rectangle.assertEquals(0,200,120,50);
 
 		layout.boundaries.assertEquals(0, 0, 170, 250);
 	}
@@ -44,9 +44,9 @@ class TestWrapLayout
 		layout.addPanel(p3);
 		layout.update();
 
-		p1.frame.assertEquals(0,0,30,30);
-		p2.frame.assertEquals(0,30,100,40);
-		p3.frame.assertEquals(0,70,30,30);
+		p1.rectangle.assertEquals(0,0,30,30);
+		p2.rectangle.assertEquals(0,30,100,40);
+		p3.rectangle.assertEquals(0,70,30,30);
 
 		layout.boundaries.assertEquals(0, 0, 100, 100);
 	}
@@ -65,9 +65,9 @@ class TestWrapLayout
 		layout.addPanel(p3).setMarginWidth(20).setMarginHeight(10);
 		layout.update();
 
-		p1.frame.assertEquals(0,0,120,50);
-		p2.frame.assertEquals(130,0,50,200);
-		p3.frame.assertEquals(0,205,120,50);
+		p1.rectangle.assertEquals(0,0,120,50);
+		p2.rectangle.assertEquals(130,0,50,200);
+		p3.rectangle.assertEquals(0,205,120,50);
 
 		layout.boundaries.assertEquals(0, 0, 180, 255);
 	}

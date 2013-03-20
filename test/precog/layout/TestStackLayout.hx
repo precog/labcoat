@@ -22,9 +22,9 @@ class TestStackLayout
 		layout.addPanel(p3);
 		layout.update();
 
-		p1.frame.assertEquals(0,0,100,20);
-		p2.frame.assertEquals(100,0,50,20);
-		p3.frame.assertEquals(150,0,100,20);
+		p1.rectangle.assertEquals(0,0,100,20);
+		p2.rectangle.assertEquals(100,0,50,20);
+		p3.rectangle.assertEquals(150,0,100,20);
 
 		layout.boundaries.assertEquals(0, 0, 250, 20);
 	}
@@ -42,9 +42,9 @@ class TestStackLayout
 		layout.addPanel(p3);
 		layout.update();
 
-		p1.frame.assertEquals(0,0,200,100);
-		p2.frame.assertEquals(0,100,200,50);
-		p3.frame.assertEquals(0,150,200,100);
+		p1.rectangle.assertEquals(0,0,200,100);
+		p2.rectangle.assertEquals(0,100,200,50);
+		p3.rectangle.assertEquals(0,150,200,100);
 
 		layout.boundaries.assertEquals(0, 0, 200, 250);
 	}
@@ -62,9 +62,9 @@ class TestStackLayout
 		layout.addPanel(p3).setMargin(5);
 		layout.update();
 
-		p1.frame.assertEquals(0,0,100,20);
-		p2.frame.assertEquals(120,0,50,20);
-		p3.frame.assertEquals(180,0,100,20);
+		p1.rectangle.assertEquals(0,0,100,20);
+		p2.rectangle.assertEquals(120,0,50,20);
+		p3.rectangle.assertEquals(180,0,100,20);
 
 		layout.boundaries.assertEquals(0, 0, 280, 20);
 	}
