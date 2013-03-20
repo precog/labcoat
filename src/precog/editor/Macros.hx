@@ -1,4 +1,4 @@
-package precog.labcoat.editor;
+package precog.editor;
 
 import haxe.macro.Expr;
 

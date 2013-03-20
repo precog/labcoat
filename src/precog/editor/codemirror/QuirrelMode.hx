@@ -1,7 +1,7 @@
-package precog.labcoat.editor;
+package precog.editor.codemirror;
 
-import precog.labcoat.editor.codemirror.Externs;
-import precog.labcoat.editor.Macros.jsRegExp;
+import precog.editor.codemirror.Externs;
+import precog.editor.Macros.jsRegExp;
 
 class QuirrelMode {
     static var punctuation = jsRegExp(~/([([{]|[)}\]]|,)/);

@@ -1,6 +1,7 @@
-package precog.labcoat.editor.codemirror;
+package precog.editor.codemirror;
 
 import js.html.Node;
+import js.html.Element;
 
 typedef Pos = {
     line: Int,
@@ -85,6 +86,11 @@ typedef StringStream = {
     @:overload(function(event: String, callback: CodeMirror -> ChangeObj -> Void): Void {})
     function on(event: String, callback: CodeMirror -> Void): Void;
 
+    function getWrapperElement(): Element;
+
+    function getValue(): String;
+    function setValue(text: String): Void;
+
     function markText(from: Pos, to: Pos, options: {?className: String, ?replacedWith: Node, ?atomic: Bool, ?inclusiveLeft: Bool, ?inclusiveRight: Bool}): TextMarker;
     function findMarksAt(pos: Pos): Array<TextMarker>;
     function getAllMarks(): Array<TextMarker>;
@@ -101,10 +107,18 @@ typedef StringStream = {
     function lineInfo(line: Int): {line: Int, text: String, widgets: Array<Widget>, gutterMarkers: Dynamic};
 
     function replaceSelection(text: String, ?collapse: String, ?origin: String): Void;
+
+    function getOption(option: String): Dynamic;
+
+    function refresh(): Void;
+    function focus(): Void;
 }
 
 class CodeMirrorFactory {
-    public static function create(elem: Node, ?options: Config): CodeMirror untyped {
+    public static function addTo(elem: Node, ?options: Config): CodeMirror untyped {
         return CodeMirror(elem, options);
+    }
+    public static function create(callback: Node -> Void, ?options: Config): CodeMirror untyped {
+        return CodeMirror(callback, options);
     }
 }
