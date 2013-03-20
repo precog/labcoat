@@ -1,6 +1,5 @@
 node_modules
-bin/www/output
+bin/output
 
 labcoat.sublime-project
-
 labcoat.sublime-workspace

@@ -1,2 +1,2 @@
 editor:
-	haxe -cp src -js bin/output/editor.main.js -main precog.labcoat.editor.Main
+	haxe -cp src -js bin/debug/html5/js/editor.js -main precog.editor.Main
