@@ -9,36 +9,27 @@ import js.html.OptionElement;
 import js.html.SelectElement;
 
 class Toolbar {
-    public static function element(region: Region) {
-        var element = new JQuery('<div class="toolbar"><select class="mode-select"><option class="quirrel" value="quirrel">Quirrel</option><option class="markdown" value="markdown">Markdown</option><option class="json" value="json">JSON</option></select> <button class="delete btn">&#x2716;</button></div>').hide();
+    var select: JQuery;
 
-        switch(region.mode) {
-        case QuirrelRegionMode: element.find('option.quirrel').attr('selected', 'selected');
-        case MarkdownRegionMode: element.find('option.markdown').attr('selected', 'selected');
-        case JSONRegionMode: element.find('option.json').attr('selected', 'selected');
-        }
+    public function new(element: JQuery) {
+        select = new JQuery('<select class="mode-select"></select>').appendTo(element);
 
-        var mode = element.find('.mode-select');
-        function modeChange(event: JqEvent) {
-            Editor.changeRegionMode(region, valueToEditorMode(mode.val()));
-        }
-        mode.change(modeChange);
+        makeOption('Quirrel', 'quirrel').appendTo(select);
+        makeOption('Markdown', 'markdown').appendTo(select);
+        makeOption('JSON', 'json').appendTo(select);
 
-        var delete = element.find('.delete.btn');
-        function deleteRegion(event: JqEvent) {
-            Editor.deleteRegionEnsureNonEmpty(region);
-        }
-        delete.click(deleteRegion);
-
-        return element;
+        new JQuery('<button class="delete btn">&#x2716;</button></div>').appendTo(element);
     }
 
-    public static function valueToEditorMode(value: String) {
-        return switch(value) {
-        case 'quirrel': QuirrelRegionMode;
-        case 'markdown': MarkdownRegionMode;
-        case 'json': JSONRegionMode;
-        case _: throw "Unknown region mode";
-        }
+    public function selectMode(mode: RegionMode) {
+        select.val(switch(mode) {
+            case QuirrelRegionMode: 'quirrel';
+            case MarkdownRegionMode: 'markdown';
+            case JSONRegionMode: 'json';
+        });
+    }
+
+    static function makeOption(label: String, value: String) {
+        return new JQuery('<option class="$value" value="$value">$label</option>');
     }
 }
