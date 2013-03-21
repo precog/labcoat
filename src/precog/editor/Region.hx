@@ -2,15 +2,15 @@ package precog.editor;
 
 import precog.editor.codemirror.Externs;
 import js.Browser.document;
-import js.html.Element;
+import js.JQuery;
 import js.html.Event;
 
 class Region {
     public var mode: RegionMode;
 
-    public var element: Element;
+    public var element: JQuery;
     public var editor: RegionEditor;
-    var toolbarElement: Element;
+    var toolbarElement: JQuery;
 
     static function editorForMode(mode: RegionMode, region: Region) {
         return switch(mode) {
@@ -23,26 +23,24 @@ class Region {
     public function new(mode: RegionMode) {
         this.mode = mode;
 
-        element = document.createElement('div');
-        element.className = 'region';
+        element = new JQuery('<div class="region"></div>');
 
         toolbarElement = Toolbar.element(this);
-        element.appendChild(toolbarElement);
+        element.append(toolbarElement);
 
         editor = editorForMode(mode, this);
-        element.appendChild(editor.element);
+        element.append(editor.element);
 
-        element.addEventListener('mouseover', mouseOver, false);
-        element.addEventListener('mouseout', mouseOut, false);
+        element.hover(mouseOver, mouseOut);
     }
 
-    function mouseOver(event: Event) {
-        element.className = 'region hover';
-        toolbarElement.style.display = 'block';
+    function mouseOver(event: JqEvent) {
+        element.addClass('hover');
+        toolbarElement.show();
     }
 
-    function mouseOut(event: Event) {
-        element.className = 'region';
-        toolbarElement.style.display = 'none';
+    function mouseOut() {
+        element.removeClass('hover');
+        toolbarElement.hide();
     }
 }

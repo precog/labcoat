@@ -1,5 +1,6 @@
 package precog.app.module.view;
 
+import precog.editor.Editor;
 import precog.communicator.*;
 import js.Browser;
 import js.JQuery;
@@ -7,6 +8,7 @@ import precog.layout.DockLayout;
 import precog.layout.Panel;
 import precog.html.HtmlPanel;
 import precog.app.message.HtmlApplicationContainerMessage;
+
 using precog.html.JQuerys;
 using thx.react.IObservable;
 
@@ -71,6 +73,8 @@ class LayoutModule extends Module
 		support = new HtmlPanel("support", container);
 		tools   = new HtmlPanel("tools", container);
 
+                main.element.append(Editor.element);
+
 		layouts = {
 			main    : new DockLayout(0, 0),
 			context : new DockLayout(0, 0),
@@ -83,6 +87,7 @@ class LayoutModule extends Module
 		});
 
 		updateLayouts();
+                Editor.init();
 		new JQuery(Browser.window).resize(function(_) {
 			updateLayouts();
 		});

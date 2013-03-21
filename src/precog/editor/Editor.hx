@@ -3,11 +3,14 @@ package precog.editor;
 import precog.editor.codemirror.Externs;
 import precog.editor.codemirror.QuirrelMode;
 import js.Browser.document;
+import js.JQuery;
 import js.html.Element;
 import js.html.Node;
 
-class Main {
-    static function main() {
+class Editor {
+    public static var element = new JQuery('<div class="editor"></div>');
+
+    public static function init() {
         QuirrelMode.init();
 
         // Place first at end of document body
@@ -21,7 +24,7 @@ class Main {
     }
 
     static function deleteRegion(region: Region) {
-        document.body.removeChild(region.element);
+        region.element.remove();
     }
 
     public static function deleteRegionEnsureNonEmpty(region: Region) {
@@ -38,11 +41,11 @@ class Main {
         deleteRegion(oldRegion);
     }
 
-    static function appendRegion(region: Region, ?target: Node) {
-        if(target == null || target.nextSibling == null) {
-            document.body.appendChild(region.element);
+    static function appendRegion(region: Region, ?target: JQuery) {
+        if(target != null) {
+            target.after(region.element);
         } else {
-            document.body.insertBefore(region.element, target.nextSibling);
+            element.append(region.element);
         }
         region.editor.focus();
     }

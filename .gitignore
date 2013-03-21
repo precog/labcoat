@@ -1,5 +1,7 @@
 node_modules
-bin/output
+bin/debug/html5/css/labcoat.css
+bin/debug/html5/js/labcoat.js
+bin/debug/html5/js/labcoat.js.map
 
 labcoat.sublime-project
 labcoat.sublime-workspace
