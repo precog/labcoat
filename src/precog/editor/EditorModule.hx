@@ -1,5 +1,8 @@
 package precog.editor;
 
+import precog.app.message.HtmlMainPanelMessage;
+import precog.communicator.Communicator;
+import precog.communicator.Module;
 import precog.editor.codemirror.Externs;
 import precog.editor.codemirror.QuirrelMode;
 import js.Browser.document;
@@ -7,10 +10,21 @@ import js.JQuery;
 import js.html.Element;
 import js.html.Node;
 
-class Editor {
-    public static var element = new JQuery('<div class="editor"></div>');
+class EditorModule extends Module {
+    public static var element = new JQuery('<div class="editor"><div class="toolbar"></div></div>');
+    static var toolbar = new Toolbar(element.find('.toolbar'));
 
-    public static function init() {
+    override public function connect(communicator: Communicator) {
+        communicator.demand(HtmlMainPanelMessage).then(init);
+    }
+
+    override public function disconnect(communicator: Communicator) {
+        element.remove();
+    }
+
+    public function init(mainPanelMessage: HtmlMainPanelMessage) {
+        mainPanelMessage.value.element.append(element);
+
         QuirrelMode.init();
 
         // Place first at end of document body

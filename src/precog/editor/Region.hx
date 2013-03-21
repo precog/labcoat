@@ -10,7 +10,6 @@ class Region {
 
     public var element: JQuery;
     public var editor: RegionEditor;
-    var toolbarElement: JQuery;
 
     static function editorForMode(mode: RegionMode, region: Region) {
         return switch(mode) {
@@ -25,22 +24,7 @@ class Region {
 
         element = new JQuery('<div class="region"></div>');
 
-        toolbarElement = Toolbar.element(this);
-        element.append(toolbarElement);
-
         editor = editorForMode(mode, this);
         element.append(editor.element);
-
-        element.hover(mouseOver, mouseOut);
-    }
-
-    function mouseOver(event: JqEvent) {
-        element.addClass('hover');
-        toolbarElement.show();
-    }
-
-    function mouseOut(event: JqEvent) {
-        element.removeClass('hover');
-        toolbarElement.hide();
     }
 }
