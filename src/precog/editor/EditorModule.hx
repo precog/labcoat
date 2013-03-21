@@ -1,6 +1,6 @@
 package precog.editor;
 
-import precog.app.message.HtmlMainPanelMessage;
+import precog.app.message.HtmlMainEditorPanelMessage;
 import precog.communicator.Communicator;
 import precog.communicator.Module;
 import precog.editor.codemirror.Externs;
@@ -15,15 +15,15 @@ class EditorModule extends Module {
     static var toolbar = new Toolbar(element.find('.toolbar'));
 
     override public function connect(communicator: Communicator) {
-        communicator.demand(HtmlMainPanelMessage).then(init);
+        communicator.demand(HtmlMainEditorPanelMessage).then(init);
     }
 
     override public function disconnect(communicator: Communicator) {
         element.remove();
     }
 
-    public function init(mainPanelMessage: HtmlMainPanelMessage) {
-        mainPanelMessage.value.element.append(element);
+    public function init(editorPanelMessage: HtmlMainEditorPanelMessage) {
+        editorPanelMessage.value.element.append(element);
 
         QuirrelMode.init();
 
