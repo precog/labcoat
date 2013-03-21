@@ -9,6 +9,6 @@ class VersionMacro {
     public static macro function gitVersion() {
         var gitProcess = new sys.io.Process('git', ['describe', '--always', '--dirty', '--long', '--tags']);
         var gitDescription = gitProcess.stdout.readAll().toString().trim();
-        return Context.makeExpr(gitDescription, Context.currentPos());
+        return macro $v{gitDescription};
     }
 }
