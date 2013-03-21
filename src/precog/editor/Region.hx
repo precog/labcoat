@@ -39,7 +39,7 @@ class Region {
         toolbarElement.show();
     }
 
-    function mouseOut() {
+    function mouseOut(event: JqEvent) {
         element.removeClass('hover');
         toolbarElement.hide();
     }
