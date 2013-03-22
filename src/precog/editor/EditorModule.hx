@@ -11,8 +11,7 @@ import js.html.Element;
 import js.html.Node;
 
 class EditorModule extends Module {
-    public static var element = new JQuery('<div class="editor"><div class="toolbar"></div></div>');
-    static var toolbar = new Toolbar(element.find('.toolbar'));
+    public static var element = new JQuery('<div class="editor"></div>');
 
     override public function connect(communicator: Communicator) {
         communicator.demand(HtmlMainEditorPanelMessage).then(init);

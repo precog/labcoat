@@ -7,15 +7,18 @@ import js.html.Event;
 
 class Region {
     public var mode: RegionMode;
-
     public var element: JQuery;
     public var editor: RegionEditor;
 
-    static function editorForMode(mode: RegionMode, region: Region) {
-        return switch(mode) {
-        case QuirrelRegionMode: new QuirrelEditor(region);
-        case MarkdownRegionMode: new MarkdownEditor(region);
-        case JSONRegionMode: new JSONEditor(region);
+    var buttons: RegionButtons;
+    var hovered: Bool = false;
+    var focused: Bool = true;
+
+    function createEditor() {
+        return switch(this.mode) {
+        case QuirrelRegionMode: new QuirrelEditor(this);
+        case MarkdownRegionMode: new MarkdownEditor(this);
+        case JSONRegionMode: new JSONEditor(this);
         }
     }
 
@@ -23,8 +26,38 @@ class Region {
         this.mode = mode;
 
         element = new JQuery('<div class="region"></div>');
+        element.hover(mouseOver, mouseOut);
+        buttons = new RegionButtons(mode);
+        element.append(buttons.element);
 
-        editor = editorForMode(mode, this);
-        element.append(editor.element);
+        editor = createEditor();
+        var content = new JQuery('<div class="content"></div>');
+        content.append(editor.element);
+        element.append(content);
+
+        updateButtons();
+    }
+
+    public function setFocused(state: Bool) {
+        focused = state;
+        updateButtons();
+    }
+
+    function mouseOver(event: JqEvent) {
+        hovered = true;
+        updateButtons();
+    }
+
+    function mouseOut(/*event: JqEvent*/) {
+        hovered = false;
+        updateButtons();
+    }
+
+    function updateButtons() {
+        if(focused || hovered) {
+            buttons.show();
+            return;
+        }
+        buttons.hide();
     }
 }

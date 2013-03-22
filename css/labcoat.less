@@ -55,14 +55,31 @@ body {
 }
 
 .editor {
-    .toolbar {
-        background: #eee;
-        padding: 1em;
-    }
-
     .region {
+        background: #fff;
         border: 1px solid #ddd;
         margin: 1em 1em 2em;
+        min-height: 152px;
+
+        clear: right;
+
+        .buttons.visible ~ .content {
+            margin-right: 40px;
+        }
+
+        .buttons {
+            display: none;
+            float: right;
+
+            button {
+                display: block;
+                width: 40px;
+            }
+
+            &.visible {
+                display: block;
+            }
+        }
 
         .output {
             background: #fdd;

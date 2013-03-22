@@ -12,15 +12,18 @@ using StringTools;
 class MarkdownEditor implements RegionEditor {
     public var element: Element;
     var editor: CodeMirror;
+    var region: Region;
     var rendered: Element;
 
     public function new(region: Region) {
+        this.region = region;
+
         var options: Dynamic = {mode: 'markdown', region: region};
 
         rendered = document.createElement('div');
         rendered.style.display = 'none';
         // Giving block elements a tabIndex give them a "focus" event.
-        rendered.tabIndex = 0;
+        rendered.tabIndex = -1;
         rendered.addEventListener('focus', renderedFocus, false);
 
         element = document.createElement('div');
@@ -31,12 +34,16 @@ class MarkdownEditor implements RegionEditor {
     }
 
     function renderedFocus(event: Event) {
+        region.setFocused(true);
+
         rendered.style.display = 'none';
         editor.getWrapperElement().style.display = 'block';
         focus();
     }
 
     function editorBlur(editor: CodeMirror) {
+        region.setFocused(false);
+
         // Don't remove the editor if the content is empty (would
         // result in an empty, non-clickable div)
         if(getContent().trim().length == 0) return;

@@ -1,6 +1,6 @@
 {
   "name": "labcoat",
-  "main": "www/index.html",
+  "main": "bin/debug/html5/index.html",
   "window": {
     "toolbar": false
   }
