@@ -27,7 +27,7 @@ class Region {
 
         element = new JQuery('<div class="region"></div>');
         element.hover(mouseOver, mouseOut);
-        buttons = new RegionButtons(mode);
+        buttons = new RegionButtons(this);
         element.append(buttons.element);
 
         editor = createEditor();
