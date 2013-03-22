@@ -7,6 +7,7 @@ import precog.layout.DockLayout;
 import precog.layout.Panel;
 import thx.react.IObserver;
 using thx.react.IObservable;
+using precog.html.JQuerys;
 
 @:access(precog.html.HtmlPanelGroupItem.setGroup)
 class HtmlPanelGroup implements IObserver<IRectangle>
@@ -17,6 +18,7 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 	public var container(default, null) : JQuery;
 	public var pane(default, null) : Panel;
 	public var gutter(default, null) : HtmlPanel;
+	public var togglesContainer(default, null) : JQuery;
 	var layout : DockLayout;
 	var gutterMargin : Int = 3;
 	var gutterSize : Int = 22;
@@ -33,6 +35,7 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 		layout = new DockLayout(0, 0);
 		pane = new Panel();
 		gutter = new HtmlPanel();
+		togglesContainer = new JQuery('<div class="btn-group"></div>').appendTo(gutter.element);
 
 		container.append(gutter.element);
 
@@ -53,10 +56,10 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 		items.remove(item);
 		items.push(item);
 		item.setGroup(this);
-		gutter.element.append(item.toggle.element);
+		togglesContainer.append(item.toggle.element);
 		container.append(item.panel.element);
 		length = items.length;
-
+updateVerticalPosition();
 		pane.rectangle.attach(item.panel);
 		item.panel.update(pane.rectangle);
 	}
@@ -67,6 +70,7 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 		item.toggle.element.detach();
 		item.panel.element.detach();
 		pane.rectangle.detach(item.panel);
+updateVerticalPosition();
 		item.setGroup(null);
 		length = items.length;
 	}
@@ -85,22 +89,57 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 	function set_gutterPosition(position : GutterPosition)
 	{
 		if(Type.enumEq(gutterPosition, position)) return position;
+		if(null != gutterPosition) switch (gutterPosition) {
+			case Top:
+				togglesContainer.removeClass("toggles-top");
+			case Bottom:
+				togglesContainer.removeClass("toggles-bottom");
+			case Left:
+				togglesContainer.removeClass("toggles-left");
+			case Right:
+				togglesContainer.removeClass("toggles-bottom");
+		}
 		gutterPosition = position;
-		updateDock();
-		return position;
-	}
-
-	function updateDock()
-	{
 		layout.clear();
+		togglesContainer.css({
+			top  : '0px',
+			left : '0px'
+		});
 		switch (gutterPosition) {
-			case Top:		layout.addPanel(gutter.panel).dockTop(gutterSize, gutterMargin);
-			case Bottom:	layout.addPanel(gutter.panel).dockBottom(gutterSize, gutterMargin);
-			case Left:		layout.addPanel(gutter.panel).dockLeft(gutterSize, gutterMargin);
-			case Right:		layout.addPanel(gutter.panel).dockRight(gutterSize, gutterMargin);
+			case Top:
+				togglesContainer.addClass("toggles-top");
+				layout.addPanel(gutter.panel).dockTop(gutterSize, gutterMargin);
+			case Bottom:
+				togglesContainer.addClass("toggles-bottom");
+				layout.addPanel(gutter.panel).dockBottom(gutterSize, gutterMargin);
+			case Left:
+				togglesContainer.addClass("toggles-left");
+				layout.addPanel(gutter.panel).dockLeft(gutterSize, gutterMargin);
+			case Right:
+				togglesContainer.addClass("toggles-right");
+				layout.addPanel(gutter.panel).dockRight(gutterSize, gutterMargin);
 		}
 		layout.addPanel(pane).fill();
 		layout.update();
+		return position;
+	}
+
+	function updateVerticalPosition() {
+		switch (gutterPosition) {
+			case Left:
+				var size = togglesContainer.getOuterSize(),
+					w = size.width,
+					h = size.height;
+				var offset = (w + 3 * length - h) / 2;
+				togglesContainer.cssTransform('rotateZ(-90deg) translate3d(-${offset}px, -${offset}px, 0)');
+			case Right:
+				var size = togglesContainer.getOuterSize(),
+					w = size.width,
+					h = size.height;
+				var offset = (w + 3 * length - h) / 2;
+				togglesContainer.cssTransform('rotateZ(90deg) translate3d(${offset}px, ${offset+length}px, 0)');
+			case _:
+		}
 	}
 }
 

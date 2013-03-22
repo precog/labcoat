@@ -1,7 +1,6 @@
-@import "elements.less";
-@import "custom.less";
 @import "bootstrap/bootstrap.less";
 @import "codemirror/codemirror.css";
+@import "custom.less";
 
 body {
 	// this should prevent draggin the UI on iOS but doesn't seem to be effective
@@ -10,7 +9,7 @@ body {
 
 .labcoat, .labcoat *
 {
-	.box-sizing;
+	.box-sizing(border-box);
 }
 
 .labcoat 
@@ -22,7 +21,7 @@ body {
 	.panel {
 //		border: 1px solid hsla(0,0,0.8,0.5);
 		.border-radius(1px);
-		.drop-shadow(1px,1px,3px,0.45);
+		.box-shadow(1px 1px 3px rgba(0, 0, 0, 0.15));
 //		.gradient(#f9f9f9, #e6e6e6);
 
 //background: rgb(242,245,246); /* Old browsers */
@@ -47,6 +46,63 @@ body {
 
     .CodeMirror {
         .box-sizing(content-box);
+    }
+
+    .toggles-left {
+        direction: rtl;
+//        margin-top: 100%;
+        position: absolute;
+        display: block;
+
+        i.left-icon, i.right-icon {
+            display: inline-block;
+            .transform(rotateZ(90deg));
+        }
+
+        .with-left-icon {
+            margin-right: 3px;
+        }
+
+        .with-right-icon {
+            margin-left: 3px;
+        }
+    }
+
+    .with-left-icon {
+        margin-left: 3px;
+    }
+
+    .with-right-icon {
+        margin-right: 3px;
+    }
+
+    .toggles-left.btn-group > .btn:first-child {
+        .border-top-right-radius(@baseBorderRadius);
+        .border-bottom-right-radius(@baseBorderRadius);
+        .border-top-left-radius(0);
+        .border-bottom-left-radius(0);
+    }
+
+    .toggles-left.btn-group > .btn:last-child {
+//            margin-left: 0;
+        .border-top-left-radius(@baseBorderRadius);
+        .border-bottom-left-radius(@baseBorderRadius);
+        .border-top-right-radius(0);
+        .border-bottom-right-radius(0);
+    }
+
+    .toggles-right {
+//        .transform(rotateZ(-90deg) translate3d(-72.5px, -72.5px, 0));
+//        margin-top: 100%;
+        position: absolute;
+        display: block;
+
+        i.left-icon, i.right-icon {
+            display: inline-block;
+            .transform(rotateZ(-90deg));
+        }
+//        .rotate(90deg);
+//        .transform-origin(right 50%);
     }
 }
 

@@ -19,4 +19,15 @@ class JQuerys
 			height : o.outerHeight()
 		};
 	}
+
+	public static function cssTransform(o : JQuery, transform : String)
+	{
+		o.css({
+			"-webkit-transform": transform,
+			"-moz-transform": transform,
+			"-ms-transform": transform,
+			"-o-transform": transform,
+			"transform": transform
+		});
+	}
 }

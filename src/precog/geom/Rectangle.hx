@@ -47,9 +47,9 @@ class Rectangle extends Suspendable<IRectangle> implements IRectangleObservable
 		set(other.x, other.y, other.width, other.height);
 	}
 
-	public function updateZeroed(other : IRectangle)
+	public function updateSize(other : IRectangle)
 	{
-		set(0, 0, other.width, other.height);
+		set(x, y, other.width, other.height);
 	}
 
 	public function addRectangle(other : IRectangle)

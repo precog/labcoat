@@ -29,17 +29,17 @@ class SystemLayoutModule extends Module {
         var systemPanel = msgsys.value;
 
         var subs = addSubs(systemPanel, Top, 2);
-        subs = addSubs(subs[0].panel, Left, 3);
-        subs = addSubs(subs[0].panel, Right, 4);
-        addSubs(subs[0].panel, Bottom, 1);
+        subs = addSubs(subs[0].panel, Left, 2);
+        subs = addSubs(subs[0].panel, Right, 3);
+        addSubs(subs[0].panel, Bottom, 2);
     }
 
     function addSubs(container : HtmlPanel, position, n)
     {
         var rect = new Rectangle();
 
-        container.panel.rectangle.addListener(rect.updateZeroed);
-        rect.updateZeroed(container.panel.rectangle);
+        container.panel.rectangle.addListener(rect.updateSize);
+        rect.updateSize(container.panel.rectangle);
 
         var group = new HtmlPanelGroup(container.element, rect, position),
             items = [];
