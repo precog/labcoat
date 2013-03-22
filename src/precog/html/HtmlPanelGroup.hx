@@ -8,59 +8,71 @@ import thx.react.IObserver;
 using thx.react.IObservable;
 
 @:access(precog.html.HtmlPanelGroupItem.setGroup)
-class HtmlPanelGroup
+class HtmlPanelGroup implements IObserver<IRectangle>
 {
 	public var length(default, null) : Int;
-	var panels : Array<HtmlPanelGroupItem>;
+	var items : Array<HtmlPanelGroupItem>;
 	var current : HtmlPanelGroupItem;
-	public var boundaries : IRectangleObservable;
+	public var container : HtmlPanel;
 	public var pane : HtmlPanel;
 	public var gutter : HtmlPanel;
 	var layout : DockLayout;
+	var gutterMargin : Int = 3;
+	var gutterSize : Int = 22;
 
 	@:isVar public var gutterPosition(get_gutterPosition, set_gutterPosition) : GutterPosition;
 
-	public function new(boundaries : IRectangleObservable, ?gutterPosition : GutterPosition)
+	public function new(container : HtmlPanel, ?gutterPosition : GutterPosition)
 	{
 		length = 0;
-		panels = [];
+		items = [];
 		current = null;
-		this.boundaries = boundaries;
+		this.container = container;
 
 		layout = new DockLayout(0, 0);
 		pane = new HtmlPanel();
 		gutter = new HtmlPanel();
+
+		container.element.append(gutter.element);
+		container.element.append(pane.element);
+
 		if(null == gutterPosition)
-			gutterPosition = Left;
+			gutterPosition = Top;
 		this.gutterPosition = gutterPosition;
-
-		boundaries.addListener(function(rect) {
-			layout.rectangle.set(rec.x, rect.y, rect.width, rect.height);
-		});
+		container.panel.rectangle.attach(this);
+		update(container.panel.rectangle);
 	}
 
-	public function addPanel(panel : HtmlPanelGroupItem) 
-	{
-		if(panels.remove(panel))
-			length--;
-		panels.push(panel);
-		length++;
+	public function update(rect : IRectangle) {
+		layout.rectangle.set(rect.x, rect.y, rect.width, rect.height);
+		layout.update();
 	}
 
-	public function removePanel(panel : HtmlPanelGroupItem) 
+	public function addItem(item : HtmlPanelGroupItem) 
 	{
-		if(!panels.remove(panel)) return;
-		panel.setGroup(null);
-		length--;
+		items.remove(item);
+		items.push(item);
+		gutter.element.append(item.toggle.element);
+		pane.element.append(item.panel.element);
+		length = items.length;
 	}
 
-	function activate(panel : HtmlPanelGroupItem)
+	public function removeItem(item : HtmlPanelGroupItem) 
 	{
-		for(panel in panels)
-			panel.deactivate();
-		if(null != panel)
-			panel.activate();
-		current = panel;
+		if(!items.remove(item)) return;
+		item.toggle.element.detach();
+		item.panel.element.detach();
+		item.setGroup(null);
+		length = items.length;
+	}
+
+	function activate(item : HtmlPanelGroupItem)
+	{
+		for(item in items)
+			item.deactivate();
+		if(null != item)
+			item.activate();
+		current = item;
 	}
 
 	function get_gutterPosition()
@@ -68,7 +80,7 @@ class HtmlPanelGroup
 
 	function set_gutterPosition(position : GutterPosition)
 	{
-		if(Reflect.enumEq(gutterPosition, position)) return position;
+		if(Type.enumEq(gutterPosition, position)) return position;
 		gutterPosition = position;
 		updateDock();
 		return position;
@@ -107,7 +119,8 @@ class HtmlPanelGroupItem
 	public function new(panel : HtmlSwapPanel)
 	{
 		this.active = false;
-		this.toggle = new HtmlButton();
+		this.toggle = new HtmlButton(null, Icons.ok);
+		this.toggle.size = Mini;
 		this.panel = panel;
 	}
 
@@ -116,12 +129,12 @@ class HtmlPanelGroupItem
 		if(active) return;
 		if(group != null)
 		{
-			group.pane.attach(panel);
-			group.activate(panel);
+			group.pane.panel.rectangle.attach(panel);
+			group.activate(this);
 		}
 		toggle.active = true;
 		panel.show();
-		panel.update(group.pane);
+		panel.update(group.pane.panel.rectangle);
 	}
 
 	public function deactivate()
@@ -130,7 +143,7 @@ class HtmlPanelGroupItem
 		toggle.active = false;
 		panel.hide();
 		if(null != group)
-			group.pane.detach(panel);
+			group.pane.panel.rectangle.detach(panel);
 	}
 
 	function setGroup(group : HtmlPanelGroup)

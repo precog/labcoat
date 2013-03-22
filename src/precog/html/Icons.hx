@@ -206,7 +206,7 @@ class Icons
 	public static inline var truck : String = "truck";
 	public static inline var pinterest : String = "pinterest";
 	public static inline var pinterestSign : String = "pinterest-sign";
-	public static inline var googlePlus-sign : String = "google-plus-sign";
+	public static inline var googlePlusSign : String = "google-plus-sign";
 	public static inline var googlePlus : String = "google-plus";
 	public static inline var money : String = "money";
 	public static inline var caretDown : String = "caret-down";

@@ -7,7 +7,7 @@ import precog.geom.IRectangleObservable;
 import thx.react.IObserver;
 import thx.react.promise.Timer;
 
-class HtmlSwapPanel extends SwapPanel
+class HtmlSwapPanel extends HtmlPanel
 {
 	public var visible(default, null) : Bool;
 
@@ -21,7 +21,7 @@ class HtmlSwapPanel extends SwapPanel
 		if(visible) return;
 		panel.rectangle.attach(this);
 		update(panel.rectangle);
-		element.display();
+		element.show();
 	}
 
 	public function hide()
