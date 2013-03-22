@@ -4,6 +4,7 @@ import js.JQuery;
 import precog.geom.IRectangle;
 import precog.geom.IRectangleObservable;
 import precog.layout.DockLayout;
+import precog.layout.Panel;
 import thx.react.IObserver;
 using thx.react.IObservable;
 
@@ -13,34 +14,33 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 	public var length(default, null) : Int;
 	var items : Array<HtmlPanelGroupItem>;
 	var current : HtmlPanelGroupItem;
-	public var container : HtmlPanel;
-	public var pane : HtmlPanel;
-	public var gutter : HtmlPanel;
+	public var container(default, null) : JQuery;
+	public var pane(default, null) : Panel;
+	public var gutter(default, null) : HtmlPanel;
 	var layout : DockLayout;
 	var gutterMargin : Int = 3;
 	var gutterSize : Int = 22;
 
 	@:isVar public var gutterPosition(get_gutterPosition, set_gutterPosition) : GutterPosition;
 
-	public function new(container : HtmlPanel, ?gutterPosition : GutterPosition)
+	public function new(parent : JQuery, rectangle : IRectangleObservable, ?gutterPosition : GutterPosition)
 	{
 		length = 0;
 		items = [];
 		current = null;
-		this.container = container;
+		container = parent;
 
 		layout = new DockLayout(0, 0);
-		pane = new HtmlPanel();
+		pane = new Panel();
 		gutter = new HtmlPanel();
 
-		container.element.append(gutter.element);
-		container.element.append(pane.element);
+		container.append(gutter.element);
 
 		if(null == gutterPosition)
 			gutterPosition = Top;
 		this.gutterPosition = gutterPosition;
-		container.panel.rectangle.attach(this);
-		update(container.panel.rectangle);
+		rectangle.addListener(update);
+		update(rectangle);
 	}
 
 	public function update(rect : IRectangle) {
@@ -52,9 +52,13 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 	{
 		items.remove(item);
 		items.push(item);
+		item.setGroup(this);
 		gutter.element.append(item.toggle.element);
-		pane.element.append(item.panel.element);
+		container.append(item.panel.element);
 		length = items.length;
+
+		pane.rectangle.attach(item.panel);
+		item.panel.update(pane.rectangle);
 	}
 
 	public function removeItem(item : HtmlPanelGroupItem) 
@@ -62,16 +66,16 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 		if(!items.remove(item)) return;
 		item.toggle.element.detach();
 		item.panel.element.detach();
+		pane.rectangle.detach(item.panel);
 		item.setGroup(null);
 		length = items.length;
 	}
 
 	function activate(item : HtmlPanelGroupItem)
 	{
-		for(item in items)
-			item.deactivate();
-		if(null != item)
-			item.activate();
+		for(other in items)
+			if(other != item)
+				other.deactivate();
 		current = item;
 	}
 
@@ -95,7 +99,7 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 			case Left:		layout.addPanel(gutter.panel).dockLeft(gutterSize, gutterMargin);
 			case Right:		layout.addPanel(gutter.panel).dockRight(gutterSize, gutterMargin);
 		}
-		layout.addPanel(pane.panel);
+		layout.addPanel(pane).fill();
 		layout.update();
 	}
 }
@@ -116,40 +120,41 @@ class HtmlPanelGroupItem
 	public var group(default, null) : HtmlPanelGroup;
 	public var active(default, null) : Bool;
 
-	public function new(panel : HtmlSwapPanel)
+	public function new(label : String, ?icon : String)
 	{
 		this.active = false;
-		this.toggle = new HtmlButton("hello world", Icons.ok);
+		this.toggle = new HtmlButton(label, icon);
 		this.toggle.size = Mini;
-		this.panel = panel;
+		this.panel = new HtmlSwapPanel();
+		this.panel.hide();
+		this.toggle.element.bind("click", click);
+	}
+
+	function click(_) 
+	{
+		if(active)
+			deactivate();
+		else
+			activate();
 	}
 
 	public function activate()
 	{
-		if(active) return;
-		if(group != null)
-		{
-			group.pane.panel.rectangle.attach(panel);
-			group.activate(this);
-		}
-		toggle.active = true;
+		if(null == group || active) return;
+		group.activate(this);
+		toggle.active = active = true;
 		panel.show();
-		panel.update(group.pane.panel.rectangle);
 	}
 
 	public function deactivate()
 	{
-		if(!active) return;	
-		toggle.active = false;
+		if(null == group || !active) return;	
+		toggle.active = active = false;
 		panel.hide();
-		if(null != group)
-			group.pane.panel.rectangle.detach(panel);
 	}
 
 	function setGroup(group : HtmlPanelGroup)
 	{
-		if(null == group)
-			deactivate();
 		this.group = group;
 	}
 }

@@ -14,51 +14,20 @@ class HtmlSwapPanel extends HtmlPanel
 	public function new(cls : String = "", ?container : JQuery)
 	{
 		super(cls, container);
+		show();
 	}
 
 	public function show()
 	{
 		if(visible) return;
-		panel.rectangle.attach(this);
-		update(panel.rectangle);
+		visible = true;
 		element.show();
 	}
 
 	public function hide()
 	{
 		if(!visible) return;
+		visible = false;
 		element.hide();
-		panel.rectangle.detach(this);
 	}
-	/*
-	public var element(default, null) : JQuery;
-	public var panel(default, null) : Panel;
-	public function new(cls : String = "", ?container : JQuery)
-	{
-		panel = new Panel();
-		element = new JQuery('<div class="panel $cls" style="position:absolute"></div>');
-		Timer.delay(0).then(element.addClass.bind("animate-all"));
-		panel.rectangle.attach(this);
-		if(null != container)
-			element.appendTo(container);
-	}
-
-	public function update(rect : IRectangle)
-	{
-		element.css({
-			top    : rect.y + "px",
-			left   : rect.x + "px",
-			width  : rect.width + "px",
-			height : rect.height + "px"
-		});
-	}
-
-	public function destroy()
-	{
-		panel.rectangle.detach(this);
-		element.remove();
-		panel = null;
-		element = null;
-	}
-	*/
 }

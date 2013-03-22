@@ -15,7 +15,7 @@ class HtmlPanel implements IObserver<IRectangle>
 	{
 		panel = new Panel();
 		element = new JQuery('<div class="panel $cls" style="position:absolute"></div>');
-		Timer.delay(0).then(element.addClass.bind("animate-all"));
+//		Timer.delay(0).then(element.addClass.bind("animate-all"));
 		panel.rectangle.attach(this);
 		if(null != container)
 			element.appendTo(container);
@@ -23,6 +23,7 @@ class HtmlPanel implements IObserver<IRectangle>
 
 	public function update(rect : IRectangle)
 	{
+		panel.rectangle.set(rect.x, rect.y, rect.width, rect.height);
 		element.css({
 			top    : rect.y + "px",
 			left   : rect.x + "px",
