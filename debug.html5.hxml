@@ -6,6 +6,7 @@
 #DEFS
 -D html5
 -D embed_js
+-D js-classic
 #LIBS
 -lib thx-core
 -lib thx-react
