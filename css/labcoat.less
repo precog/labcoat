@@ -59,12 +59,14 @@ body {
         background: #fff;
         border: 1px solid #ddd;
         margin: 1em 1em 2em;
-        min-height: 152px;
+        min-height: 112px;
 
         clear: right;
 
+        @buttonwidth: 25px;
+
         .buttons.visible ~ .content {
-            margin-right: 40px;
+            margin-right: @buttonwidth;
         }
 
         .buttons {
@@ -73,7 +75,7 @@ body {
 
             button {
                 display: block;
-                width: 40px;
+                width: @buttonwidth;
             }
 
             &.visible {
