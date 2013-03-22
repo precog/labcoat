@@ -119,7 +119,7 @@ class HtmlPanelGroupItem
 	public function new(panel : HtmlSwapPanel)
 	{
 		this.active = false;
-		this.toggle = new HtmlButton(null, Icons.ok);
+		this.toggle = new HtmlButton("hello world", Icons.ok);
 		this.toggle.size = Mini;
 		this.panel = panel;
 	}

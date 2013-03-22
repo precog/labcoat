@@ -11,7 +11,7 @@ class HtmlButton
 	@:isVar public var size(get_size, set_size) : ButtonSize;
 	@:isVar public var rightIcon(get_rightIcon, set_rightIcon) : String;
 	@:isVar public var active(get_active, set_active) : Bool;
-	@:isVar public var primary(get_primary, set_primary) : Bool;
+	@:isVar public var type(get_type, set_type) : ButtonType;
 	@:isVar public var enabled(get_enabled, set_enabled) : Bool;
 
 	public function new(?text : String, ?icon : String, ?btnsize : ButtonSize)
@@ -23,15 +23,14 @@ class HtmlButton
 		if(null != icon)
 			this.leftIcon = icon;
 		if(null == btnsize)
-			btnsize = Normal;
+			btnsize = Default;
 		this.size = btnsize;
 		active = false;
-		primary = false;
+		type = Default;
 	}
 
 	function get_text()
 		return text;
-
 	function set_text(text : String)
 	{
 		this.text = text;
@@ -41,7 +40,6 @@ class HtmlButton
 
 	function get_leftIcon()
 		return leftIcon;
-
 	function set_leftIcon(icon : String)
 	{
 		this.leftIcon = icon;
@@ -51,7 +49,6 @@ class HtmlButton
 
 	function get_rightIcon()
 		return rightIcon;
-
 	function set_rightIcon(icon : String)
 	{
 		this.rightIcon = icon;
@@ -59,20 +56,8 @@ class HtmlButton
 		return text;
 	}
 
-	function get_primary()
-		return primary;
-
-	function set_primary(state : Bool)
-	{
-		if(this.primary == state) return state;
-		this.primary = state;
-		this.element.toggleClass("btn-primary", state);
-		return state;
-	}
-
 	function get_active()
 		return active;
-
 	function set_active(state : Bool)
 	{
 		if(this.active == state) return state;
@@ -83,7 +68,6 @@ class HtmlButton
 
 	function get_enabled()
 		return enabled;
-
 	function set_enabled(state : Bool)
 	{
 		if(this.enabled == state) return state;
@@ -97,14 +81,13 @@ class HtmlButton
 
 	function get_size()
 		return size;
-
 	function set_size(value : ButtonSize)
 	{
 		if(Type.enumEq(size, value)) return value;
 		if(null != size) switch(size)
 		{
 			case Large:		element.removeClass("btn-large");
-			case Normal:	
+			case Default:	
 			case Small:		element.removeClass("btn-small");
 			case Mini:		element.removeClass("btn-mini");
 		}
@@ -112,9 +95,40 @@ class HtmlButton
 		switch(size)
 		{
 			case Large:		element.addClass("btn-large");
-			case Normal:	
+			case Default:	
 			case Small:		element.addClass("btn-small");
 			case Mini:		element.addClass("btn-mini");
+		}
+		return value;
+	}
+
+	function get_type()
+		return type;
+	function set_type(value : ButtonType)
+	{
+		if(Type.enumEq(type, value)) return value;
+		if(null != type) switch(type)
+		{
+			case Default:
+			case Primary:	element.removeClass("btn-primary");
+			case Info:		element.removeClass("btn-info");
+			case Success:	element.removeClass("btn-success");
+			case Warning:	element.removeClass("btn-warning");
+			case Danger:	element.removeClass("btn-danger");
+			case Inverse:	element.removeClass("btn-inverse");
+			case Link:	element.removeClass("btn-link");
+		}
+		type = value;
+		switch(type)
+		{
+			case Default:
+			case Primary:	element.addClass("btn-primary");
+			case Info:		element.addClass("btn-info");
+			case Success:	element.addClass("btn-success");
+			case Warning:	element.addClass("btn-warning");
+			case Danger:	element.addClass("btn-danger");
+			case Inverse:	element.addClass("btn-inverse");
+			case Link:	element.addClass("btn-link");
 		}
 		return value;
 	}
@@ -145,7 +159,19 @@ class HtmlButton
 enum ButtonSize
 {
 	Large;
-	Normal;
+	Default;
 	Small;
 	Mini;
+}
+
+enum ButtonType
+{
+	Default;
+	Primary;
+	Info;
+	Success;
+	Warning;
+	Danger;
+	Inverse;
+	Link;
 }
