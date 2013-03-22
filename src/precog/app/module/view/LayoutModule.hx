@@ -8,6 +8,9 @@ import precog.layout.Panel;
 import precog.html.HtmlPanel;
 import precog.app.message.HtmlApplicationContainerMessage;
 import precog.app.message.HtmlMainPanelMessage;
+import precog.app.message.HtmlSystemPanelMessage;
+import precog.app.message.HtmlSupportPanelMessage;
+import precog.app.message.HtmlToolsPanelMessage;
 
 using precog.html.JQuerys;
 using thx.react.IObservable;
@@ -91,7 +94,10 @@ class LayoutModule extends Module
 			updateLayouts();
 		});
 
-                comm.provide(new HtmlMainPanelMessage(main));
+        comm.provide(new HtmlMainPanelMessage(main));
+        comm.provide(new HtmlSystemPanelMessage(system));
+        comm.provide(new HtmlSupportPanelMessage(support));
+        comm.provide(new HtmlToolsPanelMessage(tools));
 	}
 
 	override public function connect(comm : Communicator)

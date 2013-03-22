@@ -17,6 +17,7 @@ class Main
         manager.addModule(new ContainerModule());
         manager.addModule(new LayoutModule());
         manager.addModule(new MainLayoutModule());
+        manager.addModule(new SystemLayoutModule());
 
         // Editor
         manager.addModule(new EditorModule());
