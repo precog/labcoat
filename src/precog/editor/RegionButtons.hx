@@ -41,10 +41,12 @@ class RegionButtons {
     function changeTo(mode: RegionMode) {
         return function(event: Event) {
             EditorModule.changeRegionMode(region, mode);
+            return false;
         };
     }
 
     function deleteRegion(event: Event) {
         EditorModule.deleteRegionEnsureNonEmpty(region);
+        return false;
     }
 }
