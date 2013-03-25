@@ -122,31 +122,23 @@ body {
 }
 
 .editor {
+    height: 100%;
+
     .region {
         background: #fff;
         border: 1px solid #ddd;
         margin: 1em 1em 2em;
-        min-height: 112px;
 
         clear: right;
 
         @buttonwidth: 25px;
 
-        .buttons.visible ~ .content {
-            margin-right: @buttonwidth;
-        }
-
         .buttons {
-            display: none;
             float: right;
 
             button {
                 display: block;
                 width: @buttonwidth;
-            }
-
-            &.visible {
-                display: block;
             }
         }
 

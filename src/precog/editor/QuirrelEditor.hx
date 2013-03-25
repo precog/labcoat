@@ -18,20 +18,10 @@ class QuirrelEditor implements RegionEditor {
         element = document.createElement('div');
 
         editor = CodeMirrorFactory.addTo(element, options);
-        editor.on('focus', editorFocus);
-        editor.on('blur', editorBlur);
 
         outputElement = document.createElement('div');
         outputElement.className = 'output';
         element.appendChild(outputElement);
-    }
-
-    function editorFocus(editor: CodeMirror) {
-        region.setFocused(true);
-    }
-
-    function editorBlur(editor: CodeMirror) {
-        region.setFocused(false);
     }
 
     public function getContent() {

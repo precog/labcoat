@@ -34,16 +34,12 @@ class MarkdownEditor implements RegionEditor {
     }
 
     function renderedFocus(event: Event) {
-        region.setFocused(true);
-
         rendered.style.display = 'none';
         editor.getWrapperElement().style.display = 'block';
         focus();
     }
 
     function editorBlur(editor: CodeMirror) {
-        region.setFocused(false);
-
         // Don't remove the editor if the content is empty (would
         // result in an empty, non-clickable div)
         if(getContent().trim().length == 0) return;
