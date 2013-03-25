@@ -1,6 +1,6 @@
 package precog.html;
 
-import js.JQuery;
+import jQuery.JQuery;
 import precog.geom.IRectangle;
 import precog.geom.IRectangleObservable;
 import precog.layout.DockLayout;
@@ -102,10 +102,10 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 		}
 		gutterPosition = position;
 		layout.clear();
-		togglesContainer.css({
-			top  : '0px',
-			left : '0px'
-		});
+		togglesContainer
+                    .css("top",  '0px')
+                    .css("left", '0px');
+
 		switch (gutterPosition) {
 			case Top:
 				togglesContainer.addClass("toggles-top");

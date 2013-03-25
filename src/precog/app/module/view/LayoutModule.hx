@@ -2,7 +2,7 @@ package precog.app.module.view;
 
 import precog.communicator.*;
 import js.Browser;
-import js.JQuery;
+import jQuery.JQuery;
 import precog.layout.DockLayout;
 import precog.layout.Panel;
 import precog.html.HtmlPanel;

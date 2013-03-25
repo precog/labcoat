@@ -5,8 +5,8 @@ import precog.communicator.Communicator;
 import precog.communicator.Module;
 import precog.editor.codemirror.Externs;
 import precog.editor.codemirror.QuirrelMode;
+import jQuery.JQuery;
 import js.Browser.document;
-import js.JQuery;
 import js.html.Element;
 import js.html.Node;
 

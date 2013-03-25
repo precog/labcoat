@@ -1,6 +1,6 @@
 package precog.html;
 
-import js.JQuery;
+import jQuery.JQuery;
 
 class HtmlButton 
 {

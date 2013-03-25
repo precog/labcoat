@@ -1,12 +1,9 @@
 package precog.editor;
 
 import precog.editor.RegionMode;
+import jQuery.JQuery;
+import jQuery.Event;
 import js.Browser.document;
-import js.JQuery;
-import js.html.Element;
-import js.html.Event;
-import js.html.OptionElement;
-import js.html.SelectElement;
 
 class RegionButtons {
     public var element: JQuery;
@@ -33,7 +30,7 @@ class RegionButtons {
     }
 
     function changeTo(mode: RegionMode) {
-        return function(event: JqEvent) {
+        return function(event: Event) {
             EditorModule.changeRegionMode(region, mode);
         };
     }

@@ -7,7 +7,7 @@ import precog.communicator.Module;
 import precog.html.HtmlPanel;
 import precog.layout.DockLayout;
 import js.Browser;
-import js.JQuery;
+import jQuery.JQuery;
 
 using precog.html.JQuerys;
 

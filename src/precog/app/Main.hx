@@ -1,7 +1,6 @@
 package precog.app;
 
 import precog.communicator.ModuleManager;
-import js.JQuery;
 import precog.app.module.view.*;
 import precog.app.module.api.*;
 import precog.editor.EditorModule;

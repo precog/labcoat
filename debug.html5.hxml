@@ -10,3 +10,4 @@
 #LIBS
 -lib thx-core
 -lib thx-react
+-lib jQueryExtern

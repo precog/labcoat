@@ -1,6 +1,6 @@
 package precog.html;
 
-import js.JQuery;
+import jQuery.JQuery;
 import precog.layout.Panel;
 import precog.geom.IRectangle;
 import precog.geom.IRectangleObservable;

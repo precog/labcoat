@@ -1,9 +1,9 @@
 package precog.editor;
 
 import precog.editor.codemirror.Externs;
+import jQuery.JQuery;
+import jQuery.Event;
 import js.Browser.document;
-import js.JQuery;
-import js.html.Event;
 
 class Region {
     public var mode: RegionMode;
@@ -43,12 +43,12 @@ class Region {
         updateButtons();
     }
 
-    function mouseOver(event: JqEvent) {
+    function mouseOver(event: Event) {
         hovered = true;
         updateButtons();
     }
 
-    function mouseOut(event: JqEvent) {
+    function mouseOut(event: Event) {
         hovered = false;
         updateButtons();
     }

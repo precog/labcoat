@@ -1,6 +1,6 @@
 package precog.html;
 
-import js.JQuery;
+import jQuery.JQuery;
 import precog.layout.Panel;
 import precog.geom.IRectangle;
 import precog.geom.IRectangleObservable;
@@ -24,12 +24,11 @@ class HtmlPanel implements IObserver<IRectangle>
 	public function update(rect : IRectangle)
 	{
 		panel.rectangle.set(rect.x, rect.y, rect.width, rect.height);
-		element.css({
-			top    : rect.y + "px",
-			left   : rect.x + "px",
-			width  : rect.width + "px",
-			height : rect.height + "px"
-		});
+		element
+                    .css("top",    rect.y + "px")
+                    .css("left",   rect.x + "px")
+                    .css("width",  rect.width + "px")
+                    .css("height", rect.height + "px");
 	}
 
 	public function destroy()

@@ -1,3 +1,3 @@
 package precog.app.message;
 
-class ApplicationHtmlContainerMessage extends Message<js.JQuery> { }
+class ApplicationHtmlContainerMessage extends Message<jQuery.JQuery> { }
