@@ -1,6 +1,3 @@
 package precog.app.message;
 
-class JavaScriptAPIMessage extends Message<Dynamic> 
-{
-
-}
+class JavaScriptAPIMessage extends Message<Dynamic> { }

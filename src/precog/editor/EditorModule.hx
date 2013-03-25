@@ -1,6 +1,6 @@
 package precog.editor;
 
-import precog.app.message.HtmlMainEditorPanelMessage;
+import precog.app.message.MainEditorHtmlPanelMessage;
 import precog.communicator.Communicator;
 import precog.communicator.Module;
 import precog.editor.codemirror.Externs;
@@ -14,14 +14,14 @@ class EditorModule extends Module {
     public static var element = new JQuery('<div class="editor"></div>');
 
     override public function connect(communicator: Communicator) {
-        communicator.demand(HtmlMainEditorPanelMessage).then(init);
+        communicator.demand(MainEditorHtmlPanelMessage).then(init);
     }
 
     override public function disconnect(communicator: Communicator) {
         element.remove();
     }
 
-    public function init(editorPanelMessage: HtmlMainEditorPanelMessage) {
+    public function init(editorPanelMessage: MainEditorHtmlPanelMessage) {
         editorPanelMessage.value.element.append(element);
 
         QuirrelMode.init();

@@ -19,7 +19,6 @@ class HtmlButton
 		element = new JQuery('<button type="button" class="btn" data-toggle="button"></button>');
 		if(null != text)
 			this.text = text;
-
 		if(null != icon)
 			this.leftIcon = icon;
 		if(null == btnsize)
@@ -34,7 +33,7 @@ class HtmlButton
 	function set_text(text : String)
 	{
 		this.text = text;
-		element.find("span.text").html((null == text) ? "" : text);
+		update();
 		return text;
 	}
 

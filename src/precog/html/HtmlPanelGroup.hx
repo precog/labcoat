@@ -21,7 +21,7 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 	public var togglesContainer(default, null) : JQuery;
 	var layout : DockLayout;
 	var gutterMargin : Int = 3;
-	var gutterSize : Int = 22;
+	var gutterSize : Int = 18;
 
 	@:isVar public var gutterPosition(get_gutterPosition, set_gutterPosition) : GutterPosition;
 
@@ -33,8 +33,9 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 		container = parent;
 
 		layout = new DockLayout(0, 0);
-		pane = new Panel();
+		pane   = new Panel();
 		gutter = new HtmlPanel();
+		gutter.element.addClass("gutter");
 		togglesContainer = new JQuery('<div class="btn-group"></div>').appendTo(gutter.element);
 
 		container.append(gutter.element);
@@ -59,7 +60,7 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 		togglesContainer.append(item.toggle.element);
 		container.append(item.panel.element);
 		length = items.length;
-updateVerticalPosition();
+		updateVerticalPosition();
 		pane.rectangle.attach(item.panel);
 		item.panel.update(pane.rectangle);
 	}
@@ -70,7 +71,7 @@ updateVerticalPosition();
 		item.toggle.element.detach();
 		item.panel.element.detach();
 		pane.rectangle.detach(item.panel);
-updateVerticalPosition();
+		updateVerticalPosition();
 		item.setGroup(null);
 		length = items.length;
 	}
@@ -130,15 +131,16 @@ updateVerticalPosition();
 				var size = togglesContainer.getOuterSize(),
 					w = size.width,
 					h = size.height;
-				var offset = (w + 3 * length - h) / 2;
+				var offset = (w - h) / 2;
 				togglesContainer.cssTransform('rotateZ(-90deg) translate3d(-${offset}px, -${offset}px, 0)');
 			case Right:
 				var size = togglesContainer.getOuterSize(),
 					w = size.width,
 					h = size.height;
-				var offset = (w + 3 * length - h) / 2;
-				togglesContainer.cssTransform('rotateZ(90deg) translate3d(${offset}px, ${offset+length}px, 0)');
+				var offset = (w - h) / 2;
+				togglesContainer.cssTransform('rotateZ(90deg) translate3d(${offset-length/2}px, ${offset+length}px, 0)');
 			case _:
+				togglesContainer.cssTransform('none');
 		}
 	}
 }
@@ -155,7 +157,7 @@ enum GutterPosition
 class HtmlPanelGroupItem 
 {
 	public var toggle(default, null) : HtmlButton;
-	public var panel(default, null) : HtmlSwapPanel;
+	public var panel(default, null) : HtmlPanelSwap;
 	public var group(default, null) : HtmlPanelGroup;
 	public var active(default, null) : Bool;
 
@@ -164,7 +166,8 @@ class HtmlPanelGroupItem
 		this.active = false;
 		this.toggle = new HtmlButton(label, icon);
 		this.toggle.size = Mini;
-		this.panel = new HtmlSwapPanel();
+//		this.toggle.rightIcon = Icons.heart;
+		this.panel = new HtmlPanelSwap();
 		this.panel.hide();
 		this.toggle.element.bind("click", click);
 	}

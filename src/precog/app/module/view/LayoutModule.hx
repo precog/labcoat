@@ -6,11 +6,11 @@ import js.JQuery;
 import precog.layout.DockLayout;
 import precog.layout.Panel;
 import precog.html.HtmlPanel;
-import precog.app.message.HtmlApplicationContainerMessage;
-import precog.app.message.HtmlMainPanelMessage;
-import precog.app.message.HtmlSystemPanelMessage;
-import precog.app.message.HtmlSupportPanelMessage;
-import precog.app.message.HtmlToolsPanelMessage;
+import precog.app.message.ApplicationHtmlContainerMessage;
+import precog.app.message.MainHtmlPanelMessage;
+import precog.app.message.SystemHtmlPanelMessage;
+import precog.app.message.SupportHtmlPanelMessage;
+import precog.app.message.ToolsHtmlPanelMessage;
 
 using precog.html.JQuerys;
 using thx.react.IObservable;
@@ -65,7 +65,7 @@ class LayoutModule extends Module
 		layouts.context.update();
 	}
 
-	function oncontainer(message : HtmlApplicationContainerMessage)
+	function oncontainer(message : ApplicationHtmlContainerMessage)
 	{
 		container = message.value;
 		container.addClass("labcoat");
@@ -94,17 +94,17 @@ class LayoutModule extends Module
 			updateLayouts();
 		});
 
-        comm.provide(new HtmlMainPanelMessage(main));
-        comm.provide(new HtmlSystemPanelMessage(system));
-        comm.provide(new HtmlSupportPanelMessage(support));
-        comm.provide(new HtmlToolsPanelMessage(tools));
+        comm.provide(new MainHtmlPanelMessage(main));
+        comm.provide(new SystemHtmlPanelMessage(system));
+        comm.provide(new SupportHtmlPanelMessage(support));
+        comm.provide(new ToolsHtmlPanelMessage(tools));
 	}
 
 	override public function connect(comm : Communicator)
 	{
 		this.comm = comm;
 
-		comm.demand(HtmlApplicationContainerMessage)
+		comm.demand(ApplicationHtmlContainerMessage)
 			.then(oncontainer);
 	}
 }

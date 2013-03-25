@@ -7,7 +7,7 @@ import precog.geom.IRectangleObservable;
 import thx.react.IObserver;
 import thx.react.promise.Timer;
 
-class HtmlSwapPanel extends HtmlPanel
+class HtmlPanelSwap extends HtmlPanel
 {
 	public var visible(default, null) : Bool;
 

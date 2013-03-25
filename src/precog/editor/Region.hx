@@ -48,7 +48,7 @@ class Region {
         updateButtons();
     }
 
-    function mouseOut(/*event: JqEvent*/) {
+    function mouseOut(event: JqEvent) {
         hovered = false;
         updateButtons();
     }

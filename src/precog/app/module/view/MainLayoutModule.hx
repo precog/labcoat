@@ -1,7 +1,7 @@
 package precog.app.module.view;
 
-import precog.app.message.HtmlMainPanelMessage;
-import precog.app.message.HtmlMainEditorPanelMessage;
+import precog.app.message.MainHtmlPanelMessage;
+import precog.app.message.MainEditorHtmlPanelMessage;
 import precog.communicator.Communicator;
 import precog.communicator.Module;
 import precog.html.HtmlPanel;
@@ -25,10 +25,10 @@ class MainLayoutModule extends Module {
 
     override public function connect(communicator: Communicator) {
         this.communicator = communicator;
-        communicator.demand(HtmlMainPanelMessage).then(onMainPanelMessage);
+        communicator.demand(MainHtmlPanelMessage).then(onMainPanelMessage);
     }
 
-    function onMainPanelMessage(message: HtmlMainPanelMessage) {
+    function onMainPanelMessage(message: MainHtmlPanelMessage) {
         container = message.value.element;
 
         toolbar = new HtmlPanel("toolbar", container);
@@ -41,7 +41,7 @@ class MainLayoutModule extends Module {
         updateLayout();
         new JQuery(Browser.window).resize(function(_) { updateLayout(); });
 
-        communicator.provide(new HtmlMainEditorPanelMessage(editor));
+        communicator.provide(new MainEditorHtmlPanelMessage(editor));
     }
 
     function updateLayout() {

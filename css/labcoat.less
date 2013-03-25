@@ -21,7 +21,8 @@ body {
 	.panel {
 //		border: 1px solid hsla(0,0,0.8,0.5);
 		.border-radius(1px);
-		.box-shadow(1px 1px 3px rgba(0, 0, 0, 0.15));
+        background-color: #f9f9f9;
+		.box-shadow(1px 1px 3px rgba(0, 0, 0, 0.05));
 //		.gradient(#f9f9f9, #e6e6e6);
 
 //background: rgb(242,245,246); /* Old browsers */
@@ -46,6 +47,12 @@ body {
 
     .CodeMirror {
         .box-sizing(content-box);
+    }
+
+    .gutter {
+        .btn {
+            line-height: 16px;
+        }
     }
 
     .toggles-left {
@@ -74,6 +81,10 @@ body {
 
     .with-right-icon {
         margin-right: 3px;
+    }
+
+    .btn-group {
+        display: block;
     }
 
     .toggles-left.btn-group > .btn:first-child {
