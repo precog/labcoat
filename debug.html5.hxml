@@ -11,3 +11,4 @@
 -lib thx-core
 -lib thx-react
 -lib jQueryExtern
+-lib thx-culture

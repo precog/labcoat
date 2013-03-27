@@ -14,10 +14,10 @@ class SystemLayoutModule extends Module {
     override public function connect(communicator: Communicator) {
         communicator
             .demand(SystemHtmlPanelMessage)
-            .then(onSystemPanelMessage.bind(communicator));
+            .then(onMessage.bind(communicator));
     }
 
-    function onSystemPanelMessage(communicator : Communicator, msgsys: SystemHtmlPanelMessage) {
+    function onMessage(communicator : Communicator, msgsys: SystemHtmlPanelMessage) {
         var panel = msgsys.value;
 
         var rect = new Rectangle();

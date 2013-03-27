@@ -65,7 +65,7 @@ class LayoutModule extends Module
 		layouts.context.update();
 	}
 
-	function oncontainer(message : ApplicationHtmlContainerMessage)
+	function onMessage(message : ApplicationHtmlContainerMessage)
 	{
 		container = message.value;
 		container.addClass("labcoat");
@@ -105,6 +105,6 @@ class LayoutModule extends Module
 		this.comm = comm;
 
 		comm.demand(ApplicationHtmlContainerMessage)
-			.then(oncontainer);
+			.then(onMessage);
 	}
 }

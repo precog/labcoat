@@ -1,9 +1,13 @@
 package precog.app.module.view;
 
 import precog.app.message.SupportHtmlPanelGroupMessage;
+import precog.app.message.LocalizationMessage;
 import precog.communicator.Communicator;
 import precog.communicator.Module;
 import precog.html.HtmlPanelGroup;
+
+import thx.translation.Translation;
+using thx.react.Promise;
 
 using precog.html.JQuerys;
 
@@ -12,9 +16,10 @@ class TutorialModule extends Module {
     override public function connect(communicator: Communicator) {
         communicator
             .demand(SupportHtmlPanelGroupMessage)
-            .then(onSystemPanelMessage);
+            .await(communicator.demand(LocalizationMessage))
+            .then(onMessage);
     }
 
-    function onSystemPanelMessage(message: SupportHtmlPanelGroupMessage)
-        message.value.addItem(new HtmlPanelGroupItem("tutorial"));
+    function onMessage(message: SupportHtmlPanelGroupMessage, locale : LocalizationMessage)
+        message.value.addItem(new HtmlPanelGroupItem(locale.translation.singular("tutorial")));
 }

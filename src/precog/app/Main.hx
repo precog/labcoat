@@ -1,6 +1,7 @@
 package precog.app;
 
 import precog.communicator.ModuleManager;
+import precog.app.module.config.*;
 import precog.app.module.view.*;
 import precog.app.module.api.*;
 import precog.editor.EditorModule;
@@ -11,6 +12,10 @@ class Main
     static function main()
     {
         var manager = new ModuleManager();
+
+        // Config
+        manager.addModule(new LocalizationAdvisorModule());
+        manager.addModule(new LocalizationModule());
 
         // View
         manager.addModule(new ContainerModule());

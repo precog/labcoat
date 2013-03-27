@@ -14,10 +14,10 @@ class ToolsLayoutModule extends Module {
     override public function connect(communicator: Communicator) {
         communicator
             .demand(ToolsHtmlPanelMessage)
-            .then(onToolsPanelMessage.bind(communicator));
+            .then(onMessage.bind(communicator));
     }
 
-    function onToolsPanelMessage(communicator : Communicator, msgsys: ToolsHtmlPanelMessage) {
+    function onMessage(communicator : Communicator, msgsys: ToolsHtmlPanelMessage) {
         var panel = msgsys.value,
             rect = new Rectangle();
 

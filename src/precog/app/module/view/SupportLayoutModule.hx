@@ -14,10 +14,10 @@ class SupportLayoutModule extends Module {
     override public function connect(communicator: Communicator) {
         communicator
             .demand(SupportHtmlPanelMessage)
-            .then(onSupportPanelMessage.bind(communicator));
+            .then(onMessage.bind(communicator));
     }
 
-    function onSupportPanelMessage(communicator : Communicator, msgsys: SupportHtmlPanelMessage) {
+    function onMessage(communicator : Communicator, msgsys: SupportHtmlPanelMessage) {
         var panel = msgsys.value,
             rect = new Rectangle();
 

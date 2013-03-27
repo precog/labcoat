@@ -25,10 +25,10 @@ class MainLayoutModule extends Module {
 
     override public function connect(communicator: Communicator) {
         this.communicator = communicator;
-        communicator.demand(MainHtmlPanelMessage).then(onMainPanelMessage);
+        communicator.demand(MainHtmlPanelMessage).then(onMessage);
     }
 
-    function onMainPanelMessage(message: MainHtmlPanelMessage) {
+    function onMessage(message: MainHtmlPanelMessage) {
         container = message.value.element;
 
         toolbar = new HtmlPanel("toolbar", container);
