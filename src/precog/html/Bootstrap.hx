@@ -1,10 +1,11 @@
 package precog.html;
 
+import precog.html.JQuerys;
+
 @:native("bootstrap") extern class Bootstrap {
     static function __init__() : Void
     {
-        #if embed_js
+        JQuerys;
         haxe.macro.Compiler.includeFile("precog/html/bootstrap.js");
-        #end
     }
 }

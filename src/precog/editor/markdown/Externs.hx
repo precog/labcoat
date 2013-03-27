@@ -5,8 +5,6 @@ package precog.editor.markdown;
 
     static function __init__() : Void
     {
-        #if embed_js
         haxe.macro.Compiler.includeFile("precog/editor/markdown/markdown.js");
-        #end
     }
 }

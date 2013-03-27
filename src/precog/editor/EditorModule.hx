@@ -36,13 +36,8 @@ class EditorModule extends Module {
         Reflect.setField(CodeMirror.keyMap.pcDefault, "Ctrl-Enter", insertRegion);
     }
 
-    static function deleteRegion(region: Region) {
+    public static function deleteRegion(region: Region) {
         region.element.remove();
-    }
-
-    public static function deleteRegionEnsureNonEmpty(region: Region) {
-        //if(parentElement.childElementCount <= 1) return;
-        deleteRegion(region);
     }
 
     public static function changeRegionMode(oldRegion: Region, mode: RegionMode) {
@@ -54,7 +49,7 @@ class EditorModule extends Module {
         deleteRegion(oldRegion);
     }
 
-    static function appendRegion(region: Region, ?target: JQuery) {
+    public static function appendRegion(region: Region, ?target: JQuery) {
         if(target != null) {
             target.after(region.element);
         } else {

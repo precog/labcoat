@@ -83,21 +83,9 @@ class HtmlButton
 	function set_size(value : ButtonSize)
 	{
 		if(Type.enumEq(size, value)) return value;
-		if(null != size) switch(size)
-		{
-			case Large:		element.removeClass("btn-large");
-			case Default:	
-			case Small:		element.removeClass("btn-small");
-			case Mini:		element.removeClass("btn-mini");
-		}
+		if(null != size) element.removeClass(ButtonSizes.toClass(size));
 		size = value;
-		switch(size)
-		{
-			case Large:		element.addClass("btn-large");
-			case Default:	
-			case Small:		element.addClass("btn-small");
-			case Mini:		element.addClass("btn-mini");
-		}
+		element.addClass(ButtonSizes.toClass(size));
 		return value;
 	}
 
@@ -161,6 +149,17 @@ enum ButtonSize
 	Default;
 	Small;
 	Mini;
+}
+
+class ButtonSizes {
+	public static function toClass(size: ButtonSize) {
+		return switch(size) {
+		case Large: "btn-large";
+		case Default: "";
+		case Small: "btn-small";
+		case Mini: "btn-mini";
+		}
+	}
 }
 
 enum ButtonType

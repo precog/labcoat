@@ -115,10 +115,8 @@ typedef StringStream = {
 
     static function __init__() : Void
     {
-        #if embed_js
         haxe.macro.Compiler.includeFile("precog/editor/codemirror/codemirror.js");
         haxe.macro.Compiler.includeFile("precog/editor/codemirror/codemirror.markdown.js");
-        #end
     }
 }
 

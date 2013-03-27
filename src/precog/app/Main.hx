@@ -4,7 +4,7 @@ import precog.communicator.ModuleManager;
 import precog.app.module.config.*;
 import precog.app.module.view.*;
 import precog.app.module.api.*;
-import precog.editor.EditorModule;
+import precog.editor.*;
 import js.Browser.window;
 
 class Main 
@@ -37,6 +37,7 @@ class Main
         manager.addModule(new ChatModule());
 
         // Editor
+        manager.addModule(new ToolbarModule());
         manager.addModule(new EditorModule());
 
         // API
