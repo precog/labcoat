@@ -12,7 +12,8 @@ class LocalizationAdvisorModule extends Module
     		.demand(Translation)
 			.then(function(t : Translation) {
 				t.missingKeyCallback = function(domain, key) {
-					trace('missing translation "$key" ($domain)');
+					if(domain != "en-US")
+						trace('missing translation "$key" ($domain)');
 				};
 			});
     }
