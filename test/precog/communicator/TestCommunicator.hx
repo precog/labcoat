@@ -2,7 +2,7 @@ package precog.communicator;
 
 import utest.Assert;
 import thx.react.Promise;
-import precog.app.message.HtmlApplicationContainerMessage;
+import precog.app.message.ApplicationHtmlContainerMessage;
 
 class TestCommunicator
 {
@@ -36,11 +36,11 @@ class TestCommunicator
 	public function testDemandProvideInstance()
 	{
 		var comm = new Communicator();
-		comm.provide(new HtmlApplicationContainerMessage(null));
-		comm.demand(HtmlApplicationContainerMessage)
-			.then(function(o : HtmlApplicationContainerMessage) {
+		comm.provide(new ApplicationHtmlContainerMessage(null));
+		comm.demand(ApplicationHtmlContainerMessage)
+			.then(function(o : ApplicationHtmlContainerMessage) {
 				Assert.notNull(o);
-				Assert.is(o, HtmlApplicationContainerMessage);
+				Assert.is(o, ApplicationHtmlContainerMessage);
 			});
 	}
 }

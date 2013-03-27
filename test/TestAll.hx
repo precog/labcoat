@@ -11,6 +11,8 @@ class TestAll
 		runner.addCase(new precog.geom.TestPoint());
 		runner.addCase(new precog.geom.TestRectangle());
 
+		runner.addCase(new precog.util.TestFileSystem());
+
 		runner.addCase(new precog.layout.TestLayout());
 		runner.addCase(new precog.layout.TestCanvasLayout());
 		runner.addCase(new precog.layout.TestDockLayout());

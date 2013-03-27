@@ -83,11 +83,19 @@ Lambda.array = function(it) {
 	}
 	return a;
 }
-Lambda.has = function(it,elt) {
-	var $it0 = $iterator(it)();
-	while( $it0.hasNext() ) {
-		var x = $it0.next();
-		if(x == elt) return true;
+Lambda.has = function(it,elt,cmp) {
+	if(cmp == null) {
+		var $it0 = $iterator(it)();
+		while( $it0.hasNext() ) {
+			var x = $it0.next();
+			if(x == elt) return true;
+		}
+	} else {
+		var $it1 = $iterator(it)();
+		while( $it1.hasNext() ) {
+			var x = $it1.next();
+			if(cmp(x,elt)) return true;
+		}
 	}
 	return false;
 }
@@ -228,6 +236,7 @@ TestAll.addTests = function(runner) {
 	runner.addCase(new precog.communicator.TestModuleManager());
 	runner.addCase(new precog.geom.TestPoint());
 	runner.addCase(new precog.geom.TestRectangle());
+	runner.addCase(new precog.util.TestFileSystem());
 	runner.addCase(new precog.layout.TestLayout());
 	runner.addCase(new precog.layout.TestCanvasLayout());
 	runner.addCase(new precog.layout.TestDockLayout());
@@ -468,29 +477,7 @@ haxe.ds.IntMap = function() {
 };
 haxe.ds.IntMap.__name__ = ["haxe","ds","IntMap"];
 haxe.ds.IntMap.prototype = {
-	toString: function() {
-		var s = new StringBuf();
-		s.b += "{";
-		var it = this.keys();
-		while( it.hasNext() ) {
-			var i = it.next();
-			s.b += Std.string(i);
-			s.b += " => ";
-			s.b += Std.string(Std.string(this.get(i)));
-			if(it.hasNext()) s.b += ", ";
-		}
-		s.b += "}";
-		return s.b;
-	}
-	,iterator: function() {
-		return { ref : this.h, it : this.keys(), hasNext : function() {
-			return this.it.hasNext();
-		}, next : function() {
-			var i = this.it.next();
-			return this.ref[i];
-		}};
-	}
-	,keys: function() {
+	keys: function() {
 		var a = [];
 		for( var key in this.h ) {
 		if(this.h.hasOwnProperty(key)) a.push(key | 0);
@@ -521,47 +508,12 @@ haxe.ds.ObjectMap = function(weakKeys) {
 };
 haxe.ds.ObjectMap.__name__ = ["haxe","ds","ObjectMap"];
 haxe.ds.ObjectMap.prototype = {
-	toString: function() {
-		var s = new StringBuf();
-		s.b += "{";
-		var it = this.keys();
-		while( it.hasNext() ) {
-			var i = it.next();
-			s.b += Std.string(Std.string(i));
-			s.b += " => ";
-			s.b += Std.string(Std.string(this.h[i.__id__]));
-			if(it.hasNext()) s.b += ", ";
-		}
-		s.b += "}";
-		return s.b;
-	}
-	,iterator: function() {
-		return { ref : this.h, it : this.keys(), hasNext : function() {
-			return this.it.hasNext();
-		}, next : function() {
-			var i = this.it.next();
-			return this.ref[i.__id__];
-		}};
-	}
-	,keys: function() {
-		var a = [];
-		for( var key in this.h.__keys__ ) {
-		if(this.h.hasOwnProperty(key)) a.push(this.h.__keys__[key]);
-		}
-		return HxOverrides.iter(a);
-	}
-	,remove: function(key) {
+	remove: function(key) {
 		var id = key.__id__;
 		if(!this.h.hasOwnProperty(id)) return false;
 		delete(this.h[id]);
 		delete(this.h.__keys__[id]);
 		return true;
-	}
-	,exists: function(key) {
-		return this.h.hasOwnProperty(key.__id__);
-	}
-	,get: function(key) {
-		return this.h[key.__id__];
 	}
 	,set: function(key,value) {
 		var id = key.__id__ != null?key.__id__:key.__id__ = ++haxe.ds.ObjectMap.count;
@@ -576,29 +528,7 @@ haxe.ds.StringMap = function() {
 };
 haxe.ds.StringMap.__name__ = ["haxe","ds","StringMap"];
 haxe.ds.StringMap.prototype = {
-	toString: function() {
-		var s = new StringBuf();
-		s.b += "{";
-		var it = this.keys();
-		while( it.hasNext() ) {
-			var i = it.next();
-			s.b += Std.string(i);
-			s.b += " => ";
-			s.b += Std.string(Std.string(this.get(i)));
-			if(it.hasNext()) s.b += ", ";
-		}
-		s.b += "}";
-		return s.b;
-	}
-	,iterator: function() {
-		return { ref : this.h, it : this.keys(), hasNext : function() {
-			return this.it.hasNext();
-		}, next : function() {
-			var i = this.it.next();
-			return this.ref["$" + i];
-		}};
-	}
-	,keys: function() {
+	keys: function() {
 		var a = [];
 		for( var key in this.h ) {
 		if(this.h.hasOwnProperty(key)) a.push(key.substr(1));
@@ -767,13 +697,13 @@ precog.app.message.Message.prototype = {
 	,value: null
 	,__class__: precog.app.message.Message
 }
-precog.app.message.HtmlApplicationContainerMessage = function(value) {
+precog.app.message.ApplicationHtmlContainerMessage = function(value) {
 	precog.app.message.Message.call(this,value);
 };
-precog.app.message.HtmlApplicationContainerMessage.__name__ = ["precog","app","message","HtmlApplicationContainerMessage"];
-precog.app.message.HtmlApplicationContainerMessage.__super__ = precog.app.message.Message;
-precog.app.message.HtmlApplicationContainerMessage.prototype = $extend(precog.app.message.Message.prototype,{
-	__class__: precog.app.message.HtmlApplicationContainerMessage
+precog.app.message.ApplicationHtmlContainerMessage.__name__ = ["precog","app","message","ApplicationHtmlContainerMessage"];
+precog.app.message.ApplicationHtmlContainerMessage.__super__ = precog.app.message.Message;
+precog.app.message.ApplicationHtmlContainerMessage.prototype = $extend(precog.app.message.Message.prototype,{
+	__class__: precog.app.message.ApplicationHtmlContainerMessage
 });
 precog.communicator = {}
 precog.communicator.Communicator = function() {
@@ -891,10 +821,10 @@ precog.communicator.TestCommunicator.__name__ = ["precog","communicator","TestCo
 precog.communicator.TestCommunicator.prototype = {
 	testDemandProvideInstance: function() {
 		var comm = new precog.communicator.Communicator();
-		comm.provide(new precog.app.message.HtmlApplicationContainerMessage(null));
-		comm.demand(precog.app.message.HtmlApplicationContainerMessage).then(function(o) {
+		comm.provide(new precog.app.message.ApplicationHtmlContainerMessage(null));
+		comm.demand(precog.app.message.ApplicationHtmlContainerMessage).then(function(o) {
 			utest.Assert.notNull(o,null,{ fileName : "TestCommunicator.hx", lineNumber : 42, className : "precog.communicator.TestCommunicator", methodName : "testDemandProvideInstance"});
-			utest.Assert["is"](o,precog.app.message.HtmlApplicationContainerMessage,null,{ fileName : "TestCommunicator.hx", lineNumber : 43, className : "precog.communicator.TestCommunicator", methodName : "testDemandProvideInstance"});
+			utest.Assert["is"](o,precog.app.message.ApplicationHtmlContainerMessage,null,{ fileName : "TestCommunicator.hx", lineNumber : 43, className : "precog.communicator.TestCommunicator", methodName : "testDemandProvideInstance"});
 		});
 	}
 	,testRequestRespond: function() {
@@ -1161,6 +1091,12 @@ precog.geom.Rectangle.prototype = $extend(thx.react.Suspendable.prototype,{
 			_g.addPointXY(other.x + other.width,other.y + other.height);
 		});
 		return this;
+	}
+	,updateSize: function(other) {
+		this.set(this.x,this.y,other.width,other.height);
+	}
+	,update: function(other) {
+		this.set(other.x,other.y,other.width,other.height);
 	}
 	,set: function(x,y,width,height) {
 		if(this.x == x && this.y == y && this.width == width && this.height == height) return;
@@ -2216,6 +2152,160 @@ precog.layout.WrapItem.prototype = {
 	,width: null
 	,__class__: precog.layout.WrapItem
 }
+precog.util = {}
+precog.util.FileSystem = function() {
+	this.root = new precog.util.Root(this);
+};
+precog.util.FileSystem.__name__ = ["precog","util","FileSystem"];
+precog.util.FileSystem.prototype = {
+	root: null
+	,__class__: precog.util.FileSystem
+}
+precog.util.Node = function(name,parent) {
+	this.set_name(name);
+	this.parent = parent;
+	if(null != parent) this.filesystem = parent.filesystem;
+};
+precog.util.Node.__name__ = ["precog","util","Node"];
+precog.util.Node.prototype = {
+	toString: function() {
+		return this.get_name();
+	}
+	,set_name: function(value) {
+		return this.name = value;
+	}
+	,get_name: function() {
+		return this.name;
+	}
+	,isRoot: null
+	,isDirectory: null
+	,isFile: null
+	,parent: null
+	,filesystem: null
+	,name: null
+	,__class__: precog.util.Node
+}
+precog.util.File = function(name,parent) {
+	precog.util.Node.call(this,name,parent);
+	this.isFile = true;
+	this.isDirectory = false;
+	this.isRoot = false;
+};
+precog.util.File.__name__ = ["precog","util","File"];
+precog.util.File.__super__ = precog.util.Node;
+precog.util.File.prototype = $extend(precog.util.Node.prototype,{
+	__class__: precog.util.File
+});
+precog.util.Directory = function(name,parent) {
+	precog.util.Node.call(this,name,parent);
+	this.children = [];
+	this.length = this.directoriesLength = this.filesLength = 0;
+	this.isFile = false;
+	this.isDirectory = true;
+	this.isRoot = false;
+};
+precog.util.Directory.__name__ = ["precog","util","Directory"];
+precog.util.Directory.__super__ = precog.util.Node;
+precog.util.Directory.prototype = $extend(precog.util.Node.prototype,{
+	childNodes: function() {
+		return HxOverrides.iter(this.children);
+	}
+	,files: function() {
+		return HxOverrides.iter(this.children.filter(function(v) {
+			return js.Boot.__instanceof(v,precog.util.File);
+		}));
+	}
+	,directories: function() {
+		return HxOverrides.iter(this.children.filter(function(v) {
+			return js.Boot.__instanceof(v,precog.util.Directory);
+		}));
+	}
+	,remove: function(node) {
+		if(js.Boot.__instanceof(node,precog.util.Root)) throw "root node cannot be added or removed";
+		if(HxOverrides.remove(this.children,node)) {
+			this.length--;
+			if(node.isFile) this.filesLength--;
+			if(node.isDirectory) this.directoriesLength--;
+			return true;
+		} else return false;
+	}
+	,add: function(node) {
+		if(js.Boot.__instanceof(node,precog.util.Root)) throw "root node cannot be added or removed";
+		if(null != node.parent) node.parent.remove(node);
+		this.children.push(node);
+		this.length++;
+		if(node.isFile) this.filesLength++;
+		if(node.isDirectory) this.directoriesLength++;
+	}
+	,filesLength: null
+	,directoriesLength: null
+	,length: null
+	,children: null
+	,__class__: precog.util.Directory
+});
+precog.util.Root = function(filesystem) {
+	precog.util.Directory.call(this,"",null);
+	this.isRoot = true;
+	this.filesystem = filesystem;
+};
+precog.util.Root.__name__ = ["precog","util","Root"];
+precog.util.Root.__super__ = precog.util.Directory;
+precog.util.Root.prototype = $extend(precog.util.Directory.prototype,{
+	__class__: precog.util.Root
+});
+precog.util.TestFileSystem = function() {
+};
+precog.util.TestFileSystem.__name__ = ["precog","util","TestFileSystem"];
+precog.util.TestFileSystem.prototype = {
+	testDuplicate: function() {
+	}
+	,testRename: function() {
+	}
+	,testOrder: function() {
+	}
+	,testPagination: function() {
+	}
+	,testEventAddRemove: function() {
+	}
+	,testFindByPath: function() {
+	}
+	,testCount: function() {
+		utest.Assert.equals(0,this.fs.root.length,null,{ fileName : "TestFileSystem.hx", lineNumber : 43, className : "precog.util.TestFileSystem", methodName : "testCount"});
+		utest.Assert.equals(0,this.fs.root.directoriesLength,null,{ fileName : "TestFileSystem.hx", lineNumber : 44, className : "precog.util.TestFileSystem", methodName : "testCount"});
+		utest.Assert.equals(0,this.fs.root.filesLength,null,{ fileName : "TestFileSystem.hx", lineNumber : 45, className : "precog.util.TestFileSystem", methodName : "testCount"});
+		new precog.util.Directory("dir",this.fs.root);
+		utest.Assert.equals(1,this.fs.root.length,null,{ fileName : "TestFileSystem.hx", lineNumber : 48, className : "precog.util.TestFileSystem", methodName : "testCount"});
+		utest.Assert.equals(1,this.fs.root.directoriesLength,null,{ fileName : "TestFileSystem.hx", lineNumber : 49, className : "precog.util.TestFileSystem", methodName : "testCount"});
+		utest.Assert.equals(0,this.fs.root.filesLength,null,{ fileName : "TestFileSystem.hx", lineNumber : 50, className : "precog.util.TestFileSystem", methodName : "testCount"});
+		new precog.util.File("file.ext",this.fs.root);
+		utest.Assert.equals(2,this.fs.root.length,null,{ fileName : "TestFileSystem.hx", lineNumber : 53, className : "precog.util.TestFileSystem", methodName : "testCount"});
+		utest.Assert.equals(1,this.fs.root.directoriesLength,null,{ fileName : "TestFileSystem.hx", lineNumber : 54, className : "precog.util.TestFileSystem", methodName : "testCount"});
+		utest.Assert.equals(1,this.fs.root.filesLength,null,{ fileName : "TestFileSystem.hx", lineNumber : 55, className : "precog.util.TestFileSystem", methodName : "testCount"});
+	}
+	,testPath: function() {
+		var dir = new precog.util.Directory("dir",this.fs.root), file = new precog.util.File("file.ext",dir);
+		utest.Assert.equals("/",this.fs.root.toString(),null,{ fileName : "TestFileSystem.hx", lineNumber : 36, className : "precog.util.TestFileSystem", methodName : "testPath"});
+		utest.Assert.equals("/dir",dir.toString(),null,{ fileName : "TestFileSystem.hx", lineNumber : 37, className : "precog.util.TestFileSystem", methodName : "testPath"});
+		utest.Assert.equals("/dir/file.ext",file.toString(),null,{ fileName : "TestFileSystem.hx", lineNumber : 38, className : "precog.util.TestFileSystem", methodName : "testPath"});
+	}
+	,testAddRemoveDirectory: function() {
+		var dir = new precog.util.Directory("sample",this.fs.root);
+		utest.Assert.equals(dir,this.fs.root.directories().next(),null,{ fileName : "TestFileSystem.hx", lineNumber : 27, className : "precog.util.TestFileSystem", methodName : "testAddRemoveDirectory"});
+		this.fs.root.remove(dir);
+		utest.Assert.isFalse(this.fs.root.directories().hasNext(),null,{ fileName : "TestFileSystem.hx", lineNumber : 29, className : "precog.util.TestFileSystem", methodName : "testAddRemoveDirectory"});
+	}
+	,testAddRemoveFile: function() {
+		var file = new precog.util.File("sample",this.fs.root);
+		utest.Assert.equals(file,this.fs.root.files().next(),null,{ fileName : "TestFileSystem.hx", lineNumber : 19, className : "precog.util.TestFileSystem", methodName : "testAddRemoveFile"});
+		this.fs.root.remove(file);
+		utest.Assert.isFalse(this.fs.root.files().hasNext(),null,{ fileName : "TestFileSystem.hx", lineNumber : 21, className : "precog.util.TestFileSystem", methodName : "testAddRemoveFile"});
+	}
+	,setup: function() {
+		this.fs = new precog.util.FileSystem();
+	}
+	,fs: null
+	,__class__: precog.util.TestFileSystem
+}
 thx.core = {}
 thx.core.Arrays = function() { }
 thx.core.Arrays.__name__ = ["thx","core","Arrays"];
@@ -2260,6 +2350,15 @@ thx.core.Arrays.crossMulti = function(a) {
 thx.core.Arrays.pushIf = function(arr,cond,value) {
 	if(cond) arr.push(value);
 	return arr;
+}
+thx.core.Arrays.mapi = function(arr,handler) {
+	var r = [];
+	var _g1 = 0, _g = arr.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		r.push(handler(arr[i],i));
+	}
+	return r;
 }
 thx.core._Procedure = {}
 thx.core._Procedure.ProcedureDefImpl = function() { }
@@ -5054,8 +5153,6 @@ var Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = { __name__ : ["Class"]};
 var Enum = { };
-var q = window.jQuery;
-js.JQuery = q;
 haxe.ds.ObjectMap.count = 0;
 js.Browser.document = typeof window != "undefined" ? window.document : null;
 precog.layout.TestCanvasLayout.point0 = new precog.geom.Point(0,0);

@@ -5,4 +5,6 @@
 -lib utest
 -lib thx-react
 -lib thx-core
+-lib jQueryExtern
+-D embed_jquery
 -debug
