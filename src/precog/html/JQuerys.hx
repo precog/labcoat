@@ -28,4 +28,11 @@ class JQuerys
 		 .css("-o-transform", transform)
 		 .css("transform", transform);
 	}
+
+	static function __init__() 
+	{
+#if embed_jquery
+		haxe.macro.Compiler.includeFile("precog/html/jquery-1.9.1.js");
+#end
+	}
 }

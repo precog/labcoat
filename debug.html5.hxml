@@ -5,7 +5,8 @@
 -debug
 #DEFS
 -D html5
--D embed_js
+#-D embed_js
+-D embed_jquery
 -D js-classic
 #LIBS
 -lib thx-core
