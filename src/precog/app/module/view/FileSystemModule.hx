@@ -19,5 +19,5 @@ class FileSystemModule extends Module {
     }
 
     function onMessage(message: SystemHtmlPanelGroupMessage, locale : LocalizationMessage)
-        message.value.addItem(new HtmlPanelGroupItem(locale.translation.singular("file system")));
+        message.value.addItem(new HtmlPanelGroupItem(locale.singular("file system")));
 }

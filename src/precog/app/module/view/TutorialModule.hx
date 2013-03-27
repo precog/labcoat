@@ -21,5 +21,5 @@ class TutorialModule extends Module {
     }
 
     function onMessage(message: SupportHtmlPanelGroupMessage, locale : LocalizationMessage)
-        message.value.addItem(new HtmlPanelGroupItem(locale.translation.singular("tutorial")));
+        message.value.addItem(new HtmlPanelGroupItem(locale.singular("tutorial")));
 }

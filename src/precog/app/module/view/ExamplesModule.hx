@@ -19,5 +19,5 @@ class ExamplesModule extends Module {
     }
 
     function onMessage(message: SupportHtmlPanelGroupMessage, locale : LocalizationMessage)
-        message.value.addItem(new HtmlPanelGroupItem(locale.translation.singular("examples")));
+        message.value.addItem(new HtmlPanelGroupItem(locale.singular("examples")));
 }

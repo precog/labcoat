@@ -3,7 +3,7 @@
       "": {
          "Project-Id-Version": "Labcoat2",
          "POT-Creation-Date": "2013-03-26 18:38+0100",
-         "PO-Revision-Date": "2013-03-26 18:50-0700",
+         "PO-Revision-Date": "2013-03-27 08:41-0700",
          "Last-Translator": "Franco Ponticelli <franco@precog.com>",
          "Language-Team": "",
          "MIME-Version": "1.0",
@@ -39,7 +39,7 @@
       ],
       "tasks": [
          null,
-         "operazioni"
+         "compiti"
       ],
       "tutorial": [
          null,

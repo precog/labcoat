@@ -19,5 +19,5 @@ class NotesModule extends Module {
     }
 
     function onMessage(message: SupportHtmlPanelGroupMessage, locale : LocalizationMessage)
-        message.value.addItem(new HtmlPanelGroupItem(locale.translation.singular("my notes")));
+        message.value.addItem(new HtmlPanelGroupItem(locale.singular("my notes")));
 }

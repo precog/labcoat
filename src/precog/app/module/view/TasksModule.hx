@@ -20,5 +20,5 @@ class TasksModule extends Module {
     }
 
     function onMessage(message: ToolsHtmlPanelGroupMessage, locale : LocalizationMessage)
-        message.value.addItem(new HtmlPanelGroupItem(locale.translation.singular("tasks")));
+        message.value.addItem(new HtmlPanelGroupItem(locale.singular("tasks")));
 }

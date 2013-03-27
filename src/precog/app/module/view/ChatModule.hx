@@ -20,5 +20,5 @@ class ChatModule extends Module {
     }
 
     function onMessage(message: ToolsHtmlPanelGroupMessage, locale : LocalizationMessage)
-        message.value.addItem(new HtmlPanelGroupItem(locale.translation.singular("chat")));
+        message.value.addItem(new HtmlPanelGroupItem(locale.singular("chat")));
 }

@@ -19,5 +19,5 @@ class ReferenceModule extends Module {
     }
 
     function onMessage(message: SupportHtmlPanelGroupMessage, locale : LocalizationMessage)
-        message.value.addItem(new HtmlPanelGroupItem(locale.translation.singular("reference")));
+        message.value.addItem(new HtmlPanelGroupItem(locale.singular("reference")));
 }
