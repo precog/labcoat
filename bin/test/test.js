@@ -2162,9 +2162,12 @@ precog.util.FileSystem.prototype = {
 	,__class__: precog.util.FileSystem
 }
 precog.util.Node = function(name,parent) {
+	this.init();
 	this.set_name(name);
-	this.parent = parent;
-	if(null != parent) this.filesystem = parent.filesystem;
+	if(null != parent) {
+		this.filesystem = parent.filesystem;
+		parent.add(this);
+	}
 };
 precog.util.Node.__name__ = ["precog","util","Node"];
 precog.util.Node.prototype = {
@@ -2177,6 +2180,8 @@ precog.util.Node.prototype = {
 	,get_name: function() {
 		return this.name;
 	}
+	,init: function() {
+	}
 	,isRoot: null
 	,isDirectory: null
 	,isFile: null
@@ -2187,55 +2192,69 @@ precog.util.Node.prototype = {
 }
 precog.util.File = function(name,parent) {
 	precog.util.Node.call(this,name,parent);
-	this.isFile = true;
-	this.isDirectory = false;
-	this.isRoot = false;
 };
 precog.util.File.__name__ = ["precog","util","File"];
 precog.util.File.__super__ = precog.util.Node;
 precog.util.File.prototype = $extend(precog.util.Node.prototype,{
-	__class__: precog.util.File
+	toString: function() {
+		return null == this.parent?this.get_name():this.parent.toString() + this.get_name();
+	}
+	,init: function() {
+		this.isFile = true;
+		this.isDirectory = false;
+		this.isRoot = false;
+	}
+	,__class__: precog.util.File
 });
 precog.util.Directory = function(name,parent) {
 	precog.util.Node.call(this,name,parent);
 	this.children = [];
 	this.length = this.directoriesLength = this.filesLength = 0;
-	this.isFile = false;
-	this.isDirectory = true;
-	this.isRoot = false;
 };
 precog.util.Directory.__name__ = ["precog","util","Directory"];
 precog.util.Directory.__super__ = precog.util.Node;
 precog.util.Directory.prototype = $extend(precog.util.Node.prototype,{
-	childNodes: function() {
+	toString: function() {
+		return (null == this.parent?this.get_name():this.parent.toString() + this.get_name()) + "/";
+	}
+	,nodes: function() {
 		return HxOverrides.iter(this.children);
 	}
 	,files: function() {
 		return HxOverrides.iter(this.children.filter(function(v) {
-			return js.Boot.__instanceof(v,precog.util.File);
+			return v.isFile;
 		}));
 	}
 	,directories: function() {
 		return HxOverrides.iter(this.children.filter(function(v) {
-			return js.Boot.__instanceof(v,precog.util.Directory);
+			return v.isDirectory;
 		}));
 	}
 	,remove: function(node) {
-		if(js.Boot.__instanceof(node,precog.util.Root)) throw "root node cannot be added or removed";
+		if(node.isRoot) throw "root node cannot be added or removed";
+		haxe.Log.trace("remove " + Std.string(node),{ fileName : "FileSystem.hx", lineNumber : 95, className : "precog.util.Directory", methodName : "remove"});
 		if(HxOverrides.remove(this.children,node)) {
 			this.length--;
 			if(node.isFile) this.filesLength--;
+			haxe.Log.trace(this.directoriesLength,{ fileName : "FileSystem.hx", lineNumber : 100, className : "precog.util.Directory", methodName : "remove"});
 			if(node.isDirectory) this.directoriesLength--;
+			haxe.Log.trace(this.directoriesLength,{ fileName : "FileSystem.hx", lineNumber : 103, className : "precog.util.Directory", methodName : "remove"});
 			return true;
 		} else return false;
 	}
 	,add: function(node) {
-		if(js.Boot.__instanceof(node,precog.util.Root)) throw "root node cannot be added or removed";
+		if(node.isRoot) throw "root node cannot be added or removed";
 		if(null != node.parent) node.parent.remove(node);
 		this.children.push(node);
+		node.parent = this;
 		this.length++;
 		if(node.isFile) this.filesLength++;
 		if(node.isDirectory) this.directoriesLength++;
+	}
+	,init: function() {
+		this.isFile = false;
+		this.isDirectory = true;
+		this.isRoot = false;
 	}
 	,filesLength: null
 	,directoriesLength: null
@@ -2245,13 +2264,20 @@ precog.util.Directory.prototype = $extend(precog.util.Node.prototype,{
 });
 precog.util.Root = function(filesystem) {
 	precog.util.Directory.call(this,"",null);
-	this.isRoot = true;
 	this.filesystem = filesystem;
 };
 precog.util.Root.__name__ = ["precog","util","Root"];
 precog.util.Root.__super__ = precog.util.Directory;
 precog.util.Root.prototype = $extend(precog.util.Directory.prototype,{
-	__class__: precog.util.Root
+	toString: function() {
+		return "/";
+	}
+	,init: function() {
+		this.isFile = false;
+		this.isDirectory = true;
+		this.isRoot = true;
+	}
+	,__class__: precog.util.Root
 });
 precog.util.TestFileSystem = function() {
 };
@@ -2269,6 +2295,10 @@ precog.util.TestFileSystem.prototype = {
 	}
 	,testFindByPath: function() {
 	}
+	,testMoveNodeToAnotherSameFilesystem: function() {
+	}
+	,testMoveNodeInTheSameFilesystem: function() {
+	}
 	,testCount: function() {
 		utest.Assert.equals(0,this.fs.root.length,null,{ fileName : "TestFileSystem.hx", lineNumber : 43, className : "precog.util.TestFileSystem", methodName : "testCount"});
 		utest.Assert.equals(0,this.fs.root.directoriesLength,null,{ fileName : "TestFileSystem.hx", lineNumber : 44, className : "precog.util.TestFileSystem", methodName : "testCount"});
@@ -2281,24 +2311,6 @@ precog.util.TestFileSystem.prototype = {
 		utest.Assert.equals(2,this.fs.root.length,null,{ fileName : "TestFileSystem.hx", lineNumber : 53, className : "precog.util.TestFileSystem", methodName : "testCount"});
 		utest.Assert.equals(1,this.fs.root.directoriesLength,null,{ fileName : "TestFileSystem.hx", lineNumber : 54, className : "precog.util.TestFileSystem", methodName : "testCount"});
 		utest.Assert.equals(1,this.fs.root.filesLength,null,{ fileName : "TestFileSystem.hx", lineNumber : 55, className : "precog.util.TestFileSystem", methodName : "testCount"});
-	}
-	,testPath: function() {
-		var dir = new precog.util.Directory("dir",this.fs.root), file = new precog.util.File("file.ext",dir);
-		utest.Assert.equals("/",this.fs.root.toString(),null,{ fileName : "TestFileSystem.hx", lineNumber : 36, className : "precog.util.TestFileSystem", methodName : "testPath"});
-		utest.Assert.equals("/dir",dir.toString(),null,{ fileName : "TestFileSystem.hx", lineNumber : 37, className : "precog.util.TestFileSystem", methodName : "testPath"});
-		utest.Assert.equals("/dir/file.ext",file.toString(),null,{ fileName : "TestFileSystem.hx", lineNumber : 38, className : "precog.util.TestFileSystem", methodName : "testPath"});
-	}
-	,testAddRemoveDirectory: function() {
-		var dir = new precog.util.Directory("sample",this.fs.root);
-		utest.Assert.equals(dir,this.fs.root.directories().next(),null,{ fileName : "TestFileSystem.hx", lineNumber : 27, className : "precog.util.TestFileSystem", methodName : "testAddRemoveDirectory"});
-		this.fs.root.remove(dir);
-		utest.Assert.isFalse(this.fs.root.directories().hasNext(),null,{ fileName : "TestFileSystem.hx", lineNumber : 29, className : "precog.util.TestFileSystem", methodName : "testAddRemoveDirectory"});
-	}
-	,testAddRemoveFile: function() {
-		var file = new precog.util.File("sample",this.fs.root);
-		utest.Assert.equals(file,this.fs.root.files().next(),null,{ fileName : "TestFileSystem.hx", lineNumber : 19, className : "precog.util.TestFileSystem", methodName : "testAddRemoveFile"});
-		this.fs.root.remove(file);
-		utest.Assert.isFalse(this.fs.root.files().hasNext(),null,{ fileName : "TestFileSystem.hx", lineNumber : 21, className : "precog.util.TestFileSystem", methodName : "testAddRemoveFile"});
 	}
 	,setup: function() {
 		this.fs = new precog.util.FileSystem();

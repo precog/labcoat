@@ -12,7 +12,7 @@ class TestFileSystem
 	{
 		fs = new FileSystem();
 	}
-
+/*
 	public function testAddRemoveFile()
 	{
 		var file = new File("sample", fs.root);
@@ -34,10 +34,10 @@ class TestFileSystem
 		var dir = new Directory("dir", fs.root),
 			file = new File("file.ext", dir);
 		Assert.equals("/", fs.root.toString());
-		Assert.equals("/dir", dir.toString());
+		Assert.equals("/dir/", dir.toString());
 		Assert.equals("/dir/file.ext", file.toString());
 	}
-
+*/
 	public function testCount()
 	{
 		Assert.equals(0, fs.root.length);
@@ -53,6 +53,16 @@ class TestFileSystem
 		Assert.equals(2, fs.root.length);
 		Assert.equals(1, fs.root.directoriesLength);
 		Assert.equals(1, fs.root.filesLength);
+	}
+
+	public function testMoveNodeInTheSameFilesystem()
+	{
+		
+	}
+
+	public function testMoveNodeToAnotherSameFilesystem()
+	{
+		
 	}
 
 	public function testFindByPath()
