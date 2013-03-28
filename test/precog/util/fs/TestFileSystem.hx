@@ -1,0 +1,259 @@
+package precog.util.fs;
+
+import utest.Assert;
+import precog.util.fs.FileSystem;
+
+class TestFileSystem 
+{
+	public function new() { }
+
+	var fs : FileSystem;
+	public function setup()
+	{
+		fs = new FileSystem();
+	}
+
+	public function testAddRemoveFile()
+	{
+		var file = new File("sample", fs.root);
+		Assert.equals(file, fs.root.files.list()[0]);
+		fs.root.removeNode(file);
+		Assert.equals(0, fs.root.files.length);
+	}
+
+	public function testAddRemoveDirectory()
+	{
+		var dir = new Directory("sample", fs.root);
+		Assert.equals(dir, fs.root.directories.list()[0]);
+		fs.root.removeNode(dir);
+		Assert.equals(0, fs.root.directories.length);
+	}
+
+	public function testPath()
+	{
+		var dir = new Directory("dir", fs.root),
+			file = new File("file.ext", dir);
+		Assert.equals("/", fs.root.toString());
+		Assert.equals("/dir", dir.toString());
+		Assert.equals("/dir/file.ext", file.toString());
+	}
+
+	public function testCount()
+	{
+		Assert.equals(0, fs.root.length);
+		Assert.equals(0, fs.root.directories.length);
+		Assert.equals(0, fs.root.files.length);
+		// count directories
+		new Directory("dir", fs.root);
+		Assert.equals(1, fs.root.length);
+		Assert.equals(1, fs.root.directories.length);
+		Assert.equals(0, fs.root.files.length);
+		// count files
+		new File("file.ext", fs.root);
+		Assert.equals(2, fs.root.length);
+		Assert.equals(1, fs.root.directories.length);
+		Assert.equals(1, fs.root.files.length);
+	}
+
+	public function testPathWithSlash()
+	{
+		var dir = new Directory("di/r", fs.root),
+			file = new File("fil/e.ext", dir);
+		Assert.equals("/", fs.root.toString());
+		Assert.equals("/di\\/r", dir.toString());
+		Assert.equals("/di\\/r/fil\\/e.ext", file.toString());
+
+	}
+
+	public function testMoveNodeInTheSameFilesystem()
+	{
+		var dir1 = new Directory("dir1", fs.root),
+			dir2 = new Directory("dir2", fs.root),
+			file = new File("file.ext", dir1);
+		Assert.equals("/dir1/file.ext", file.toString());
+		dir2.addNode(file);
+		Assert.equals("/dir2/file.ext", file.toString());
+		Assert.equals(0, dir1.files.length);
+		Assert.equals(1, dir2.files.length);
+	}
+
+	public function testMoveNodeToAnotherSameFilesystem()
+	{
+		var file = new File("file.ext", fs.root);
+		Assert.equals(1, fs.root.files.length);
+		Assert.equals(fs, file.filesystem);
+		Assert.equals(fs.root, file.parent);
+
+		var fs2 = new FileSystem();
+		fs2.root.addNode(file);
+		Assert.equals(fs2, file.filesystem);
+		Assert.equals(fs2.root, file.parent);
+		Assert.equals(0, fs.root.files.length);
+		Assert.equals(1, fs2.root.files.length);
+	}
+
+	public function testRename()
+	{
+		var file = new File("file.ext", fs.root);
+		Assert.equals("file.ext", file.name);
+		file.name = "other.ext";
+		Assert.equals("other.ext", file.name);
+		Assert.equals("/other.ext", file.toString());
+	}
+
+	public function testExtension()
+	{
+		var file = new File("fil.e.ext", fs.root);
+		Assert.equals("fil.e", file.baseName);
+		Assert.equals("ext", file.extension);
+		file.extension = "png";
+		Assert.equals("fil.e.png", file.name);
+		file.baseName = "file";
+		Assert.equals("file.png", file.name);
+	}
+
+	public function testMetadata()
+	{
+		var file = new File("file.ext", fs.root);
+		Assert.isFalse(file.meta.exists("key"));
+		file.meta.set("key", 1);
+		Assert.isTrue(file.meta.exists("key"));
+		Assert.equals(1, file.meta.get("key"));
+		Assert.isTrue(file.meta.keys().hasNext());
+		Assert.isTrue(file.meta.iterator().hasNext());
+		file.meta.remove("key");
+		Assert.isFalse(file.meta.keys().hasNext());
+		Assert.isFalse(file.meta.iterator().hasNext());
+		var m = new Map<String, Dynamic>();
+		m.set("key", 1);
+		file.meta.setMap(m);
+		Assert.equals(1, file.meta.get("key"));
+		file.meta.setObject({key2:2});
+		Assert.equals(2, file.meta.get("key2"));
+	}
+
+	public function testNameValidation()
+	{
+		Assert.raises(function()
+			new File(null, fs.root)
+		);
+		Assert.raises(function()
+			new File("", fs.root)
+		);
+	}
+
+	function createTree()
+	{
+		var a = new Directory("a", fs.root),
+			b = new Directory("b", fs.root),
+			c = new Directory("c", a);
+		return {
+			a : a,
+			b : b,
+			c : c,
+			AAA : new File("AAA.ext", fs.root),
+			ABA : new File("ABA.ext", fs.root),
+			ABC : new File("ABC.ext", b),
+			G : new File("G.png", c)
+		};
+	}
+
+	public function testFindFromDirectory()
+	{
+		var tree = createTree();
+
+		Assert.equals(2 , fs.root.find(~/\.ext$/).length);
+		Assert.equals(4 , fs.root.find(~/.+/).length);
+		Assert.equals(3 , fs.root.find(~/a/i).length);
+
+		Assert.equals(2 , fs.root.files.find(~/.+/).length);
+		Assert.equals(1 , fs.root.files.find(~/b/).length);
+
+		Assert.equals(2 , fs.root.directories.find(~/.+/).length);
+		Assert.equals(1 , fs.root.directories.find(~/a/i).length);
+
+		// traverse
+		Assert.equals(2, tree.c.traverse(["..", "..", ".", "b", "|bc|i"]).length);
+		Assert.equals(2, tree.c.traverse("../.././b/|bc|i").length);
+	}
+
+	public function testPick()
+	{
+		var tree = createTree();
+		Assert.equals(tree.ABC, tree.c.pick("../.././b/|bc|i"));
+		Assert.equals(tree.c, tree.c.pick("../.././a/|^C$|i"));
+	}
+
+	public function testEnsureDirectory()
+	{
+		var a = new Directory("a", fs.root);
+		var b = fs.root.ensureDirectory("a/b");
+		Assert.is(b, Directory);
+		Assert.equals(a, b.parent);
+		var c = b.ensureDirectory("/a/c");
+		Assert.equals(a, c.parent);
+		var d = b.ensureDirectory("../d");
+		Assert.equals(a, d.parent);
+	}
+
+	public function testEnsureDirectoryForFile()
+	{
+		var a = new Directory("a", fs.root);
+		var b = fs.root.createFileAt("a/b");
+		Assert.is(b, File);
+		Assert.equals(a, b.parent);
+		Assert.raises(function()
+			a.createFileAt("/b/c")
+		);
+
+		var c = a.createFileAt("/b/c");
+		Assert.notEquals(fs.root, c.parent);
+		
+	}
+
+	public function testRemove()
+	{
+		var tree = createTree();
+		Assert.raises(function()
+			tree.a.remove()
+		);
+		Assert.equals(1, fs.root.find("a").length);
+		tree.a.removeRecursive();
+		Assert.equals(0, fs.root.find("a").length);
+	}
+
+	public function testRemoveAt()
+	{
+		var tree = createTree();
+		Assert.raises(function()
+			fs.root.removeAt("/a")
+		);
+		Assert.equals(1, fs.root.find("a").length);
+		fs.root.removeAt("/a", true);
+		Assert.equals(0, fs.root.find("a").length);
+	}
+
+	public function testDuplicatedFileAndDirectory()
+	{
+		new Directory("a", fs.root);
+		Assert.raises(function()
+			new Directory("a", fs.root)
+		);
+	}
+/*
+	public function testObserveName()
+	{
+
+	}
+
+	public function testObserveAddRemove()
+	{
+
+	}
+
+	public function testObserveMetadata()
+	{
+
+	}
+*/
+}
