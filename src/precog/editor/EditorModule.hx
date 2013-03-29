@@ -6,12 +6,12 @@ import precog.communicator.Module;
 import precog.editor.codemirror.Externs;
 import precog.editor.codemirror.QuirrelMode;
 import jQuery.JQuery;
-import js.Browser.document;
-import js.html.Element;
-import js.html.Node;
 
 class EditorModule extends Module {
-    public static var element = new JQuery('<div class="editor"></div>');
+    public static var element: JQuery = new JQuery('<div class="editor"></div>');
+
+    static var current: Notebook;
+    static var notebooks: Array<Notebook> = [];
 
     override public function connect(communicator: Communicator) {
         communicator.demand(MainEditorHtmlPanelMessage).then(init);
@@ -26,8 +26,7 @@ class EditorModule extends Module {
 
         QuirrelMode.init();
 
-        // Place first at end of document body
-        appendRegion(new Region(QuirrelRegionMode));
+        insertNotebook();
 
         // Global keyhandlers
         Reflect.setField(CodeMirror.keyMap.macDefault, "Shift-Enter", evaluateRegion);
@@ -36,8 +35,26 @@ class EditorModule extends Module {
         Reflect.setField(CodeMirror.keyMap.pcDefault, "Ctrl-Enter", insertRegion);
     }
 
+    public static function insertNotebook() {
+        var notebook = new Notebook();
+        notebooks.push(notebook);
+        changeNotebook(notebook);
+
+        ToolbarModule.updateNotebooks(notebooks);
+    }
+
+    public static function changeNotebook(notebook: Notebook) {
+        if(current != null) {
+            current.element.detach();
+        }
+
+        current = notebook;
+        element.append(current.element);
+        current.show();
+    }
+
     public static function deleteRegion(region: Region) {
-        region.element.remove();
+        current.deleteRegion(region);
     }
 
     public static function changeRegionMode(oldRegion: Region, mode: RegionMode) {
@@ -50,17 +67,12 @@ class EditorModule extends Module {
     }
 
     public static function appendRegion(region: Region, ?target: JQuery) {
-        if(target != null) {
-            target.after(region.element);
-        } else {
-            element.append(region.element);
-        }
-        region.editor.focus();
+        current.appendRegion(region, target);
     }
 
     static function insertRegion(editor: CodeMirror) {
         var region: Region = editor.getOption('region');
-        appendRegion(new Region(region.mode), region.element);
+        current.appendRegion(new Region(region.mode), region.element);
     }
 
     static function evaluateRegion(editor: CodeMirror) {
