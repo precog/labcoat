@@ -249,20 +249,39 @@ class TestFileSystem
 		});
 		file.name = "b";
 	}
-/*
-	public function testObserveName()
-	{
-
-	}
 
 	public function testObserveAddRemove()
 	{
+		var added = false,
+			removed = false;
+		fs.on(function(event : NodeAddEvent) {
+			added = true;
+			Assert.is(event.node, File);
+		});
 
+		fs.on(function(event : NodeRemoveEvent) {
+			removed = true;
+			Assert.equals(fs.root, event.parent);
+			Assert.is(event.node, File);
+		});
+
+		var file = new File("a", fs.root);
+		Assert.isTrue(added);
+		Assert.isFalse(removed);
+
+		file.remove();
+		Assert.isTrue(removed);
 	}
 
 	public function testObserveMetadata()
 	{
-
+		var file = new File("a", fs.root);
+		fs.on(function(event : MetaChangeEvent) {
+			Assert.equals(file, event.node);
+			Assert.isNull(event.oldvalue);
+			Assert.equals(1, event.newvalue);
+			Assert.equals("k", event.key);
+		});
+		file.meta.set("k", 1);
 	}
-*/
 }

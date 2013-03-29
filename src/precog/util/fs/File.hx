@@ -8,7 +8,7 @@ class File extends Node
 	public function new(name : String, parent : Directory)
 	{
 		super(name, parent);
-		meta = new Meta();
+		meta = new Meta(this);
 	}
 
 	function get_extension()

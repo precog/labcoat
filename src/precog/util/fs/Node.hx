@@ -43,7 +43,11 @@ class Node
 	public function remove()
 	{
 		if(null != parent)
+		{
+			var p = parent;
 			parent.removeNode(this);
+			trigger(new NodeRemoveEvent(this, p));
+		}
 	}
 
 	macro function trigger<T>(ethis : haxe.macro.Expr, values : Array<haxe.macro.Expr>)

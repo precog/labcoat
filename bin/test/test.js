@@ -2256,7 +2256,11 @@ precog.util.fs.Node = function(name,parent) {
 precog.util.fs.Node.__name__ = ["precog","util","fs","Node"];
 precog.util.fs.Node.prototype = {
 	remove: function() {
-		if(null != this.parent) this.parent.removeNode(this);
+		if(null != this.parent) {
+			var p = this.parent;
+			this.parent.removeNode(this);
+			if(null != this.filesystem) this.filesystem.dispatcher.binder.dispatch("precog.util.fs.NodeRemoveEvent Dynamic",[new precog.util.fs.NodeRemoveEvent(this,p)]); else null;
+		}
 	}
 	,toString: function() {
 		return this.get_name();
@@ -2382,6 +2386,7 @@ precog.util.fs.Directory.prototype = $extend(precog.util.fs.Node.prototype,{
 		node.filesystem = this.filesystem;
 		this.length++;
 		if(node.isFile) this.files.add(node); else if(node.isDirectory) this.directories.add(node);
+		if(null != this.filesystem) this.filesystem.dispatcher.binder.dispatch("precog.util.fs.NodeAddEvent Dynamic",[new precog.util.fs.NodeAddEvent(node)]); else null;
 	}
 	,removeRecursive: function() {
 		var $it0 = this.files.iterator();
@@ -2421,7 +2426,7 @@ precog.util.fs.ESegment.Current.toString = $estr;
 precog.util.fs.ESegment.Current.__enum__ = precog.util.fs.ESegment;
 precog.util.fs.File = function(name,parent) {
 	precog.util.fs.Node.call(this,name,parent);
-	this.meta = new precog.util.fs.Meta();
+	this.meta = new precog.util.fs.Meta(this);
 };
 precog.util.fs.File.__name__ = ["precog","util","fs","File"];
 precog.util.fs.File.__super__ = precog.util.fs.Node;
@@ -2509,7 +2514,8 @@ precog.util.fs.Files.prototype = $extend(precog.util.fs.Nodes.prototype,{
 	}
 	,__class__: precog.util.fs.Files
 });
-precog.util.fs.Meta = function() {
+precog.util.fs.Meta = function(node) {
+	this.node = node;
 	this.map = new haxe.ds.StringMap();
 };
 precog.util.fs.Meta.__name__ = ["precog","util","fs","Meta"];
@@ -2541,9 +2547,11 @@ precog.util.fs.Meta.prototype = {
 		return this.map.exists(key);
 	}
 	,remove: function(key) {
+		if(null != this.node.filesystem) this.node.filesystem.dispatcher.binder.dispatch("precog.util.fs.MetaChangeEvent Dynamic",[new precog.util.fs.MetaChangeEvent(this.node,key,this.map.get(key),null)]); else null;
 		return this.map.remove(key);
 	}
 	,set: function(key,value) {
+		if(null != this.node.filesystem) this.node.filesystem.dispatcher.binder.dispatch("precog.util.fs.MetaChangeEvent Dynamic",[new precog.util.fs.MetaChangeEvent(this.node,key,this.map.get(key),value)]); else null;
 		var value1 = value;
 		this.map.set(key,value1);
 		return this;
@@ -2551,8 +2559,31 @@ precog.util.fs.Meta.prototype = {
 	,get: function(key) {
 		return this.map.get(key);
 	}
+	,node: null
 	,map: null
 	,__class__: precog.util.fs.Meta
+}
+precog.util.fs.MetaChangeEvent = function(node,key,oldvalue,newvalue) {
+	this.node = node;
+	this.key = key;
+	this.oldvalue = oldvalue;
+	this.newvalue = newvalue;
+};
+precog.util.fs.MetaChangeEvent.__name__ = ["precog","util","fs","MetaChangeEvent"];
+precog.util.fs.MetaChangeEvent.prototype = {
+	node: null
+	,newvalue: null
+	,oldvalue: null
+	,key: null
+	,__class__: precog.util.fs.MetaChangeEvent
+}
+precog.util.fs.NodeAddEvent = function(node) {
+	this.node = node;
+};
+precog.util.fs.NodeAddEvent.__name__ = ["precog","util","fs","NodeAddEvent"];
+precog.util.fs.NodeAddEvent.prototype = {
+	node: null
+	,__class__: precog.util.fs.NodeAddEvent
 }
 precog.util.fs.NodeNameEvent = function(old,node) {
 	this.oldname = old;
@@ -2565,6 +2596,16 @@ precog.util.fs.NodeNameEvent.prototype = {
 	,newname: null
 	,oldname: null
 	,__class__: precog.util.fs.NodeNameEvent
+}
+precog.util.fs.NodeRemoveEvent = function(node,parent) {
+	this.node = node;
+	this.parent = parent;
+};
+precog.util.fs.NodeRemoveEvent.__name__ = ["precog","util","fs","NodeRemoveEvent"];
+precog.util.fs.NodeRemoveEvent.prototype = {
+	node: null
+	,parent: null
+	,__class__: precog.util.fs.NodeRemoveEvent
 }
 precog.util.fs._Path = {}
 precog.util.fs._Path.PathImpl = function() { }
@@ -2663,7 +2704,38 @@ precog.util.fs.TestFileSystem = function() {
 };
 precog.util.fs.TestFileSystem.__name__ = ["precog","util","fs","TestFileSystem"];
 precog.util.fs.TestFileSystem.prototype = {
-	testObserveName: function() {
+	testObserveMetadata: function() {
+		var file = new precog.util.fs.File("a",this.fs.root);
+		this.fs.dispatcher.binder.bind("precog.util.fs.MetaChangeEvent",{ fun : function(event) {
+			utest.Assert.equals(file,event.node,null,{ fileName : "TestFileSystem.hx", lineNumber : 280, className : "precog.util.fs.TestFileSystem", methodName : "testObserveMetadata"});
+			utest.Assert.isNull(event.oldvalue,null,{ fileName : "TestFileSystem.hx", lineNumber : 281, className : "precog.util.fs.TestFileSystem", methodName : "testObserveMetadata"});
+			utest.Assert.equals(1,event.newvalue,null,{ fileName : "TestFileSystem.hx", lineNumber : 282, className : "precog.util.fs.TestFileSystem", methodName : "testObserveMetadata"});
+			utest.Assert.equals("k",event.key,null,{ fileName : "TestFileSystem.hx", lineNumber : 283, className : "precog.util.fs.TestFileSystem", methodName : "testObserveMetadata"});
+		}, arity : 1});
+		this.fs;
+		file.meta.set("k",1);
+	}
+	,testObserveAddRemove: function() {
+		var _g = this;
+		var added = false, removed = false;
+		this.fs.dispatcher.binder.bind("precog.util.fs.NodeAddEvent",{ fun : function(event) {
+			added = true;
+			utest.Assert["is"](event.node,precog.util.fs.File,null,{ fileName : "TestFileSystem.hx", lineNumber : 259, className : "precog.util.fs.TestFileSystem", methodName : "testObserveAddRemove"});
+		}, arity : 1});
+		this.fs;
+		this.fs.dispatcher.binder.bind("precog.util.fs.NodeRemoveEvent",{ fun : function(event) {
+			removed = true;
+			utest.Assert.equals(_g.fs.root,event.parent,null,{ fileName : "TestFileSystem.hx", lineNumber : 264, className : "precog.util.fs.TestFileSystem", methodName : "testObserveAddRemove"});
+			utest.Assert["is"](event.node,precog.util.fs.File,null,{ fileName : "TestFileSystem.hx", lineNumber : 265, className : "precog.util.fs.TestFileSystem", methodName : "testObserveAddRemove"});
+		}, arity : 1});
+		this.fs;
+		var file = new precog.util.fs.File("a",this.fs.root);
+		utest.Assert.isTrue(added,null,{ fileName : "TestFileSystem.hx", lineNumber : 269, className : "precog.util.fs.TestFileSystem", methodName : "testObserveAddRemove"});
+		utest.Assert.isFalse(removed,null,{ fileName : "TestFileSystem.hx", lineNumber : 270, className : "precog.util.fs.TestFileSystem", methodName : "testObserveAddRemove"});
+		file.remove();
+		utest.Assert.isTrue(removed,null,{ fileName : "TestFileSystem.hx", lineNumber : 273, className : "precog.util.fs.TestFileSystem", methodName : "testObserveAddRemove"});
+	}
+	,testObserveName: function() {
 		var file = new precog.util.fs.File("a",this.fs.root);
 		this.fs.dispatcher.binder.bind("precog.util.fs.NodeNameEvent",{ fun : function(event) {
 			utest.Assert.equals("a",event.oldname,null,{ fileName : "TestFileSystem.hx", lineNumber : 246, className : "precog.util.fs.TestFileSystem", methodName : "testObserveName"});

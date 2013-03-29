@@ -55,6 +55,7 @@ class Directory extends Node
 			files.add(cast node);
 		else if(node.isDirectory)
 			directories.add(cast node);
+		trigger(new NodeAddEvent(node));
 	}
 
 	public function removeNode(node : Node)
@@ -151,6 +152,11 @@ class Directory extends Node
 		while(segments.length > 0)
 			dir = new Directory(segments.shift().getLiteral(), dir);
 		return dir;
+	}
+
+	macro override function trigger<T>(ethis : haxe.macro.Expr, values : Array<haxe.macro.Expr>)
+	{
+		return macro { if(null != $ethis.filesystem) $ethis.filesystem.dispatcher.trigger($a{values}); };
 	}
 
 	override public function toString()
