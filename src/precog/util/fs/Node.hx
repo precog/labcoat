@@ -26,7 +26,12 @@ class Node
 	{
 		if(value == "" || value == null)
 			throw "invalid value (empty or null)";
-		return this.name = value;
+		if(value == this.name)
+			return value;
+		var old = this.name;
+		this.name = value;
+		trigger(new NodeNameEvent(old, this));
+		return value;
 	}
 
 	function get_isSystem()
@@ -39,5 +44,10 @@ class Node
 	{
 		if(null != parent)
 			parent.removeNode(this);
+	}
+
+	macro function trigger<T>(ethis : haxe.macro.Expr, values : Array<haxe.macro.Expr>)
+	{
+		return macro { if(null != $ethis.filesystem) $ethis.filesystem.dispatcher.trigger($a{values}); };
 	}
 }

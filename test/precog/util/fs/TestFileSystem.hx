@@ -239,6 +239,16 @@ class TestFileSystem
 			new Directory("a", fs.root)
 		);
 	}
+	public function testObserveName()
+	{
+		var file = new File("a", fs.root);
+		fs.on(function(event : NodeNameEvent) {
+			Assert.equals("a", event.oldname);
+			Assert.equals("b", event.newname);
+			Assert.equals(file, event.node);
+		});
+		file.name = "b";
+	}
 /*
 	public function testObserveName()
 	{

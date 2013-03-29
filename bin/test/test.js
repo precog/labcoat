@@ -2269,7 +2269,11 @@ precog.util.fs.Node.prototype = {
 	}
 	,set_name: function(value) {
 		if(value == "" || value == null) throw "invalid value (empty or null)";
-		return this.name = value;
+		if(value == this.get_name()) return value;
+		var old = this.get_name();
+		this.name = value;
+		if(null != this.filesystem) this.filesystem.dispatcher.binder.dispatch("precog.util.fs.NodeNameEvent Dynamic",[new precog.util.fs.NodeNameEvent(old,this)]); else null;
+		return value;
 	}
 	,get_name: function() {
 		return this.name;
@@ -2451,10 +2455,15 @@ precog.util.fs.File.prototype = $extend(precog.util.fs.Node.prototype,{
 });
 precog.util.fs.FileSystem = function() {
 	this.root = new precog.util.fs.Root(this);
+	this.dispatcher = new thx.react.Dispatcher();
 };
 precog.util.fs.FileSystem.__name__ = ["precog","util","fs","FileSystem"];
 precog.util.fs.FileSystem.prototype = {
-	root: null
+	clear: function(type) {
+		if(null != type) this.dispatcher.clear(type);
+	}
+	,dispatcher: null
+	,root: null
 	,__class__: precog.util.fs.FileSystem
 }
 precog.util.fs.Files = function(directory) {
@@ -2544,6 +2553,18 @@ precog.util.fs.Meta.prototype = {
 	}
 	,map: null
 	,__class__: precog.util.fs.Meta
+}
+precog.util.fs.NodeNameEvent = function(old,node) {
+	this.oldname = old;
+	this.newname = node.get_name();
+	this.node = node;
+};
+precog.util.fs.NodeNameEvent.__name__ = ["precog","util","fs","NodeNameEvent"];
+precog.util.fs.NodeNameEvent.prototype = {
+	node: null
+	,newname: null
+	,oldname: null
+	,__class__: precog.util.fs.NodeNameEvent
 }
 precog.util.fs._Path = {}
 precog.util.fs._Path.PathImpl = function() { }
@@ -2642,7 +2663,17 @@ precog.util.fs.TestFileSystem = function() {
 };
 precog.util.fs.TestFileSystem.__name__ = ["precog","util","fs","TestFileSystem"];
 precog.util.fs.TestFileSystem.prototype = {
-	testDuplicatedFileAndDirectory: function() {
+	testObserveName: function() {
+		var file = new precog.util.fs.File("a",this.fs.root);
+		this.fs.dispatcher.binder.bind("precog.util.fs.NodeNameEvent",{ fun : function(event) {
+			utest.Assert.equals("a",event.oldname,null,{ fileName : "TestFileSystem.hx", lineNumber : 246, className : "precog.util.fs.TestFileSystem", methodName : "testObserveName"});
+			utest.Assert.equals("b",event.newname,null,{ fileName : "TestFileSystem.hx", lineNumber : 247, className : "precog.util.fs.TestFileSystem", methodName : "testObserveName"});
+			utest.Assert.equals(file,event.node,null,{ fileName : "TestFileSystem.hx", lineNumber : 248, className : "precog.util.fs.TestFileSystem", methodName : "testObserveName"});
+		}, arity : 1});
+		this.fs;
+		file.set_name("b");
+	}
+	,testDuplicatedFileAndDirectory: function() {
 		var _g = this;
 		new precog.util.fs.Directory("a",this.fs.root);
 		utest.Assert.raises(function() {
