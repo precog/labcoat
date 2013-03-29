@@ -699,9 +699,6 @@ js.Boot.__instanceof = function(o,cl) {
 		return o.__enum__ == cl;
 	}
 }
-js.Boot.__cast = function(o,t) {
-	if(js.Boot.__instanceof(o,t)) return o; else throw "Cannot cast " + Std.string(o) + " to " + Std.string(t);
-}
 js.Browser = function() { }
 js.Browser.__name__ = ["js","Browser"];
 var precog = {}
@@ -2303,30 +2300,33 @@ precog.util.fs.Directory.prototype = $extend(precog.util.fs.Node.prototype,{
 	,ensureDirectory: function(path) {
 		var dir = path.absolute?this.filesystem.root:this, segments = path.path;
 		while(segments.length > 0) {
-			var segment = segments.shift(), next = dir.directories.pick(segment);
+			var segment = segments[0], next = dir.directories.pick(segment);
 			if(null == next) break;
+			segments.shift();
 			dir = next;
 		}
-		while(segments.length > 0) {
-			var name = precog.util.fs._Segment.SegmentImpl.getLiteral(segments.shift());
-			dir = new precog.util.fs.Directory(name,dir);
-		}
+		while(segments.length > 0) dir = new precog.util.fs.Directory(precog.util.fs._Segment.SegmentImpl.getLiteral(segments.shift()),dir);
 		return dir;
 	}
-	,createFileAt: function(path,ensureDirectory) {
-		if(ensureDirectory == null) ensureDirectory = false;
+	,createFileAt: function(path,autoCreateDirectories) {
+		if(autoCreateDirectories == null) autoCreateDirectories = false;
 		var name = precog.util.fs._Segment.SegmentImpl.getLiteral(path.path.pop());
-		var dir = ensureDirectory?this.ensureDirectory(path):js.Boot.__cast(this.traverse(path) , precog.util.fs.Directory);
+		var dir = null;
+		if(autoCreateDirectories) dir = this.ensureDirectory(path); else dir = this.traverse(path)[0];
+		if(dir == null) throw "destination directory doesn't exist";
 		return new precog.util.fs.File(name,dir);
 	}
 	,removeAt: function(path,recursive) {
 		if(recursive == null) recursive = false;
-		var list = this.traverse(path);
+		var list = this.traverse(path), dir;
 		var _g = 0;
 		while(_g < list.length) {
 			var item = list[_g];
 			++_g;
-			if(recursive && item.isDirectory) (js.Boot.__cast(item , precog.util.fs.Directory)).removeRecursive(); else item.remove();
+			if(recursive && item.isDirectory) {
+				dir = item;
+				dir.removeRecursive();
+			} else item.remove();
 		}
 	}
 	,traverseImpl: function(dirs,segments) {
@@ -2352,8 +2352,8 @@ precog.util.fs.Directory.prototype = $extend(precog.util.fs.Node.prototype,{
 		}
 		return results;
 	}
-	,pick: function(segment) {
-		return this.find(segment)[0];
+	,pick: function(path) {
+		return this.traverse(path)[0];
 	}
 	,find: function(segment) {
 		return this.files.find(segment).concat(this.directories.find(segment));
@@ -2390,6 +2390,7 @@ precog.util.fs.Directory.prototype = $extend(precog.util.fs.Node.prototype,{
 			var directory = $it1.next();
 			directory.removeRecursive();
 		}
+		this.remove();
 	}
 	,remove: function() {
 		if(this.length > 0) throw "directory is not empty and cannot be removed";
@@ -2559,20 +2560,19 @@ precog.util.fs._Path.PathImpl.split = function(s) {
 	return parts;
 }
 precog.util.fs._Path.PathImpl.fromString = function(s) {
-	var fromRoot = HxOverrides.substr(s,0,1) == "/";
-	if(fromRoot) s = HxOverrides.substr(s,1,null);
+	var absolute = HxOverrides.substr(s,0,1) == "/";
+	if(absolute) s = HxOverrides.substr(s,1,null);
 	if(HxOverrides.substr(s,-1,null) == "/") s = HxOverrides.substr(s,0,s.length - 1);
 	var arr = precog.util.fs._Path.PathImpl.split(s).filter(function(v) {
 		return v != "";
 	});
-	if(fromRoot) arr.unshift("/");
-	haxe.Log.trace(arr,{ fileName : "Path.hx", lineNumber : 37, className : "precog.util.fs._Path.PathImpl", methodName : "fromString"});
+	if(absolute) arr.unshift("/");
 	return precog.util.fs._Path.PathImpl.fromArray(arr);
 }
 precog.util.fs._Path.PathImpl.fromArray = function(s) {
-	var fromRoot = s[0] == "/";
-	if(fromRoot) s.shift();
-	return precog.util.fs._Path.PathImpl._new(fromRoot,s.map(precog.util.fs._Segment.SegmentImpl.fromString));
+	var absolute = s[0] == "/";
+	if(absolute) s.shift();
+	return precog.util.fs._Path.PathImpl._new(absolute,s.map(precog.util.fs._Segment.SegmentImpl.fromString));
 }
 precog.util.fs._Path.PathImpl.absolute = function(this1) {
 	return this1.absolute;
@@ -2647,37 +2647,37 @@ precog.util.fs.TestFileSystem.prototype = {
 		new precog.util.fs.Directory("a",this.fs.root);
 		utest.Assert.raises(function() {
 			new precog.util.fs.Directory("a",_g.fs.root);
-		},null,null,null,{ fileName : "TestFileSystem.hx", lineNumber : 239, className : "precog.util.fs.TestFileSystem", methodName : "testDuplicatedFileAndDirectory"});
+		},null,null,null,{ fileName : "TestFileSystem.hx", lineNumber : 238, className : "precog.util.fs.TestFileSystem", methodName : "testDuplicatedFileAndDirectory"});
 	}
 	,testRemoveAt: function() {
 		var _g = this;
 		var tree = this.createTree();
 		utest.Assert.raises(function() {
 			_g.fs.root.removeAt(precog.util.fs._Path.PathImpl.fromString("/a"));
-		},null,null,null,{ fileName : "TestFileSystem.hx", lineNumber : 228, className : "precog.util.fs.TestFileSystem", methodName : "testRemoveAt"});
-		utest.Assert.equals(1,this.fs.root.find(precog.util.fs._Segment.SegmentImpl.fromString("a")).length,null,{ fileName : "TestFileSystem.hx", lineNumber : 231, className : "precog.util.fs.TestFileSystem", methodName : "testRemoveAt"});
+		},null,null,null,{ fileName : "TestFileSystem.hx", lineNumber : 227, className : "precog.util.fs.TestFileSystem", methodName : "testRemoveAt"});
+		utest.Assert.equals(1,this.fs.root.find(precog.util.fs._Segment.SegmentImpl.fromString("a")).length,null,{ fileName : "TestFileSystem.hx", lineNumber : 230, className : "precog.util.fs.TestFileSystem", methodName : "testRemoveAt"});
 		this.fs.root.removeAt(precog.util.fs._Path.PathImpl.fromString("/a"),true);
-		utest.Assert.equals(0,this.fs.root.find(precog.util.fs._Segment.SegmentImpl.fromString("a")).length,null,{ fileName : "TestFileSystem.hx", lineNumber : 233, className : "precog.util.fs.TestFileSystem", methodName : "testRemoveAt"});
+		utest.Assert.equals(0,this.fs.root.find(precog.util.fs._Segment.SegmentImpl.fromString("a")).length,null,{ fileName : "TestFileSystem.hx", lineNumber : 232, className : "precog.util.fs.TestFileSystem", methodName : "testRemoveAt"});
 	}
 	,testRemove: function() {
 		var tree = this.createTree();
 		utest.Assert.raises(function() {
 			tree.a.remove();
-		},null,null,null,{ fileName : "TestFileSystem.hx", lineNumber : 217, className : "precog.util.fs.TestFileSystem", methodName : "testRemove"});
-		utest.Assert.equals(1,this.fs.root.find(precog.util.fs._Segment.SegmentImpl.fromString("a")).length,null,{ fileName : "TestFileSystem.hx", lineNumber : 220, className : "precog.util.fs.TestFileSystem", methodName : "testRemove"});
+		},null,null,null,{ fileName : "TestFileSystem.hx", lineNumber : 216, className : "precog.util.fs.TestFileSystem", methodName : "testRemove"});
+		utest.Assert.equals(1,this.fs.root.find(precog.util.fs._Segment.SegmentImpl.fromString("a")).length,null,{ fileName : "TestFileSystem.hx", lineNumber : 219, className : "precog.util.fs.TestFileSystem", methodName : "testRemove"});
 		tree.a.removeRecursive();
-		utest.Assert.equals(0,this.fs.root.find(precog.util.fs._Segment.SegmentImpl.fromString("a")).length,null,{ fileName : "TestFileSystem.hx", lineNumber : 222, className : "precog.util.fs.TestFileSystem", methodName : "testRemove"});
+		utest.Assert.equals(0,this.fs.root.find(precog.util.fs._Segment.SegmentImpl.fromString("a")).length,null,{ fileName : "TestFileSystem.hx", lineNumber : 221, className : "precog.util.fs.TestFileSystem", methodName : "testRemove"});
 	}
-	,testEnsureDirectoryForFile: function() {
+	,testCreateFileAt: function() {
 		var a = new precog.util.fs.Directory("a",this.fs.root);
 		var b = this.fs.root.createFileAt(precog.util.fs._Path.PathImpl.fromString("a/b"));
-		utest.Assert["is"](b,precog.util.fs.File,null,{ fileName : "TestFileSystem.hx", lineNumber : 203, className : "precog.util.fs.TestFileSystem", methodName : "testEnsureDirectoryForFile"});
-		utest.Assert.equals(a,b.parent,null,{ fileName : "TestFileSystem.hx", lineNumber : 204, className : "precog.util.fs.TestFileSystem", methodName : "testEnsureDirectoryForFile"});
+		utest.Assert["is"](b,precog.util.fs.File,null,{ fileName : "TestFileSystem.hx", lineNumber : 203, className : "precog.util.fs.TestFileSystem", methodName : "testCreateFileAt"});
+		utest.Assert.equals(a,b.parent,null,{ fileName : "TestFileSystem.hx", lineNumber : 204, className : "precog.util.fs.TestFileSystem", methodName : "testCreateFileAt"});
 		utest.Assert.raises(function() {
 			a.createFileAt(precog.util.fs._Path.PathImpl.fromString("/b/c"));
-		},null,null,null,{ fileName : "TestFileSystem.hx", lineNumber : 205, className : "precog.util.fs.TestFileSystem", methodName : "testEnsureDirectoryForFile"});
-		var c = a.createFileAt(precog.util.fs._Path.PathImpl.fromString("/b/c"));
-		utest.Assert.notEquals(this.fs.root,c.parent,null,{ fileName : "TestFileSystem.hx", lineNumber : 210, className : "precog.util.fs.TestFileSystem", methodName : "testEnsureDirectoryForFile"});
+		},null,null,null,{ fileName : "TestFileSystem.hx", lineNumber : 205, className : "precog.util.fs.TestFileSystem", methodName : "testCreateFileAt"});
+		var c = a.createFileAt(precog.util.fs._Path.PathImpl.fromString("/b/c"),true);
+		utest.Assert.notEquals(this.fs.root,c.parent,null,{ fileName : "TestFileSystem.hx", lineNumber : 209, className : "precog.util.fs.TestFileSystem", methodName : "testCreateFileAt"});
 	}
 	,testEnsureDirectory: function() {
 		var a = new precog.util.fs.Directory("a",this.fs.root);
@@ -2691,8 +2691,8 @@ precog.util.fs.TestFileSystem.prototype = {
 	}
 	,testPick: function() {
 		var tree = this.createTree();
-		utest.Assert.equals(tree.ABC,tree.c.pick(precog.util.fs._Segment.SegmentImpl.fromString("../.././b/|bc|i")),null,{ fileName : "TestFileSystem.hx", lineNumber : 183, className : "precog.util.fs.TestFileSystem", methodName : "testPick"});
-		utest.Assert.equals(tree.c,tree.c.pick(precog.util.fs._Segment.SegmentImpl.fromString("../.././a/|^C$|i")),null,{ fileName : "TestFileSystem.hx", lineNumber : 184, className : "precog.util.fs.TestFileSystem", methodName : "testPick"});
+		utest.Assert.equals(tree.ABC,tree.c.pick(precog.util.fs._Path.PathImpl.fromString("../.././b/|bc|i")),null,{ fileName : "TestFileSystem.hx", lineNumber : 183, className : "precog.util.fs.TestFileSystem", methodName : "testPick"});
+		utest.Assert.equals(tree.c,tree.c.pick(precog.util.fs._Path.PathImpl.fromString("../.././a/|^C$|i")),null,{ fileName : "TestFileSystem.hx", lineNumber : 184, className : "precog.util.fs.TestFileSystem", methodName : "testPick"});
 	}
 	,testFindFromDirectory: function() {
 		var tree = this.createTree();
@@ -2700,11 +2700,11 @@ precog.util.fs.TestFileSystem.prototype = {
 		utest.Assert.equals(4,this.fs.root.find(precog.util.fs._Segment.SegmentImpl._new(precog.util.fs.ESegment.Pattern(new EReg(".+","")))).length,null,{ fileName : "TestFileSystem.hx", lineNumber : 166, className : "precog.util.fs.TestFileSystem", methodName : "testFindFromDirectory"});
 		utest.Assert.equals(3,this.fs.root.find(precog.util.fs._Segment.SegmentImpl._new(precog.util.fs.ESegment.Pattern(new EReg("a","i")))).length,null,{ fileName : "TestFileSystem.hx", lineNumber : 167, className : "precog.util.fs.TestFileSystem", methodName : "testFindFromDirectory"});
 		utest.Assert.equals(2,this.fs.root.files.find(precog.util.fs._Segment.SegmentImpl._new(precog.util.fs.ESegment.Pattern(new EReg(".+","")))).length,null,{ fileName : "TestFileSystem.hx", lineNumber : 169, className : "precog.util.fs.TestFileSystem", methodName : "testFindFromDirectory"});
-		utest.Assert.equals(1,this.fs.root.files.find(precog.util.fs._Segment.SegmentImpl._new(precog.util.fs.ESegment.Pattern(new EReg("b","")))).length,null,{ fileName : "TestFileSystem.hx", lineNumber : 170, className : "precog.util.fs.TestFileSystem", methodName : "testFindFromDirectory"});
+		utest.Assert.equals(1,this.fs.root.files.find(precog.util.fs._Segment.SegmentImpl._new(precog.util.fs.ESegment.Pattern(new EReg("b","i")))).length,null,{ fileName : "TestFileSystem.hx", lineNumber : 170, className : "precog.util.fs.TestFileSystem", methodName : "testFindFromDirectory"});
 		utest.Assert.equals(2,this.fs.root.directories.find(precog.util.fs._Segment.SegmentImpl._new(precog.util.fs.ESegment.Pattern(new EReg(".+","")))).length,null,{ fileName : "TestFileSystem.hx", lineNumber : 172, className : "precog.util.fs.TestFileSystem", methodName : "testFindFromDirectory"});
 		utest.Assert.equals(1,this.fs.root.directories.find(precog.util.fs._Segment.SegmentImpl._new(precog.util.fs.ESegment.Pattern(new EReg("a","i")))).length,null,{ fileName : "TestFileSystem.hx", lineNumber : 173, className : "precog.util.fs.TestFileSystem", methodName : "testFindFromDirectory"});
-		utest.Assert.equals(2,tree.c.traverse(precog.util.fs._Path.PathImpl.fromArray(["..","..",".","b","|bc|i"])).length,null,{ fileName : "TestFileSystem.hx", lineNumber : 176, className : "precog.util.fs.TestFileSystem", methodName : "testFindFromDirectory"});
-		utest.Assert.equals(2,tree.c.traverse(precog.util.fs._Path.PathImpl.fromString("../.././b/|bc|i")).length,null,{ fileName : "TestFileSystem.hx", lineNumber : 177, className : "precog.util.fs.TestFileSystem", methodName : "testFindFromDirectory"});
+		utest.Assert.equals(1,tree.c.traverse(precog.util.fs._Path.PathImpl.fromArray(["..","..",".","b","|bc|i"])).length,null,{ fileName : "TestFileSystem.hx", lineNumber : 176, className : "precog.util.fs.TestFileSystem", methodName : "testFindFromDirectory"});
+		utest.Assert.equals(1,tree.c.traverse(precog.util.fs._Path.PathImpl.fromString("../.././b/|bc|i")).length,null,{ fileName : "TestFileSystem.hx", lineNumber : 177, className : "precog.util.fs.TestFileSystem", methodName : "testFindFromDirectory"});
 	}
 	,createTree: function() {
 		var a = new precog.util.fs.Directory("a",this.fs.root), b = new precog.util.fs.Directory("b",this.fs.root), c = new precog.util.fs.Directory("c",a);
@@ -5666,7 +5666,7 @@ var Enum = { };
 haxe.ds.ObjectMap.count = 0;
 js.Browser.document = typeof window != "undefined" ? window.document : null;
 precog.layout.TestCanvasLayout.point0 = new precog.geom.Point(0,0);
-precog.util.fs._Segment.SegmentImpl.PATTERN = new EReg("^|(.+?)|(i?)$","");
+precog.util.fs._Segment.SegmentImpl.PATTERN = new EReg("^[|](.+?)[|](i?)$","");
 thx.react.Binder.KEY_SEPARATOR = " ";
 thx.react.Dispatcher.TYPE_SEPARATOR = ";";
 thx.react.Propagation.instance = new thx.react.Propagation();

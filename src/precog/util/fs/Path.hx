@@ -26,24 +26,23 @@ abstract Path({ absolute : Bool, path : Array<Segment> })
 
 	@:from public static function fromString(s : String)
 	{
-		var fromRoot = s.substr(0, 1) == "/";
-		if(fromRoot)
+		var absolute = s.substr(0, 1) == "/";
+		if(absolute)
 			s = s.substr(1);
 		if(s.substr(-1) == "/")
 			s = s.substr(0, s.length - 1);
 		var arr = split(s).filter(function(v) return v != "");
-		if(fromRoot)
+		if(absolute)
 			arr.unshift("/");
-		trace(arr);
 		return fromArray(arr);
 	}
 
 	@:from public static function fromArray(s : Array<String>)
 	{
-		var fromRoot = s[0] == "/";
-		if(fromRoot)
+		var absolute = s[0] == "/";
+		if(absolute)
 			s.shift();
-		return new Path(fromRoot, s.map(Segment.fromString));
+		return new Path(absolute, s.map(Segment.fromString));
 	}
 
 	public inline function absolute()

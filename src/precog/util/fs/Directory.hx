@@ -36,6 +36,7 @@ class Directory extends Node
 			file.remove();
 		for(directory in directories)
 			directory.removeRecursive();
+		remove();
 	}
 
 	public function addNode(node : Node)
@@ -77,9 +78,9 @@ class Directory extends Node
 		return cast files.find(segment).concat(cast directories.find(segment));
 	}
 
-	public function pick(segment : Segment) : Node
+	public function pick(path : Path) : Node
 	{
-		return find(segment)[0];
+		return traverse(path)[0];
 	}
 
 	public function traverse(path : Path) : Array<Node>
@@ -107,20 +108,30 @@ class Directory extends Node
 
 	public function removeAt(path : Path, ?recursive : Bool = false)
 	{
-		var list = traverse(path);
+		var list = traverse(path),
+			dir : Directory;
 		for(item in list)
 		{
 			if(recursive && item.isDirectory)
-				cast(item, Directory).removeRecursive();
+			{
+				dir = cast item;
+				dir.removeRecursive();
+			}
 			else
 				item.remove();
 		}
 	}
 
-	public function createFileAt(path : Path, ?ensureDirectory : Bool = false) : File
+	public function createFileAt(path : Path, ?autoCreateDirectories : Bool = false) : File
 	{
 		var name = path.segments().pop().getLiteral();
-		var dir = ensureDirectory ? this.ensureDirectory(path) : cast(traverse(path), Directory);
+		var dir : Directory = null;
+		if(autoCreateDirectories)
+			dir = this.ensureDirectory(path)
+		else
+			dir = cast traverse(path)[0];
+		if(dir == null)
+			throw "destination directory doesn't exist";
 		return new File(name, dir);
 	}
 
@@ -130,19 +141,15 @@ class Directory extends Node
 			segments = path.segments();
 		while(segments.length > 0)
 		{
-			var segment = segments.shift(),
+			var segment = segments[0],
 				next = dir.directories.pick(segment);
 			if(null == next)
-			{
 				break;
-			}
+			segments.shift();
 			dir = next;
 		}
 		while(segments.length > 0)
-		{
-			var name = segments.shift().getLiteral();
-			dir = new Directory(name, dir);
-		}
+			dir = new Directory(segments.shift().getLiteral(), dir);
 		return dir;
 	}
 

@@ -167,14 +167,14 @@ class TestFileSystem
 		Assert.equals(3 , fs.root.find(~/a/i).length);
 
 		Assert.equals(2 , fs.root.files.find(~/.+/).length);
-		Assert.equals(1 , fs.root.files.find(~/b/).length);
+		Assert.equals(1 , fs.root.files.find(~/b/i).length);
 
 		Assert.equals(2 , fs.root.directories.find(~/.+/).length);
 		Assert.equals(1 , fs.root.directories.find(~/a/i).length);
 
 		// traverse
-		Assert.equals(2, tree.c.traverse(["..", "..", ".", "b", "|bc|i"]).length);
-		Assert.equals(2, tree.c.traverse("../.././b/|bc|i").length);
+		Assert.equals(1, tree.c.traverse(["..", "..", ".", "b", "|bc|i"]).length);
+		Assert.equals(1, tree.c.traverse("../.././b/|bc|i").length);
 	}
 
 	public function testPick()
@@ -196,17 +196,16 @@ class TestFileSystem
 		Assert.equals(a, d.parent);
 	}
 
-	public function testEnsureDirectoryForFile()
+	public function testCreateFileAt()
 	{
 		var a = new Directory("a", fs.root);
 		var b = fs.root.createFileAt("a/b");
 		Assert.is(b, File);
 		Assert.equals(a, b.parent);
-		Assert.raises(function()
-			a.createFileAt("/b/c")
-		);
-
-		var c = a.createFileAt("/b/c");
+		Assert.raises(function() {
+			a.createFileAt("/b/c");
+		});
+		var c = a.createFileAt("/b/c", true);
 		Assert.notEquals(fs.root, c.parent);
 		
 	}

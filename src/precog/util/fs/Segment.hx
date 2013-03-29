@@ -3,10 +3,9 @@ package precog.util.fs;
 abstract Segment(ESegment)
 {
 	public function new(v : ESegment)
-	{
 		this = v;
-	}
-	static var PATTERN = ~/^|(.+?)|(i?)$/;
+
+	static var PATTERN = ~/^[|](.+?)[|](i?)$/;
 	@:from public static inline function fromESegment(segment : ESegment)
 		return new Segment(segment);
 	@:from public static inline function fromEReg(reg : EReg)
