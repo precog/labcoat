@@ -40,7 +40,7 @@ class EditorModule extends Module {
         notebooks.push(notebook);
         changeNotebook(notebook);
 
-        ToolbarModule.updateNotebooks(notebooks);
+        ToolbarModule.updateNotebooks(current, notebooks);
     }
 
     public static function changeNotebook(notebook: Notebook) {
@@ -51,6 +51,14 @@ class EditorModule extends Module {
         current = notebook;
         element.append(current.element);
         current.show();
+    }
+
+    public static function closeNotebook() {
+        current.element.remove();
+        notebooks.remove(current);
+        changeNotebook(notebooks[0]);
+
+        ToolbarModule.updateNotebooks(current, notebooks);
     }
 
     public static function deleteRegion(region: Region) {

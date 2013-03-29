@@ -24,8 +24,7 @@ class HtmlDropdown {
         for(item in items) {
             var itemElement = switch(item) {
             case DropdownDivider: new JQuery('<li class="divider"></li>');
-            case DropdownButton(text, action): new JQuery('<li><a tabindex="-1" href="#">${text}</a></li>').click(action);
-
+            case DropdownButton(text, classes, action): new JQuery('<li class="${classes}"><a tabindex="-1" href="#">${text}</a></li>').click(action);
             }
             itemElement.appendTo(menu);
         }
@@ -33,7 +32,7 @@ class HtmlDropdown {
 }
 
 enum DropdownItem {
-    DropdownButton(text: String, action: Event -> Void);
+    DropdownButton(text: String, classes: String, action: Event -> Void);
     DropdownDivider;
 }
 

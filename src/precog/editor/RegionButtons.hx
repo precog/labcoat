@@ -16,18 +16,18 @@ class RegionButtons {
         var items = [];
 
         if(region.mode != QuirrelRegionMode) {
-            items.push(DropdownButton('Switch to Quirrel', changeTo(QuirrelRegionMode)));
+            items.push(DropdownButton('Switch to Quirrel', '', changeTo(QuirrelRegionMode)));
         }
         if(region.mode != MarkdownRegionMode) {
-            items.push(DropdownButton('Switch to Markdown', changeTo(MarkdownRegionMode)));
+            items.push(DropdownButton('Switch to Markdown', '', changeTo(MarkdownRegionMode)));
         }
         if(region.mode != JSONRegionMode) {
-            items.push(DropdownButton('Switch to JSON', changeTo(JSONRegionMode)));
+            items.push(DropdownButton('Switch to JSON', '', changeTo(JSONRegionMode)));
         }
 
         items = items.concat([
             DropdownDivider,
-            DropdownButton('Delete', deleteRegion)
+            DropdownButton('Delete', '', deleteRegion)
         ]);
 
         element = new HtmlDropdown('', 'cog', Mini, items, DropdownAlignRight).element;

@@ -11,6 +11,7 @@ import jQuery.Event;
 class ToolbarModule extends Module {
     public static var element = new JQuery('<div class="toolbar"></div>');
     public static var notebooksElement = new JQuery('<div class="notebooks pull-left"></div>').appendTo(element);
+    static var closeNotebookClass = 'close-notebook';
 
     override public function connect(communicator: Communicator) {
         communicator.demand(MainToolbarHtmlPanelMessage).then(init);
@@ -24,20 +25,30 @@ class ToolbarModule extends Module {
         toolbarPanelMessage.value.element.append(element);
 
         var items = [
-            DropdownButton('New notebook', insertNotebook),
-            DropdownButton('Close notebook', deleteNotebook),
+            DropdownButton('New notebook', '', insertNotebook),
+            DropdownButton('Close notebook', closeNotebookClass, closeNotebook),
             DropdownDivider,
-            DropdownButton('Insert region', insertRegion)
+            DropdownButton('Insert region', '', insertRegion)
         ];
         new HtmlDropdown('', 'cog', Mini, items, DropdownAlignRight).element.appendTo(element);
     }
 
-    public static function updateNotebooks(notebooks: Array<Notebook>) {
-        notebooksElement.html('');
+    public static function updateNotebooks(current: Notebook, notebooks: Array<Notebook>) {
+        notebooksElement.empty();
         for(notebook in notebooks) {
-            new HtmlButton("My Notebook", Mini).element.appendTo(notebooksElement).click(changeNotebook(notebook));
+            var buttonElement = new HtmlButton("My Notebook", Mini).element.appendTo(notebooksElement).click(changeNotebook(notebook));
+            if(notebook == current) {
+                buttonElement.addClass('active');
+            }
         }
-        notebooksElement.find('button:last').addClass('active');
+
+        // TODO: This could be made nicer.
+        var closeNotebookItem = new JQuery('.${closeNotebookClass}');
+        if(notebooks.length <= 1) {
+            closeNotebookItem.addClass('disabled');
+        } else {
+            closeNotebookItem.removeClass('disabled');
+        }
     }
 
     static function changeNotebook(notebook: Notebook) {
@@ -52,8 +63,9 @@ class ToolbarModule extends Module {
         EditorModule.insertNotebook();
     }
 
-    function deleteNotebook(event: Event) {
+    function closeNotebook(event: Event) {
         event.preventDefault();
+        EditorModule.closeNotebook();
     }
 
     static function insertRegion(event: Event) {
