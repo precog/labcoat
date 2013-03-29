@@ -37,10 +37,12 @@ class ToolbarModule extends Module {
         for(notebook in notebooks) {
             new HtmlButton("My Notebook", Mini).element.appendTo(notebooksElement).click(changeNotebook(notebook));
         }
+        notebooksElement.find('button:last').addClass('active');
     }
 
     static function changeNotebook(notebook: Notebook) {
         return function(event: Event) {
+            notebooksElement.find('button.active').removeClass('active');
             EditorModule.changeNotebook(notebook);
         };
     }
