@@ -118,11 +118,25 @@ body {
     }
 
     .tree {
+        .user-select(none);
         font-size: @fontSizeSmall;
+        .tree-row {
+            width: 100%;
+        }
+        .tree-content, .tree-toggle {
+            cursor: pointer;
+        }
         i {
+            display: inline-block;
+            width: 14px;
+//            -webkit-font-smoothing: anti-aliased;
             color: #666;
             font-size: 14px;
-            text-shadow:  0.5px 0.5px 1px rgba(0,0,0,.25);
+//            text-shadow:  0.5px 0.5px 1px rgba(0,0,0,.25);
+        }
+
+        .tree-toggle i {
+            color: #bbb;
         }
     }
 }

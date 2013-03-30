@@ -226,7 +226,7 @@ class HtmlTree<T>
 		timer = Timer.delay(function() {
 			update();
 			timer = null;
-		}, 50);
+		}, 15);
 	}
 
 	public function update()
@@ -311,8 +311,9 @@ class BaseHtmlTreeRenderer<T> implements IHtmlTreeRenderer<T>
 	{
 		var hwidth = (1 + node.level) * connectorWidth + margin;
 		el.find(".tree-content")
-			.css("padding-left", '${hwidth}px')
+			.css("margin-left", '${hwidth}px')
 			.html('<i class="' + (node.hasChildren ? 'icon-folder-${node.collapsed ? "close" : "open"}-alt' : 'icon-file' ) + '"></i> ' + Std.string(node.data));
+
 		var toggle = el.find(".tree-toggle");
 		if(node.collapsed || node.hasChildren) {
 			toggle.get(0).onclick = function() {
