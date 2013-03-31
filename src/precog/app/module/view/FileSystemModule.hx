@@ -35,7 +35,7 @@ class FileSystemModule extends Module {
     {
         var renderer = new BaseHtmlTreeRenderer(16),
             tree = new HtmlTree(panel, renderer),
-            tot  = 10000;
+            tot  = 1000;
 
         var nodes = [tree.addRoot("#root")],
             pick,

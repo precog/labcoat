@@ -289,9 +289,9 @@ class BaseHtmlTreeRenderer<T> implements IHtmlTreeRenderer<T>
 	var height : Float;
 	var connectorWidth : Float;
 	var toggleWidth : Float = 10;
-	var margin : Float = 2;
+	var margin : Float = 0;
 	var tree : HtmlTree<T>;
-	public function new(height : Float, connectorWidth : Float = 12)
+	public function new(height : Float, connectorWidth : Float = 10)
 	{
 		this.connectorWidth = connectorWidth;
 		this.height = height;
