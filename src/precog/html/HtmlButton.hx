@@ -16,7 +16,7 @@ class HtmlButton
 
 	public function new(?text : String, ?icon : String, ?btnsize : ButtonSize)
 	{
-		element = new JQuery('<button type="button" class="btn" data-toggle="button"></button>');
+		element = new JQuery('<button type="button" class="btn"></button>');
 		if(null != text)
 			this.text = text;
 		if(null != icon)
