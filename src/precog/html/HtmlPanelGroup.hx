@@ -6,6 +6,7 @@ import precog.geom.IRectangleObservable;
 import precog.layout.DockLayout;
 import precog.layout.Panel;
 import thx.react.IObserver;
+import thx.react.Signal;
 using thx.react.IObservable;
 using precog.html.JQuerys;
 
@@ -14,19 +15,25 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 {
 	public var length(default, null) : Int;
 	var items : Array<HtmlPanelGroupItem>;
-	var current : HtmlPanelGroupItem;
+	public var current(default, null) : HtmlPanelGroupItem;
 	public var container(default, null) : JQuery;
 	public var pane(default, null) : Panel;
 	public var gutter(default, null) : HtmlPanel;
 	public var togglesContainer(default, null) : JQuery;
 	var layout : DockLayout;
 	var gutterMargin : Int = 3;
-	var gutterSize : Int = 18;
+	public var gutterSize(default, null) : Int = 18;
+	public var events(default, null) : {
+		public var activate(default, null) : Signal<HtmlPanelGroupItem>;
+	};
 
 	@:isVar public var gutterPosition(get_gutterPosition, set_gutterPosition) : GutterPosition;
 
 	public function new(parent : JQuery, rectangle : IRectangleObservable, ?gutterPosition : GutterPosition)
 	{
+		events = {
+			activate : new Signal()
+		};
 		length = 0;
 		items = [];
 		current = null;
@@ -84,6 +91,11 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 		current = item;
 	}
 
+	function deactivate(item : HtmlPanelGroupItem)
+	{
+		current = null;
+	}
+
 	function get_gutterPosition()
 		return gutterPosition;
 
@@ -121,6 +133,7 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 				layout.addPanel(gutter.panel).dockRight(gutterSize, gutterMargin);
 		}
 		layout.addPanel(pane).fill();
+		updateVerticalPosition();
 		layout.update();
 		return position;
 	}
@@ -153,7 +166,7 @@ enum GutterPosition
 	Left;
 }
 
-@:access(precog.html.HtmlPanelGroup.activate)
+@:access(precog.html.HtmlPanelGroup)
 class HtmlPanelGroupItem 
 {
 	public var toggle(default, null) : HtmlButton;
@@ -186,17 +199,23 @@ class HtmlPanelGroupItem
 		group.activate(this);
 		toggle.active = active = true;
 		panel.show();
+		group.events.activate.trigger(this);
 	}
 
 	public function deactivate()
 	{
-		if(null == group || !active) return;	
+		if(null == group || !active) return;
+		group.deactivate(this);
 		toggle.active = active = false;
 		panel.hide();
+		group.events.activate.trigger(null);
 	}
 
 	function setGroup(group : HtmlPanelGroup)
 	{
 		this.group = group;
 	}
+
+	public function toString()
+		return 'HtmlGroupItem (${toggle.text})';
 }

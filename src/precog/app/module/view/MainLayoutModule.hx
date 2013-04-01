@@ -6,9 +6,11 @@ import precog.app.message.MainToolbarHtmlPanelMessage;
 import precog.communicator.Communicator;
 import precog.communicator.Module;
 import precog.html.HtmlPanel;
+import precog.geom.IRectangle;
 import precog.layout.DockLayout;
 import js.Browser;
 import jQuery.JQuery;
+using thx.react.IObservable;
 
 using precog.html.JQuerys;
 
@@ -39,24 +41,19 @@ class MainLayoutModule extends Module {
         layout = new DockLayout(0, 0);
         layout.defaultMargin = panelMargin;
 
-        updateLayout();
-        new JQuery(Browser.window).resize(function(_) { updateLayout(); });
+        layout.addPanel(toolbar.panel).dockTop(20);
+        layout.addPanel(editor.panel).fill();
+        layout.addPanel(statusbar.panel).dockBottom(20);
+
+        message.value.panel.rectangle.addListener(updateLayout);
+        updateLayout(message.value.panel.rectangle);
 
         communicator.provide(new MainToolbarHtmlPanelMessage(toolbar));
         communicator.provide(new MainEditorHtmlPanelMessage(editor));
     }
 
-    function updateLayout() {
-        var size = container.getInnerSize();
-
-        layout.clear();
-
-        layout.rectangle.set(0, 0, size.width, size.height);
-
-        layout.addPanel(toolbar.panel).dockTop(20);
-        layout.addPanel(editor.panel).fill();
-        layout.addPanel(statusbar.panel).dockBottom(20);
-
+    function updateLayout(size : IRectangle) {
+        layout.rectangle.updateSize(size);
         layout.update();
     }
 }

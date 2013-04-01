@@ -5,106 +5,164 @@ import js.Browser;
 import jQuery.JQuery;
 import precog.layout.DockLayout;
 import precog.layout.Panel;
+import precog.layout.Extent;
 import precog.html.HtmlPanel;
 import precog.app.message.ApplicationHtmlContainerMessage;
 import precog.app.message.MainHtmlPanelMessage;
-import precog.app.message.SystemHtmlPanelMessage;
-import precog.app.message.SupportHtmlPanelMessage;
-import precog.app.message.ToolsHtmlPanelMessage;
+import precog.app.message.SystemHtmlPanelGroupMessage;
+import precog.app.message.SupportHtmlPanelGroupMessage;
+import precog.app.message.ToolsHtmlPanelGroupMessage;
+import precog.geom.Rectangle;
 
+using precog.html.HtmlPanelGroup;
 using precog.html.JQuerys;
 using thx.react.IObservable;
 
 class LayoutModule extends Module
 {
-	var comm: Communicator;
-
 	var container : JQuery;
 	var panelMargin : Int = 3;
-	var layouts : {
-		main    : DockLayout,
-		context : DockLayout
-	};
+	var mainLayout    : DockLayout;
+	var contextLayout : DockLayout;
 
 #if (html5 || cordova)
 	var menu    : HtmlPanel;
 #end
-	var system  : HtmlPanel;
-	var main    : HtmlPanel;
-	var support : HtmlPanel;
-	var tools   : HtmlPanel;
-	var context : Panel;
+	var mainHtmlPanel : HtmlPanel;
+	var contextPanel : Panel;
+	var groups : LayoutGroups;
 
 	function updateLayouts()
 	{
 		var size = container.getInnerSize(),
 			vertical = size.width < size.height;
+
 		// TODO, this should not be required but it is :(
-		layouts.main.clear();
-		layouts.context.clear();
+		mainLayout.clear();
+		contextLayout.clear();
 
-		layouts.main.rectangle.set(0, 0, size.width, size.height);
+		mainLayout.rectangle.set(0, 0, size.width, size.height);
 #if (html5 || cordova)
-		layouts.main.addPanel(menu.panel).dockTop(20);
+		mainLayout.addPanel(menu.panel).dockTop(20);
 #end
-		layouts.main.addPanel(tools.panel).dockBottom(100);
+		groups.dockIfExists("tools", mainLayout, Bottom(groups.dockSize(["tools"], 100)));
 
-		layouts.main.addPanel(context).dockLeft(200);
 
 		if(vertical) {
-			layouts.context.addPanel(system.panel).dockTop(0.5);
-			layouts.context.addPanel(support.panel).fill();
+			mainLayout.addPanel(contextPanel).dockLeft(
+				groups.dockSize(["system", "support"], 200)
+			);
+			groups.dockIfExists("system", contextLayout, Top(0.5));
+			groups.dockIfExists("support", contextLayout, Fill, Left);
 		} else {
-			layouts.main.addPanel(support.panel).dockRight(250);
-			layouts.context.addPanel(system.panel).fill();
+			mainLayout.addPanel(contextPanel).dockLeft(groups.dockSize(["system"], 200));
+			groups.dockIfExists("system", contextLayout, Fill);
+			groups.dockIfExists("support", mainLayout, Right(groups.dockSize(["support"], 250)), Right);
 		}
 	
-		layouts.main.addPanel(main.panel).fill();
-
-		layouts.main.update();
-		layouts.context.update();
+		mainLayout.addPanel(mainHtmlPanel.panel).fill();
+		mainLayout.update();
+		contextLayout.update();
 	}
 
-	function onMessage(message : ApplicationHtmlContainerMessage)
+	function onMessage(comm : Communicator, message : ApplicationHtmlContainerMessage)
 	{
+
 		container = message.value;
 		container.addClass("labcoat");
-		context = new Panel();
+		groups = new LayoutGroups(container);
+		contextPanel = new Panel();
 #if (html5 || cordova)
-		menu    = new HtmlPanel("menu", container);
+		menu = new HtmlPanel("menu", container);
 #end
-		main    = new HtmlPanel("main", container);
-		system  = new HtmlPanel("system", container);
-		support = new HtmlPanel("support", container);
-		tools   = new HtmlPanel("tools", container);
+		mainHtmlPanel = new HtmlPanel("main", container);
 
-		layouts = {
-			main    : new DockLayout(0, 0),
-			context : new DockLayout(0, 0),
-		};
-		layouts.main.defaultMargin = panelMargin;
-		layouts.context.defaultMargin = panelMargin;
+		mainLayout = new DockLayout(0, 0);
+		contextLayout = new DockLayout(0, 0);
 
-		context.rectangle.addListener(function(rect) {
-			layouts.context.rectangle.set(rect.x, rect.y, rect.width, rect.height);
+		mainLayout.defaultMargin = panelMargin;
+		contextLayout.defaultMargin = panelMargin;
+
+		contextPanel.rectangle.addListener(function(rect) {
+			contextLayout.rectangle.set(rect.x, rect.y, rect.width, rect.height);
 		});
 
-		updateLayouts();
-		new JQuery(Browser.window).resize(function(_) {
-			updateLayouts();
-		});
+        comm.provide(new SystemHtmlPanelGroupMessage(groups.ensureGroup("system", Left, updateLayouts).group));
+        comm.provide(new SupportHtmlPanelGroupMessage(groups.ensureGroup("support", Right, updateLayouts).group));
+        comm.provide(new ToolsHtmlPanelGroupMessage(groups.ensureGroup("tools", Bottom, updateLayouts).group));
+        
+        updateLayouts();
 
-        comm.provide(new MainHtmlPanelMessage(main));
-        comm.provide(new SystemHtmlPanelMessage(system));
-        comm.provide(new SupportHtmlPanelMessage(support));
-        comm.provide(new ToolsHtmlPanelMessage(tools));
+        comm.provide(new MainHtmlPanelMessage(mainHtmlPanel));
+
+		new JQuery(Browser.window).resize(function(_) updateLayouts());
 	}
 
 	override public function connect(comm : Communicator)
 	{
-		this.comm = comm;
-
 		comm.demand(ApplicationHtmlContainerMessage)
-			.then(onMessage);
+			.then(onMessage.bind(comm, _));
+	}
+}
+
+class LayoutGroups
+{
+	var map : Map<String, { group : HtmlPanelGroup, panel : Panel }>;
+	var container : JQuery;
+	public function new(container : JQuery)
+	{
+		map = new Map();
+		this.container = container;
+	}
+
+	public function ensureGroup(name : String, position : GutterPosition, update : Void -> Void)
+	{
+		var group = map.get(name);
+		if(null == group)
+			map.set(name, group = createGroup(name, position, update));
+		return group;
+	}
+
+	public function getGroup(name : String)
+	{
+		return map.get(name);
+	}
+
+	function createGroup(name : String, position : GutterPosition, update : Void -> Void)
+	{
+		var panel  = new Panel(),
+			result = {
+				panel : panel,
+				group : new HtmlPanelGroup(container, panel.rectangle, position),
+			};
+		result.group.events.activate.on(function(current) update());
+		return result;
+	}
+
+	public function dockIfExists(name : String, layout : DockLayout, dock : DockKind, ?gutterPosition : GutterPosition)
+	{
+		var group = map.get(name);
+		if(null == group)
+			return;
+		layout.addPanel(group.panel).setDock(dock);
+		if(null != gutterPosition)
+			group.group.gutterPosition = gutterPosition;
+	}
+
+	public function dockSize(names : Array<String>, openSize : Extent) : Extent
+	{
+		var found = null;
+		for(name in names)
+		{
+			var group = map.get(name);
+			if(null == group)
+				continue;
+			if(null != group.group.current)
+				return openSize;
+			found = group;
+		}
+		if(null == found)
+			return Absolute(0);
+		return Absolute(found.group.gutterSize);
 	}
 }

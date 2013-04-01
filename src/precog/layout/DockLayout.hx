@@ -139,37 +139,25 @@ class Dock
 		margin = defaultMargin;
 	}
 
-	public function dockLeft(size : Extent, ?margin : Extent)
+	public function setDock(kind : DockKind, ?margin : Extent)
 	{
-		dock = Left(size);
+		dock = kind;
 		if(null != margin)
 			this.margin = margin;
 		return this;
 	}
+
+	public function dockLeft(size : Extent, ?margin : Extent)
+		return setDock(Left(size), margin);
 
 	public function dockRight(size : Extent, ?margin : Extent)
-	{
-		dock = Right(size);
-		if(null != margin)
-			this.margin = margin;
-		return this;
-	}
+		return setDock(Right(size), margin);
 
 	public function dockTop(size : Extent, ?margin : Extent)
-	{
-		dock = Top(size);
-		if(null != margin)
-			this.margin = margin;
-		return this;
-	}
+		return setDock(Top(size), margin);
 
 	public function dockBottom(size : Extent, ?margin : Extent)
-	{
-		dock = Bottom(size);
-		if(null != margin)
-			this.margin = margin;
-		return this;
-	}
+		return setDock(Bottom(size), margin);
 
 	public function fill()
 	{

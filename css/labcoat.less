@@ -88,19 +88,21 @@ body {
         display: block;
     }
 
+    .toggles-left.btn-group {
+        .border-top-left-radius(0);
+        .border-bottom-left-radius(0);
+        .border-top-right-radius(0);
+        .border-bottom-right-radius(0);
+    }
+
     .toggles-left.btn-group > .btn:first-child {
         .border-top-right-radius(@baseBorderRadius);
         .border-bottom-right-radius(@baseBorderRadius);
-        .border-top-left-radius(0);
-        .border-bottom-left-radius(0);
     }
 
     .toggles-left.btn-group > .btn:last-child {
-//            margin-left: 0;
         .border-top-left-radius(@baseBorderRadius);
         .border-bottom-left-radius(@baseBorderRadius);
-        .border-top-right-radius(0);
-        .border-bottom-right-radius(0);
     }
 
     .toggles-right {
