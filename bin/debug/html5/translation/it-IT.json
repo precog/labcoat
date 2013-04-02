@@ -44,6 +44,30 @@
       "tutorial": [
          null,
          "guida"
+      ],
+      "new notebook": [
+         null,
+         "nuovo notebook"
+      ],
+      "close notebook": [
+         null,
+         "chiudi notebook"
+      ],
+      "insert region": [
+         null,
+         "aggiungi sezione"
+      ],
+      "notebook #{0}": [
+         null,
+         "notebook #{0}"
+      ],
+      "switch to {0}": [
+         null,
+         "cambia con {0}"
+      ],
+      "delete": [
+         null,
+         "elimina"
       ]
    }
 }

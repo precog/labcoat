@@ -1,10 +1,10 @@
-package precog.app.message;
+package precog.util;
 
 import thx.culture.Culture;
 import thx.culture.Format;
 import thx.translation.ITranslation;
 
-class LocalizationMessage 
+class Locale 
 {
 	public var culture(default, null) : Culture;
 	var translation : ITranslation;

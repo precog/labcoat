@@ -1,12 +1,14 @@
 package precog.app.module.view;
 
 import precog.app.message.*;
+import precog.util.Locale;
 import precog.communicator.Communicator;
 import precog.communicator.Module;
 import precog.editor.*;
 import precog.editor.codemirror.Externs;
 import precog.editor.codemirror.QuirrelMode;
 import jQuery.JQuery;
+using thx.react.Promise;
 
 class EditorModule extends Module {
     var element : JQuery;
@@ -14,6 +16,7 @@ class EditorModule extends Module {
     var current : Notebook;
     var notebooks : Array<Notebook>;
     var communicator : Communicator;
+    var locale : Locale;
 
     public function new()
     {
@@ -24,7 +27,10 @@ class EditorModule extends Module {
 
     override public function connect(communicator: Communicator) {
         this.communicator = communicator;
-        communicator.demand(MainEditorHtmlPanelMessage).then(init);
+        communicator
+            .demand(MainEditorHtmlPanelMessage)
+            .await(communicator.demand(Locale))
+            .then(init);
         communicator.on(function(_ : EditorNotebookRequestCreate) createNotebook());
         communicator.on(function(_ : EditorNotebookRequestCloseCurrent) closeNotebook());
         communicator.on(function(e : EditorRegionRequestCreate) appendRegion(e.region));
@@ -35,7 +41,8 @@ class EditorModule extends Module {
         element.remove();
     }
 
-    public function init(editorPanelMessage: MainEditorHtmlPanelMessage) {
+    public function init(editorPanelMessage: MainEditorHtmlPanelMessage, locale : Locale) {
+        this.locale = locale;
         editorPanelMessage.value.element.append(element);
 
         QuirrelMode.init();
@@ -55,7 +62,7 @@ class EditorModule extends Module {
         notebooks.push(notebook);
         changeNotebook(notebook);
         communicator.trigger(new EditorNotebookUpdate(current, notebooks));
-        communicator.trigger(new EditorRegionRequestCreate(new Region(QuirrelRegionMode)));
+        communicator.trigger(new EditorRegionRequestCreate(new Region(QuirrelRegionMode, locale)));
    }
 
     function changeNotebook(notebook: Notebook) {
@@ -88,7 +95,7 @@ class EditorModule extends Module {
         oldRegion.events.remove.off(deleteRegion);
 
         var content = oldRegion.editor.getContent();
-        var region = new Region(mode);
+        var region = new Region(mode, locale);
         region.editor.setContent(content);
         appendRegion(region, oldRegion.element);
 
@@ -103,7 +110,7 @@ class EditorModule extends Module {
     
     function createRegion(editor: CodeMirror) {
         var region : Region = editor.getOption('region');
-        appendRegion(new Region(region.mode), region.element);
+        appendRegion(new Region(region.mode, locale), region.element);
     }
 
     function evaluateRegion(editor: CodeMirror) {

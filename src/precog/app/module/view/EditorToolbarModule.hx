@@ -6,6 +6,8 @@ import precog.communicator.Module;
 import precog.editor.*;
 import precog.html.HtmlButton;
 import precog.html.HtmlDropdown;
+import precog.util.Locale;
+using thx.react.Promise;
 import jQuery.JQuery;
 import jQuery.Event;
 
@@ -15,9 +17,13 @@ class EditorToolbarModule extends Module {
     static var closeNotebookClass = 'close-notebook';
 
     var communicator : Communicator;
+    var locale : Locale;
     override public function connect(communicator: Communicator) {
         this.communicator = communicator;
-        communicator.demand(MainToolbarHtmlPanelMessage).then(init);
+        communicator
+            .demand(MainToolbarHtmlPanelMessage)
+            .await(communicator.demand(Locale))
+            .then(init);
         communicator.on(updateNotebooks);
     }
 
@@ -25,23 +31,27 @@ class EditorToolbarModule extends Module {
         element.remove();
     }
 
-    function init(toolbarPanelMessage: MainToolbarHtmlPanelMessage) {
+    function init(toolbarPanelMessage: MainToolbarHtmlPanelMessage, locale : Locale) {
+        this.locale = locale;
         toolbarPanelMessage.value.element.append(element);
 
         var items = [
-            DropdownButton('New notebook', '', createNotebook),
-            DropdownButton('Close notebook', closeNotebookClass, closeNotebook),
+            DropdownButton(locale.singular('new notebook'), '', createNotebook),
+            DropdownButton(locale.singular('close notebook'), closeNotebookClass, closeNotebook),
             DropdownDivider,
-            DropdownButton('Insert region', '', createRegion)
+            DropdownButton(locale.singular('insert region'), '', createRegion)
         ];
         new HtmlDropdown('', 'cog', Mini, items, DropdownAlignRight).element.appendTo(element);
     }
 
+    // TODO: this needs to be removed and replaced with a proper name strategy
+    static var counter : Int = 0;
     // TODO: change so that it uses the HtmlButton properties instead of accessing the underlying element
+    // TODO: notebooks need to be paired with a name/path
     function updateNotebooks(event: EditorNotebookUpdate) {
         notebooksElement.empty();
         for(notebook in event.all) {
-            var buttonElement = new HtmlButton("My Notebook", Mini).element.appendTo(notebooksElement).click(changeNotebook(notebook));
+            var buttonElement = new HtmlButton(locale.format("notebook #{0}", [++counter]), Mini).element.appendTo(notebooksElement).click(changeNotebook(notebook));
             if(notebook == event.current) {
                 buttonElement.addClass('active');
             }
@@ -76,6 +86,6 @@ class EditorToolbarModule extends Module {
 
     function createRegion(event: Event) {
         event.preventDefault();
-        communicator.trigger(new EditorRegionRequestCreate(new Region(QuirrelRegionMode)));
+        communicator.trigger(new EditorRegionRequestCreate(new Region(QuirrelRegionMode, locale)));
     }
 }

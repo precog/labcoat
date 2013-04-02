@@ -35,3 +35,21 @@ msgstr ""
 
 msgid "tutorial"
 msgstr ""
+
+msgid "new notebook"
+msgstr ""
+
+msgid "close notebook"
+msgstr ""
+
+msgid "insert region"
+msgstr ""
+
+msgid "notebook #{0}"
+msgstr ""
+
+msgid "switch to {0}"
+msgstr ""
+
+msgid "delete"
+msgstr ""

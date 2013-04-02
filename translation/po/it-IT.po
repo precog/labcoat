@@ -35,3 +35,21 @@ msgstr "compiti"
 
 msgid "tutorial"
 msgstr "guida"
+
+msgid "new notebook"
+msgstr "nuovo notebook"
+
+msgid "close notebook"
+msgstr "chiudi notebook"
+
+msgid "insert region"
+msgstr "aggiungi sezione"
+
+msgid "notebook #{0}"
+msgstr "notebook #{0}"
+
+msgid "switch to {0}"
+msgstr "cambia con {0}"
+
+msgid "delete"
+msgstr "elimina"

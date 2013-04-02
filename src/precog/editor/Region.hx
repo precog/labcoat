@@ -5,6 +5,7 @@ import jQuery.JQuery;
 import jQuery.Event;
 import js.Browser.document;
 import thx.react.Signal;
+import precog.util.Locale;
 
 class Region {
     public var mode: RegionMode;
@@ -25,7 +26,7 @@ class Region {
         }
     }
 
-    public function new(mode: RegionMode) {
+    public function new(mode: RegionMode, locale : Locale) {
         this.events = {
             changeMode : new Signal2(),
             remove : new Signal1()
@@ -34,7 +35,7 @@ class Region {
         this.mode = mode;
 
         element = new JQuery('<div class="region"></div>');
-        buttons = new RegionButtons(this);
+        buttons = new RegionButtons(this, locale);
         element.append(buttons.element);
 
         editor = createEditor();
