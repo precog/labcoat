@@ -19,6 +19,7 @@ class TestAll
 		runner.addCase(new precog.layout.TestStackLayout());
 		runner.addCase(new precog.layout.TestWrapLayout());
 
+		runner.addCase(new precog.editor.markdown.TestRenderer());
 	}
 
 	public static function main()
