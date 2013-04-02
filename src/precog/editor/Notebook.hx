@@ -9,8 +9,6 @@ class Notebook {
     public function new() {
         element = new JQuery('<div class="notebook"></div>');
         regions = [];
-
-        appendRegion(new Region(QuirrelRegionMode));
     }
 
     public function deleteRegion(region: Region) {

@@ -25,7 +25,7 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 	var gutterMargin : Int = 0;
 	public var gutterSize(default, null) : Int;
 	public var events(default, null) : {
-		public var activate(default, null) : Signal<HtmlPanelGroupItem>;
+		public var activate(default, null) : Signal1<HtmlPanelGroupItem>;
 	};
 	@:isVar public var buttonSize(get, set) : ButtonSize;
 	public var buttonType : ButtonType;
@@ -35,7 +35,7 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 	public function new(parent : JQuery, rectangle : IRectangleObservable, ?gutterPosition : GutterPosition)
 	{
 		events = {
-			activate : new Signal()
+			activate : new Signal1()
 		};
 		length = 0;
 		items = [];

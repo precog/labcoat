@@ -4,11 +4,16 @@ import precog.editor.codemirror.Externs;
 import jQuery.JQuery;
 import jQuery.Event;
 import js.Browser.document;
+import thx.react.Signal;
 
 class Region {
     public var mode: RegionMode;
     public var element: JQuery;
     public var editor: RegionEditor;
+    public var events(default, null) : {
+        public var changeMode(default, null) : Signal2<Region, RegionMode>;
+        public var remove(default, null) : Signal1<Region>;
+    };
 
     var buttons: RegionButtons;
 
@@ -21,6 +26,11 @@ class Region {
     }
 
     public function new(mode: RegionMode) {
+        this.events = {
+            changeMode : new Signal2(),
+            remove : new Signal1()
+        };
+
         this.mode = mode;
 
         element = new JQuery('<div class="region"></div>');

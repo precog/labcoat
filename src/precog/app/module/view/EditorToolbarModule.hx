@@ -1,75 +1,81 @@
-package precog.editor;
+package precog.app.module.view;
 
-import precog.app.message.MainToolbarHtmlPanelMessage;
+import precog.app.message.*;
 import precog.communicator.Communicator;
 import precog.communicator.Module;
+import precog.editor.*;
 import precog.html.HtmlButton;
 import precog.html.HtmlDropdown;
 import jQuery.JQuery;
 import jQuery.Event;
 
-class ToolbarModule extends Module {
+class EditorToolbarModule extends Module {
     public static var element = new JQuery('<div class="toolbar"></div>');
     public static var notebooksElement = new JQuery('<div class="notebooks pull-left"></div>').appendTo(element);
     static var closeNotebookClass = 'close-notebook';
 
+    var communicator : Communicator;
     override public function connect(communicator: Communicator) {
+        this.communicator = communicator;
         communicator.demand(MainToolbarHtmlPanelMessage).then(init);
+        communicator.on(updateNotebooks);
     }
 
     override public function disconnect(communicator: Communicator) {
         element.remove();
     }
 
-    public function init(toolbarPanelMessage: MainToolbarHtmlPanelMessage) {
+    function init(toolbarPanelMessage: MainToolbarHtmlPanelMessage) {
         toolbarPanelMessage.value.element.append(element);
 
         var items = [
-            DropdownButton('New notebook', '', insertNotebook),
+            DropdownButton('New notebook', '', createNotebook),
             DropdownButton('Close notebook', closeNotebookClass, closeNotebook),
             DropdownDivider,
-            DropdownButton('Insert region', '', insertRegion)
+            DropdownButton('Insert region', '', createRegion)
         ];
         new HtmlDropdown('', 'cog', Mini, items, DropdownAlignRight).element.appendTo(element);
     }
 
-    public static function updateNotebooks(current: Notebook, notebooks: Array<Notebook>) {
+    // TODO: change so that it uses the HtmlButton properties instead of accessing the underlying element
+    function updateNotebooks(event: EditorNotebookUpdate) {
         notebooksElement.empty();
-        for(notebook in notebooks) {
+        for(notebook in event.all) {
             var buttonElement = new HtmlButton("My Notebook", Mini).element.appendTo(notebooksElement).click(changeNotebook(notebook));
-            if(notebook == current) {
+            if(notebook == event.current) {
                 buttonElement.addClass('active');
             }
         }
 
         // TODO: This could be made nicer.
         var closeNotebookItem = new JQuery('.${closeNotebookClass}');
-        if(notebooks.length <= 1) {
+        if(event.all.length <= 1) {
             closeNotebookItem.addClass('disabled');
         } else {
             closeNotebookItem.removeClass('disabled');
         }
     }
 
-    static function changeNotebook(notebook: Notebook) {
+    // TODO: change so that it uses the HtmlButton properties instead of accessing the underlying element
+    function changeNotebook(notebook: Notebook) {
         return function(event: Event) {
             notebooksElement.find('button.active').removeClass('active');
-            EditorModule.changeNotebook(notebook);
+            communicator.trigger(new EditorNotebookSwitchTo(notebook));
         };
     }
 
-    function insertNotebook(event: Event) {
+    function createNotebook(event: Event) {
         event.preventDefault();
-        EditorModule.insertNotebook();
+        communicator.trigger(new EditorNotebookRequestCreate());
     }
 
     function closeNotebook(event: Event) {
         event.preventDefault();
-        EditorModule.closeNotebook();
+        communicator.trigger(new EditorNotebookRequestCloseCurrent());
     }
 
-    static function insertRegion(event: Event) {
+    function createRegion(event: Event) {
         event.preventDefault();
-        EditorModule.appendRegion(new Region(QuirrelRegionMode));
+        communicator.trigger(new EditorRegionRequestCreate(new Region(QuirrelRegionMode)));
     }
 }

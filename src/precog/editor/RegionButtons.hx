@@ -35,13 +35,15 @@ class RegionButtons {
 
     function changeTo(mode: RegionMode) {
         return function(event: Event) {
-            EditorModule.changeRegionMode(region, mode);
+trace("changeTo");
+            region.events.changeMode.trigger(region, mode);
             return false;
         };
     }
 
     function deleteRegion(event: Event) {
-        EditorModule.deleteRegion(region);
+trace("delete");
+        region.events.remove.trigger(region);
         return false;
     }
 }

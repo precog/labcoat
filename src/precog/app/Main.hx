@@ -33,9 +33,8 @@ class Main
         manager.addModule(new SharingModule());
         manager.addModule(new ChatModule());
 
-        // Editor
-        manager.addModule(new ToolbarModule());
         manager.addModule(new EditorModule());
+        manager.addModule(new EditorToolbarModule());
 
         // API
         manager.addModule(new JavaScriptAPIModule());
