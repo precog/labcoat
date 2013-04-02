@@ -9,6 +9,7 @@ import thx.react.IObserver;
 import thx.react.Signal;
 using thx.react.IObservable;
 using precog.html.JQuerys;
+using precog.html.HtmlButton;
 
 @:access(precog.html.HtmlPanelGroupItem.setGroup)
 class HtmlPanelGroup implements IObserver<IRectangle>
@@ -21,11 +22,12 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 	public var gutter(default, null) : HtmlPanel;
 	public var togglesContainer(default, null) : JQuery;
 	var layout : DockLayout;
-	var gutterMargin : Int = 3;
-	public var gutterSize(default, null) : Int = 18;
+	var gutterMargin : Int = 0;
+	public var gutterSize(default, null) : Int;
 	public var events(default, null) : {
 		public var activate(default, null) : Signal<HtmlPanelGroupItem>;
 	};
+	@:isVar public var buttonSize(get, set) : ButtonSize;
 
 	@:isVar public var gutterPosition(get_gutterPosition, set_gutterPosition) : GutterPosition;
 
@@ -38,7 +40,7 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 		items = [];
 		current = null;
 		container = parent;
-
+		buttonSize = Mini;
 		layout = new DockLayout(0, 0);
 		pane   = new Panel();
 		gutter = new HtmlPanel();
@@ -52,6 +54,20 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 		this.gutterPosition = gutterPosition;
 		rectangle.addListener(update);
 		update(rectangle);
+	}
+
+	function get_buttonSize()
+		return buttonSize;
+	function set_buttonSize(value)
+	{
+		buttonSize = value;
+		var button = new HtmlButton("Sample", value);
+		var div = new JQuery('<div class="gutter"></div>').appendTo(new JQuery(".labcoat"));
+		button.element.appendTo(div);
+		gutterSize = button.element.outerHeight(true);
+		var parent = container.parent();
+		div.remove();
+		return value;
 	}
 
 	public function update(rect : IRectangle) {
@@ -151,7 +167,7 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 					w = size.width,
 					h = size.height;
 				var offset = (w - h) / 2;
-				togglesContainer.cssTransform('rotateZ(90deg) translate3d(${offset-length/2}px, ${offset+length}px, 0)');
+				togglesContainer.cssTransform('rotateZ(90deg) translate3d(${offset}px, ${offset}px, 0)');
 			case _:
 				togglesContainer.cssTransform('none');
 		}
@@ -178,7 +194,7 @@ class HtmlPanelGroupItem
 	{
 		this.active = false;
 		this.toggle = new HtmlButton(label, icon);
-		this.toggle.size = Mini;
+		
 //		this.toggle.rightIcon = Icons.heart;
 		this.panel = new HtmlPanelSwap();
 		this.panel.hide();
@@ -214,6 +230,7 @@ class HtmlPanelGroupItem
 	function setGroup(group : HtmlPanelGroup)
 	{
 		this.group = group;
+		this.toggle.size = group.buttonSize;
 	}
 
 	public function toString()
