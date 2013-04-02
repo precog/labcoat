@@ -28,6 +28,7 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 		public var activate(default, null) : Signal<HtmlPanelGroupItem>;
 	};
 	@:isVar public var buttonSize(get, set) : ButtonSize;
+	public var buttonType : ButtonType;
 
 	@:isVar public var gutterPosition(get_gutterPosition, set_gutterPosition) : GutterPosition;
 
@@ -41,6 +42,7 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 		current = null;
 		container = parent;
 		buttonSize = Mini;
+		buttonType = Default;
 		layout = new DockLayout(0, 0);
 		pane   = new Panel();
 		gutter = new HtmlPanel();
@@ -231,6 +233,7 @@ class HtmlPanelGroupItem
 	{
 		this.group = group;
 		this.toggle.size = group.buttonSize;
+		this.toggle.type = group.buttonType;
 	}
 
 	public function toString()
