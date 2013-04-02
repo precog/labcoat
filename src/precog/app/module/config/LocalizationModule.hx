@@ -12,7 +12,7 @@ class LocalizationModule extends Module
     override public function connect(communicator: Communicator)
     {
     	// load language and translations from some source
-        Assets.localization("it-IT")
+        Assets.localization("en-US")
             .then(function(culture : Culture, translation : Translation) {
                 communicator
                     .provide(culture)
