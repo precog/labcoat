@@ -15,32 +15,17 @@ body {
 .labcoat 
 {
     .user-select(none);
-//    background-image: url("../images/background.png");
 	position: absolute;
 	width: 100%;
 	height: 100%;
-//    .gradient(#ddd, #eee, #fff);
+    #gradient.radial(#fff, #f6f6f6);
 	.panel {
-//		border: 1px solid hsla(0,0,0.8,0.5);
-//		.border-radius(1px);
-//        background-color: rgba(250,250,250,0.6);
-//		.box-shadow(1px 1px 3px rgba(0, 0, 0, 0.05));
-//		.gradient(#f9f9f9, #e6e6e6);
-
-//background: rgb(242,245,246); /* Old browsers */
-//background: -moz-linear-gradient(-45deg,  rgba(242,245,246,0.8) 0%, rgba(227,234,237,0.8) 37%, rgba(200,215,220,0.8) 100%); /* FF3.6+ */
-//background: -webkit-gradient(linear, left top, right bottom, color-stop(0%,rgba(242,245,246,0.8)), color-stop(37%,rgba(227,234,237,0.8)), color-stop(100%,rgba(200,215,220,0.8))); /* Chrome,Safari4+ */
-//background: -webkit-linear-gradient(-45deg,  rgba(242,245,246,0.8) 0%,rgba(227,234,237,0.8) 37%,rgba(200,215,220,0.8) 100%); /* Chrome10+,Safari5.1+ */
-//background: -o-linear-gradient(-45deg,  rgba(242,245,246,0.8) 0%,rgba(227,234,237,0.8) 37%,rgba(200,215,220,0.8) 100%); /* Opera 11.10+ */
-//background: -ms-linear-gradient(-45deg,  rgba(242,245,246,0.8) 0%,rgba(227,234,237,0.8) 37%,rgba(200,215,220,0.8) 100%); /* IE10+ */
-//background: linear-gradient(135deg,  rgba(242,245,246,0.8) 0%,rgba(227,234,237,0.8) 37%,rgba(200,215,220,0.8) 100%); /* W3C */
-//filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f2f5f6', endColorstr='#c8d7dc',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
-
-
+        .border-radius(2px);
+        .box-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+        background-color: rgba(255,255,255,0.5);
 	}
 
-    .panel.editor
-    {
+    .panel.editor {
         overflow: hidden;
     }
 
@@ -58,7 +43,6 @@ body {
 
     .gutter {
         .btn {
-//            line-height: 16px;
             margin-top: 3px;
             margin-bottom: 3px;
         }
@@ -71,7 +55,6 @@ body {
     {
         .btn-group {
             direction: rtl;
-    //        margin-top: 100%;
             position: absolute;
             display: block;
 
@@ -112,12 +95,12 @@ body {
     }
 
     .gutter.left {
-        .btn-group > .btn:first-child {
+        .btn:first-child {
             .border-top-right-radius(@baseBorderRadius);
             .border-bottom-right-radius(@baseBorderRadius);
         }
 
-        .btn-group > .btn:last-child {
+        .btn:last-child {
             .border-top-left-radius(@baseBorderRadius);
             .border-bottom-left-radius(@baseBorderRadius);
         }
@@ -138,12 +121,16 @@ body {
     .gutter.tabs.top
     {
         border-bottom: 1px solid;
-        border-bottom-color: darken(@btnBorder, 10%);
+        border-bottom-color: @btnBorder;
         .btn-group {
             .btn {
                 .border-bottom-left-radius(0);
                 .border-bottom-right-radius(0);
                 border-bottom: none;
+                bottom: -1px;
+            }
+            .btn:first-child {
+                margin-left: 5px;
             }
         }
     }
@@ -151,12 +138,16 @@ body {
     .gutter.tabs.left
     {
         border-right: 1px solid;
-        border-right-color: darken(@btnBorder, 10%);
+        border-right-color: @btnBorder, 10%;
         .btn-group {
             .btn {
                 .border-bottom-left-radius(0);
                 .border-bottom-right-radius(0);
                 border-bottom: none;
+                bottom: -1px;
+            }
+            .btn:first-child {
+                margin-left: 5px;
             }
         }
     }
@@ -164,12 +155,16 @@ body {
     .gutter.tabs.right
     {
         border-left: 1px solid;
-        border-left-color: darken(@btnBorder, 10%);
+        border-left-color: @btnBorder, 10%;
         .btn-group {
             .btn {
                 .border-bottom-left-radius(0);
                 .border-bottom-right-radius(0);
                 border-bottom: none;
+                bottom: -1px;
+            }
+            .btn:first-child {
+                margin-left: 5px;
             }
         }
     }
@@ -177,12 +172,16 @@ body {
     .gutter.tabs.bottom
     {
         border-top: 1px solid;
-        border-top-color: darken(@btnBorder, 10%);
+        border-top-color: @btnBorder, 10%;
         .btn-group {
             .btn {
                 .border-top-left-radius(0);
                 .border-top-right-radius(0);
                 border-top: none;
+                top: -1px;
+            }
+            .btn:first-child {
+                margin-left: 5px;
             }
         }
     }
@@ -202,50 +201,49 @@ body {
         i {
             display: inline-block;
             width: 14px;
-//            -webkit-font-smoothing: anti-aliased;
             color: #666;
             font-size: 14px;
-//            text-shadow:  0.5px 0.5px 1px rgba(0,0,0,.25);
+            text-shadow:  1px 1px 1px rgba(0,0,0,.2);
         }
 
         .tree-toggle i {
             color: #bbb;
         }
     }
-}
 
-.CodeMirror {
-    height: 100% !important;
-}
+    .CodeMirror {
+        height: 100% !important;
+    }
 
-.editor {
-    height: 100%;
+    .editor {
+        height: 100%;
 
-    .region {
-        background: #fff;
-        border: 1px solid #ddd;
-        margin: 1em 1em 2em;
+        .region {
+            background: #fff;
+            border: 1px solid #ddd;
+            margin: 1em 1em 2em;
 
-        clear: right;
+            clear: right;
 
-        @buttonwidth: 25px;
+            @buttonwidth: 25px;
 
-        .buttons {
-            float: right;
+            .buttons {
+                float: right;
 
-            button {
-                display: block;
-                width: @buttonwidth;
+                button {
+                    display: block;
+                    width: @buttonwidth;
+                }
             }
-        }
 
-        .output {
-            background: #fdd;
-            padding: 0.5em;
-        }
+            .output {
+                background: #fdd;
+                padding: 0.5em;
+            }
 
-        .cm-header {
-            font-size: 1.5em;
+            .cm-header {
+                font-size: 1.5em;
+            }
         }
     }
 }
