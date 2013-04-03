@@ -34,14 +34,14 @@ class MainLayoutModule extends Module {
     function onMessage(message: MainHtmlPanelMessage) {
         container = message.value.element;
 
-        toolbar = new HtmlPanel("toolbar", container);
-        editor = new HtmlPanel("editor", container);
+        toolbar   = new HtmlPanel("toolbar", container);
+        editor    = new HtmlPanel("editor", container);
         statusbar = new HtmlPanel("statusbar", container);
 
         layout = new DockLayout(0, 0);
         layout.defaultMargin = panelMargin;
 
-        layout.addPanel(toolbar.panel).dockTop(20);
+        layout.addPanel(toolbar.panel).dockTop(22);
         layout.addPanel(editor.panel).fill();
         layout.addPanel(statusbar.panel).dockBottom(20);
 

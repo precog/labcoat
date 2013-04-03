@@ -10,18 +10,23 @@ import precog.editor.codemirror.QuirrelMode;
 import jQuery.JQuery;
 using thx.react.Promise;
 
-class EditorModule extends Module {
-    var element : JQuery;
+using thx.react.IObservable;
+import precog.html.HtmlPanelGroup;
+import precog.html.Icons;
+import precog.geom.Rectangle;
 
+class EditorModule extends Module {
     var current : Notebook;
     var notebooks : Array<Notebook>;
     var communicator : Communicator;
     var locale : Locale;
+    var main : HtmlPanelGroup;
+    var panels : Map<Notebook, HtmlPanelGroupItem>;
 
     public function new()
     {
         super();
-        element = new JQuery('<div class="editor"></div>');
+        panels = new Map();
         notebooks = [];
     }
 
@@ -34,65 +39,88 @@ class EditorModule extends Module {
         communicator.on(function(_ : EditorNotebookRequestCreate) createNotebook());
         communicator.on(function(_ : EditorNotebookRequestCloseCurrent) closeNotebook());
         communicator.on(function(e : EditorRegionRequestCreate) appendRegion(e.region));
-        communicator.on(function(e : EditorNotebookSwitchTo) changeNotebook(e.notebook));
-    }
-
-    override public function disconnect(communicator: Communicator) {
-        element.remove();
+        communicator.on(function(e : EditorNotebookUpdate) changeNotebook(e.current));
     }
 
     public function init(editorPanelMessage: MainEditorHtmlPanelMessage, locale : Locale) {
         this.locale = locale;
-        editorPanelMessage.value.element.append(element);
 
         QuirrelMode.init();
-
-        createNotebook();
 
         // Global keyhandlers
         Reflect.setField(CodeMirror.keyMap.macDefault, "Shift-Enter", evaluateRegion);
         Reflect.setField(CodeMirror.keyMap.pcDefault, "Shift-Enter", evaluateRegion);
         Reflect.setField(CodeMirror.keyMap.macDefault, "Cmd-Enter", createRegion);
         Reflect.setField(CodeMirror.keyMap.pcDefault, "Ctrl-Enter", createRegion);
+
+                // TODO: move out from here: TABS!!!
+        var rect = new Rectangle();
+        editorPanelMessage.value.panel.rectangle.addListener(rect.updateSize);
+        rect.updateSize(editorPanelMessage.value.panel.rectangle);
+        main = new HtmlPanelGroup(editorPanelMessage.value.element, rect, true);
+        main.gutterMargin = 0;
+        main.toggleSize = Default;
+//        main.toggleType = Primary;
+        main.gutterPosition = Top;
+        main.events.activate.on(function(panel : HtmlPanelGroupItem) {
+            if(null == panel)
+                return;
+            // silly way of getting back the clicked notebook
+            for(notebook in notebooks)
+            {
+                if(panel != panels.get(notebook)) continue;
+                communicator.trigger(new EditorNotebookUpdate(notebook, notebooks));
+                break;
+            }
+        });
+
+        createNotebook();
     }
 
+    var counter : Int = 0;
     function createNotebook() 
     {
-        var notebook = new Notebook();
+        var notebook = new Notebook(locale.format("notebook #{0}", [++counter])),
+            item = new HtmlPanelGroupItem(notebook.name, Icons.book);
+        main.addItem(item);
+        panels.set(notebook, item);
+        item.panel.element.append(notebook.element);
         notebooks.push(notebook);
-        changeNotebook(notebook);
-        communicator.trigger(new EditorNotebookUpdate(current, notebooks));
+        notebook.events.changeName.on(function(old : String, notebook : Notebook) {
+            item.toggle.text = notebook.name;
+        });
+        communicator.trigger(new EditorNotebookUpdate(notebook, notebooks));
         communicator.trigger(new EditorRegionRequestCreate(new Region(QuirrelRegionMode, locale)));
    }
 
     function changeNotebook(notebook: Notebook) {
-        if(current != null) {
-            current.element.detach();
-        }
-
         current = notebook;
-        element.append(current.element);
+        if(null == current)
+            return;
+        panels.get(current).activate();
         current.show();
     }
 
-    // TODO remove listeners for each region in notebook
     function closeNotebook() {
-        current.element.remove();
-        notebooks.remove(current);
-        changeNotebook(notebooks[0]);
-
-        communicator.trigger(new EditorNotebookUpdate(current, notebooks));
+        if(null == current)
+            return;
+        var notebook = current;
+        for(region in notebook)
+            region.events.clear();
+        notebooks.remove(notebook);
+        var item = panels.get(notebook);
+        panels.remove(notebook);
+        notebook.events.clear();
+        main.removeItem(item);
     }
 
     function deleteRegion(region: Region) {
-        region.events.changeMode.off(changeRegionMode);
-        region.events.remove.off(deleteRegion);
+        region.events.clear();
         current.deleteRegion(region);
     }
 
     function changeRegionMode(oldRegion: Region, mode: RegionMode) {
-        oldRegion.events.changeMode.off(changeRegionMode);
-        oldRegion.events.remove.off(deleteRegion);
+        oldRegion.events.clear();
 
         var content = oldRegion.editor.getContent();
         var region = new Region(mode, locale);

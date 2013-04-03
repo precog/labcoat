@@ -22,31 +22,35 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 	public var gutter(default, null) : HtmlPanel;
 	public var togglesContainer(default, null) : JQuery;
 	var layout : DockLayout;
-	var gutterMargin : Int = 0;
+	public var gutterMargin : Int = 0;
 	public var gutterSize(default, null) : Int;
 	public var events(default, null) : {
 		public var activate(default, null) : Signal1<HtmlPanelGroupItem>;
 	};
-	@:isVar public var buttonSize(get, set) : ButtonSize;
-	public var buttonType : ButtonType;
+	@:isVar public var toggleSize(get, set) : ButtonSize;
+	public var toggleType : ButtonType;
+	public var tabMode(default, null) : Bool;
 
 	@:isVar public var gutterPosition(get_gutterPosition, set_gutterPosition) : GutterPosition;
 
-	public function new(parent : JQuery, rectangle : IRectangleObservable, ?gutterPosition : GutterPosition)
+	public function new(parent : JQuery, rectangle : IRectangleObservable, ?gutterPosition : GutterPosition, ?tabMode : Bool = false)
 	{
 		events = {
 			activate : new Signal1()
 		};
+		this.tabMode = tabMode;
 		length = 0;
 		items = [];
 		current = null;
 		container = parent;
-		buttonSize = Mini;
-		buttonType = Default;
+		toggleSize = Mini;
+		toggleType = Default;
 		layout = new DockLayout(0, 0);
 		pane   = new Panel();
 		gutter = new HtmlPanel();
 		gutter.element.addClass("gutter");
+		if(tabMode)
+			gutter.element.addClass("tabs");
 		togglesContainer = new JQuery('<div class="btn-group"></div>').appendTo(gutter.element);
 
 		container.append(gutter.element);
@@ -58,14 +62,17 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 		update(rectangle);
 	}
 
-	function get_buttonSize()
-		return buttonSize;
-	function set_buttonSize(value)
+	function get_toggleSize()
+		return toggleSize;
+	function set_toggleSize(value)
 	{
-		buttonSize = value;
-		var button = new HtmlButton("Sample", value);
-		var div = new JQuery('<div class="gutter"></div>').appendTo(new JQuery(".labcoat"));
-		button.element.appendTo(div);
+		toggleSize = value;
+		var button = new HtmlButton("Sample", value),
+			div    = new JQuery('<div class="gutter"></div>').appendTo(new JQuery(".labcoat")),
+			group  = new JQuery('<div class="btn-group"></div>').appendTo(div);
+		if(tabMode)
+			div.addClass("tabs");
+		button.element.appendTo(group);
 		gutterSize = button.element.outerHeight(true);
 		var parent = container.parent();
 		div.remove();
@@ -88,6 +95,8 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 		updateVerticalPosition();
 		pane.rectangle.attach(item.panel);
 		item.panel.update(pane.rectangle);
+		if(tabMode && length == 1)
+			item.activate();
 	}
 
 	public function removeItem(item : HtmlPanelGroupItem) 
@@ -97,21 +106,29 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 		item.panel.element.detach();
 		pane.rectangle.detach(item.panel);
 		updateVerticalPosition();
+		if(tabMode && current == item && items.length > 0)
+		{
+			items[items.length - 1].activate();
+		}
 		item.setGroup(null);
 		length = items.length;
 	}
 
 	function activate(item : HtmlPanelGroupItem)
 	{
+		current = item;
 		for(other in items)
 			if(other != item)
 				other.deactivate();
-		current = item;
 	}
 
 	function deactivate(item : HtmlPanelGroupItem)
 	{
-		current = null;
+		if(tabMode && current == item)
+			return false;
+		if(current == item)
+			current = null;
+		return true;
 	}
 
 	function get_gutterPosition()
@@ -119,35 +136,33 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 
 	function set_gutterPosition(position : GutterPosition)
 	{
-		if(Type.enumEq(gutterPosition, position)) return position;
 		if(null != gutterPosition) switch (gutterPosition) {
 			case Top:
-				togglesContainer.removeClass("toggles-top");
+				gutter.element.removeClass("top");
 			case Bottom:
-				togglesContainer.removeClass("toggles-bottom");
+				gutter.element.removeClass("bottom");
 			case Left:
-				togglesContainer.removeClass("toggles-left");
+				gutter.element.removeClass("left");
 			case Right:
-				togglesContainer.removeClass("toggles-bottom");
+				gutter.element.removeClass("bottom");
 		}
 		gutterPosition = position;
 		layout.clear();
 		togglesContainer
                     .css("top",  '0px')
                     .css("left", '0px');
-
 		switch (gutterPosition) {
 			case Top:
-				togglesContainer.addClass("toggles-top");
+				gutter.element.addClass("top");
 				layout.addPanel(gutter.panel).dockTop(gutterSize, gutterMargin);
 			case Bottom:
-				togglesContainer.addClass("toggles-bottom");
+				gutter.element.addClass("bottom");
 				layout.addPanel(gutter.panel).dockBottom(gutterSize, gutterMargin);
 			case Left:
-				togglesContainer.addClass("toggles-left");
+				gutter.element.addClass("left");
 				layout.addPanel(gutter.panel).dockLeft(gutterSize, gutterMargin);
 			case Right:
-				togglesContainer.addClass("toggles-right");
+				gutter.element.addClass("right");
 				layout.addPanel(gutter.panel).dockRight(gutterSize, gutterMargin);
 		}
 		layout.addPanel(pane).fill();
@@ -223,17 +238,23 @@ class HtmlPanelGroupItem
 	public function deactivate()
 	{
 		if(null == group || !active) return;
-		group.deactivate(this);
-		toggle.active = active = false;
-		panel.hide();
-		group.events.activate.trigger(null);
+		if(group.deactivate(this))
+		{
+			toggle.active = active = false;
+			panel.hide();
+			group.events.activate.trigger(null);
+		}
 	}
 
 	function setGroup(group : HtmlPanelGroup)
 	{
 		this.group = group;
-		this.toggle.size = group.buttonSize;
-		this.toggle.type = group.buttonType;
+		if(null != group) {
+			this.toggle.size = group.toggleSize;
+			this.toggle.type = group.toggleType;
+		} else {
+			active = false;
+		}
 	}
 
 	public function toString()

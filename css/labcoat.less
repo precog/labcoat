@@ -15,16 +15,16 @@ body {
 .labcoat 
 {
     .user-select(none);
-    background-image: url("../images/background.png");
+//    background-image: url("../images/background.png");
 	position: absolute;
 	width: 100%;
 	height: 100%;
 //    .gradient(#ddd, #eee, #fff);
 	.panel {
 //		border: 1px solid hsla(0,0,0.8,0.5);
-		.border-radius(1px);
-        background-color: rgba(250,250,250,0.6);
-		.box-shadow(1px 1px 3px rgba(0, 0, 0, 0.05));
+//		.border-radius(1px);
+//        background-color: rgba(250,250,250,0.6);
+//		.box-shadow(1px 1px 3px rgba(0, 0, 0, 0.05));
 //		.gradient(#f9f9f9, #e6e6e6);
 
 //background: rgb(242,245,246); /* Old browsers */
@@ -38,6 +38,11 @@ body {
 
 
 	}
+
+    .panel.editor
+    {
+        overflow: hidden;
+    }
 
 	.animate-all {
 		.transition(0.4s);
@@ -58,24 +63,30 @@ body {
             margin-bottom: 3px;
         }
     }
+    .gutter.tabs .btn {
+        margin: 0;
+    }
 
-    .toggles-left {
-        direction: rtl;
-//        margin-top: 100%;
-        position: absolute;
-        display: block;
+    .gutter.left
+    {
+        .btn-group {
+            direction: rtl;
+    //        margin-top: 100%;
+            position: absolute;
+            display: block;
 
-        i.left-icon, i.right-icon {
-            display: inline-block;
-            .transform(rotateZ(90deg));
-        }
+            i.left-icon, i.right-icon {
+                display: inline-block;
+                .transform(rotateZ(90deg));
+            }
 
-        .with-left-icon {
-            margin-right: 3px;
-        }
+            .with-left-icon {
+                margin-right: 3px;
+            }
 
-        .with-right-icon {
-            margin-left: 3px;
+            .with-right-icon {
+                margin-left: 3px;
+            }
         }
     }
 
@@ -91,30 +102,88 @@ body {
         display: block;
     }
 
-    .toggles-left.btn-group {
-        .border-top-left-radius(0);
-        .border-bottom-left-radius(0);
-        .border-top-right-radius(0);
-        .border-bottom-right-radius(0);
+    .gutter.left {
+        .btn-group .btn {
+            .border-top-left-radius(0);
+            .border-bottom-left-radius(0);
+            .border-top-right-radius(0);
+            .border-bottom-right-radius(0);
+        }
     }
 
-    .toggles-left.btn-group > .btn:first-child {
-        .border-top-right-radius(@baseBorderRadius);
-        .border-bottom-right-radius(@baseBorderRadius);
+    .gutter.left {
+        .btn-group > .btn:first-child {
+            .border-top-right-radius(@baseBorderRadius);
+            .border-bottom-right-radius(@baseBorderRadius);
+        }
+
+        .btn-group > .btn:last-child {
+            .border-top-left-radius(@baseBorderRadius);
+            .border-bottom-left-radius(@baseBorderRadius);
+        }
     }
 
-    .toggles-left.btn-group > .btn:last-child {
-        .border-top-left-radius(@baseBorderRadius);
-        .border-bottom-left-radius(@baseBorderRadius);
+    .gutter.right  {
+        .btn-group {
+            position: absolute;
+            display: block;
+
+            i.left-icon, i.right-icon {
+                display: inline-block;
+                .transform(rotateZ(-90deg));
+            }
+        }
     }
 
-    .toggles-right {
-        position: absolute;
-        display: block;
+    .gutter.tabs.top
+    {
+        border-bottom: 1px solid;
+        border-bottom-color: darken(@btnBorder, 10%);
+        .btn-group {
+            .btn {
+                .border-bottom-left-radius(0);
+                .border-bottom-right-radius(0);
+                border-bottom: none;
+            }
+        }
+    }
 
-        i.left-icon, i.right-icon {
-            display: inline-block;
-            .transform(rotateZ(-90deg));
+    .gutter.tabs.left
+    {
+        border-right: 1px solid;
+        border-right-color: darken(@btnBorder, 10%);
+        .btn-group {
+            .btn {
+                .border-bottom-left-radius(0);
+                .border-bottom-right-radius(0);
+                border-bottom: none;
+            }
+        }
+    }
+
+    .gutter.tabs.right
+    {
+        border-left: 1px solid;
+        border-left-color: darken(@btnBorder, 10%);
+        .btn-group {
+            .btn {
+                .border-bottom-left-radius(0);
+                .border-bottom-right-radius(0);
+                border-bottom: none;
+            }
+        }
+    }
+
+    .gutter.tabs.bottom
+    {
+        border-top: 1px solid;
+        border-top-color: darken(@btnBorder, 10%);
+        .btn-group {
+            .btn {
+                .border-top-left-radius(0);
+                .border-top-right-radius(0);
+                border-top: none;
+            }
         }
     }
 

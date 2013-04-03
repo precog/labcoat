@@ -36,14 +36,12 @@ class RegionButtons {
 
     function changeTo(mode: RegionMode) {
         return function(event: Event) {
-trace("changeTo");
             region.events.changeMode.trigger(region, mode);
             return false;
         };
     }
 
     function deleteRegion(event: Event) {
-trace("delete");
         region.events.remove.trigger(region);
         return false;
     }

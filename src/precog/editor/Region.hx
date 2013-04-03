@@ -14,6 +14,7 @@ class Region {
     public var events(default, null) : {
         public var changeMode(default, null) : Signal2<Region, RegionMode>;
         public var remove(default, null) : Signal1<Region>;
+        public function clear() : Void;
     };
 
     var buttons: RegionButtons;
@@ -29,7 +30,15 @@ class Region {
     public function new(mode: RegionMode, locale : Locale) {
         this.events = {
             changeMode : new Signal2(),
-            remove : new Signal1()
+            remove : new Signal1(),
+            clear : function() {
+                for(field in Reflect.fields(this)) {
+                    var signal : Signal<Dynamic> = Reflect.field(this, field);
+                    if(!Std.is(signal, Signal))
+                        continue;
+                    signal.clear();
+                }
+            }
         };
 
         this.mode = mode;
