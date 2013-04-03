@@ -7,23 +7,22 @@ import precog.geom.IRectangleObservable;
 import thx.react.IObserver;
 import thx.react.promise.Timer;
 
-class HtmlPanel implements IObserver<IRectangle>
+class HtmlPanel extends Panel implements IObserver<IRectangle>
 {
 	public var element(default, null) : JQuery;
-	public var panel(default, null) : Panel;
 	public function new(cls : String = "", ?container : JQuery)
 	{
-		panel = new Panel();
+		super();
 		element = new JQuery('<div class="panel $cls" style="position:absolute"></div>');
 //		Timer.delay(0).then(element.addClass.bind("animate-all"));
-		panel.rectangle.attach(this);
+		rectangle.attach(this);
 		if(null != container)
 			element.appendTo(container);
 	}
 
 	public function update(rect : IRectangle)
 	{
-		panel.rectangle.set(rect.x, rect.y, rect.width, rect.height);
+		rectangle.set(rect.x, rect.y, rect.width, rect.height);
 		element
                     .css("top",    rect.y + "px")
                     .css("left",   rect.x + "px")
@@ -33,9 +32,7 @@ class HtmlPanel implements IObserver<IRectangle>
 
 	public function destroy()
 	{
-		panel.rectangle.detach(this);
+		rectangle.detach(this);
 		element.remove();
-		panel = null;
-		element = null;
 	}
 }

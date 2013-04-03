@@ -200,7 +200,7 @@ class HtmlTree<T>
 		panel.element.append(scroller);
 		panel.element.scroll(function(_) delayedUpdate());
 		// update rows
-		panel.panel.rectangle.addListener(function(rect) {
+		panel.rectangle.addListener(function(rect) {
 			calculateRowHeight();
 			update();
 		});
@@ -237,7 +237,7 @@ class HtmlTree<T>
 			start_index     = Math.floor(scroll / rowHeight),
 			items_total     = tree.list.length,
 			height_total    = items_total * rowHeight,
-			height_page     = panel.panel.rectangle.height,
+			height_page     = panel.rectangle.height,
 			items_page      = Math.ceil(height_page / rowHeight) * 2 + 1, // look ahead 1 page
 			items_visibles  = Math.round(Math.min(items_total - start_index, items_page)),
 			height_scroller = Math.max(height_page, height_total)
@@ -272,7 +272,7 @@ class HtmlTree<T>
 	// TODO implement
 	function calculateRowHeight()
 	{
-		rowHeight = renderer.getRowHeight(panel.panel.rectangle);
+		rowHeight = renderer.getRowHeight(panel.rectangle);
 	}
 }
 

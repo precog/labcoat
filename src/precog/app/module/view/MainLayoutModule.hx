@@ -41,12 +41,12 @@ class MainLayoutModule extends Module {
         layout = new DockLayout(0, 0);
         layout.defaultMargin = panelMargin;
 
-        layout.addPanel(toolbar.panel).dockTop(22);
-        layout.addPanel(editor.panel).fill();
-        layout.addPanel(statusbar.panel).dockBottom(20);
+        layout.addPanel(toolbar).dockTop(22);
+        layout.addPanel(editor).fill();
+        layout.addPanel(statusbar).dockBottom(20);
 
-        message.value.panel.rectangle.addListener(updateLayout);
-        updateLayout(message.value.panel.rectangle);
+        message.value.rectangle.addListener(updateLayout);
+        updateLayout(message.value.rectangle);
 
         communicator.provide(new MainToolbarHtmlPanelMessage(toolbar));
         communicator.provide(new MainEditorHtmlPanelMessage(editor));

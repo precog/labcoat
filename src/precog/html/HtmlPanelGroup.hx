@@ -154,16 +154,16 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 		switch (gutterPosition) {
 			case Top:
 				gutter.element.addClass("top");
-				layout.addPanel(gutter.panel).dockTop(gutterSize, gutterMargin);
+				layout.addPanel(gutter).dockTop(gutterSize, gutterMargin);
 			case Bottom:
 				gutter.element.addClass("bottom");
-				layout.addPanel(gutter.panel).dockBottom(gutterSize, gutterMargin);
+				layout.addPanel(gutter).dockBottom(gutterSize, gutterMargin);
 			case Left:
 				gutter.element.addClass("left");
-				layout.addPanel(gutter.panel).dockLeft(gutterSize, gutterMargin);
+				layout.addPanel(gutter).dockLeft(gutterSize, gutterMargin);
 			case Right:
 				gutter.element.addClass("right");
-				layout.addPanel(gutter.panel).dockRight(gutterSize, gutterMargin);
+				layout.addPanel(gutter).dockRight(gutterSize, gutterMargin);
 		}
 		layout.addPanel(pane).fill();
 		updateVerticalPosition();

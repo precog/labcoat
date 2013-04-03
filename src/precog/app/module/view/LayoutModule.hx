@@ -43,7 +43,7 @@ class LayoutModule extends Module
 
 		mainLayout.rectangle.set(0, 0, size.width, size.height);
 #if (html5 || cordova)
-		mainLayout.addPanel(menu.panel).dockTop(20);
+		mainLayout.addPanel(menu).dockTop(20);
 #end
 		groups.dockIfExists("tools", mainLayout, Bottom(groups.dockSize(["tools"], 100)));
 
@@ -60,7 +60,7 @@ class LayoutModule extends Module
 			groups.dockIfExists("support", mainLayout, Right(groups.dockSize(["support"], 250)), Right);
 		}
 	
-		mainLayout.addPanel(mainHtmlPanel.panel).fill();
+		mainLayout.addPanel(mainHtmlPanel).fill();
 		mainLayout.update();
 		contextLayout.update();
 	}

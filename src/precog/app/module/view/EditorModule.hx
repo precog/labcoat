@@ -55,8 +55,8 @@ class EditorModule extends Module {
 
                 // TODO: move out from here: TABS!!!
         var rect = new Rectangle();
-        editorPanelMessage.value.panel.rectangle.addListener(rect.updateSize);
-        rect.updateSize(editorPanelMessage.value.panel.rectangle);
+        editorPanelMessage.value.rectangle.addListener(rect.updateSize);
+        rect.updateSize(editorPanelMessage.value.rectangle);
         main = new HtmlPanelGroup(editorPanelMessage.value.element, rect, true);
         main.gutterMargin = 0;
         main.toggleSize = Default;
