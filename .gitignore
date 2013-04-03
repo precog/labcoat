@@ -1,7 +1,17 @@
 node_modules
-bin/debug/html5/css/labcoat.css
-bin/debug/html5/js/labcoat.js
-bin/debug/html5/js/labcoat.js.map
+bin/test/test.js
+bin/test/test.js.map
+bin/resources/translation
+bin/resources/localization
+bin/resources/css/labcoat.css
+bin/resources/js/labcoat.js
+bin/resources/js/labcoat.js.map
+bin/debug/html5
+bin/debug/node-webkit/*
+!bin/debug/node-webkit/package.json
 
 labcoat.sublime-project
 labcoat.sublime-workspace
+
+.DS_Store
+Labcoat.app
