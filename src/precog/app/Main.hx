@@ -23,7 +23,7 @@ class Main
         manager.addModule(new MainLayoutModule());
 
         manager.addModule(new FileSystemModule());
-
+///* NOT IMPLEMENTED PANELS
         manager.addModule(new TutorialModule());
         manager.addModule(new ReferenceModule());
         manager.addModule(new ExamplesModule());
@@ -32,7 +32,7 @@ class Main
         manager.addModule(new TasksModule());
         manager.addModule(new SharingModule());
         manager.addModule(new ChatModule());
-
+//*/
         manager.addModule(new EditorModule());
         manager.addModule(new EditorToolbarModule());
 

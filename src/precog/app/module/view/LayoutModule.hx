@@ -9,14 +9,18 @@ import precog.layout.Extent;
 import precog.html.HtmlPanel;
 import precog.app.message.ApplicationHtmlContainerMessage;
 import precog.app.message.MainHtmlPanelMessage;
+import precog.app.message.RequestSystemHtmlPanelGroupMessage;
 import precog.app.message.SystemHtmlPanelGroupMessage;
+import precog.app.message.RequestSupportHtmlPanelGroupMessage;
 import precog.app.message.SupportHtmlPanelGroupMessage;
+import precog.app.message.RequestToolsHtmlPanelGroupMessage;
 import precog.app.message.ToolsHtmlPanelGroupMessage;
 import precog.geom.Rectangle;
 
 using precog.html.HtmlPanelGroup;
 using precog.html.JQuerys;
 using thx.react.IObservable;
+using thx.react.Promise;
 
 class LayoutModule extends Module
 {
@@ -52,7 +56,7 @@ class LayoutModule extends Module
 			mainLayout.addPanel(contextPanel).dockLeft(
 				groups.dockSize(["system", "support"], 200)
 			);
-			groups.dockIfExists("system", contextLayout, Top(0.5));
+			groups.dockIfExists("system", contextLayout, groups.existsGroup("support") ? Top(0.5) : Fill);
 			groups.dockIfExists("support", contextLayout, Fill, Left);
 		} else {
 			mainLayout.addPanel(contextPanel).dockLeft(groups.dockSize(["system"], 200));
@@ -87,11 +91,38 @@ class LayoutModule extends Module
 			contextLayout.rectangle.set(rect.x, rect.y, rect.width, rect.height);
 		});
 
-        comm.provide(new SystemHtmlPanelGroupMessage(groups.ensureGroup("system", Left, updateLayouts).group));
-        comm.provide(new SupportHtmlPanelGroupMessage(groups.ensureGroup("support", Right, updateLayouts).group));
-        comm.provide(new ToolsHtmlPanelGroupMessage(groups.ensureGroup("tools", Bottom, updateLayouts).group));
-        
-        updateLayouts();
+        comm.respond(
+        	function(_ : RequestSystemHtmlPanelGroupMessage)
+        	{
+        		var g = new SystemHtmlPanelGroupMessage(groups.ensureGroup("system", Left, updateLayouts).group);
+        		updateLayouts();
+	        	return Promise.value(g);
+        	},
+        	RequestSystemHtmlPanelGroupMessage,
+        	SystemHtmlPanelGroupMessage
+        );
+
+        comm.respond(
+        	function(_ : RequestSupportHtmlPanelGroupMessage)
+        	{
+        		var g = new SupportHtmlPanelGroupMessage(groups.ensureGroup("support", Right, updateLayouts).group);
+        		updateLayouts();
+	        	return Promise.value(g);
+        	},
+        	RequestSupportHtmlPanelGroupMessage,
+        	SupportHtmlPanelGroupMessage
+        );
+
+        comm.respond(
+        	function(_ : RequestToolsHtmlPanelGroupMessage)
+        	{
+        		var g = new ToolsHtmlPanelGroupMessage(groups.ensureGroup("tools", Bottom, updateLayouts).group);
+        		updateLayouts();
+	        	return Promise.value(g);
+        	},
+        	RequestToolsHtmlPanelGroupMessage,
+        	ToolsHtmlPanelGroupMessage
+        );
 
         comm.provide(new MainHtmlPanelMessage(mainHtmlPanel));
 
@@ -126,6 +157,11 @@ class LayoutGroups
 	public function getGroup(name : String)
 	{
 		return map.get(name);
+	}
+
+	public function existsGroup(name : String)
+	{
+		return map.exists(name);
 	}
 
 	function createGroup(name : String, position : GutterPosition, update : Void -> Void)

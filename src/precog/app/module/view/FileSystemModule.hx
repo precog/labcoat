@@ -1,5 +1,6 @@
 package precog.app.module.view;
 
+import precog.app.message.RequestSystemHtmlPanelGroupMessage;
 import precog.app.message.SystemHtmlPanelGroupMessage;
 import precog.util.Locale;
 import precog.communicator.Communicator;
@@ -16,7 +17,7 @@ class FileSystemModule extends Module {
 
     override public function connect(communicator: Communicator) {
         communicator
-            .demand(SystemHtmlPanelGroupMessage)
+            .request(new RequestSystemHtmlPanelGroupMessage(), SystemHtmlPanelGroupMessage)
             .await(communicator.demand(Locale))
             .then(onMessage);
     }

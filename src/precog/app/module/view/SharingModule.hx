@@ -1,5 +1,6 @@
 package precog.app.module.view;
 
+import precog.app.message.RequestToolsHtmlPanelGroupMessage;
 import precog.app.message.ToolsHtmlPanelGroupMessage;
 import precog.util.Locale;
 import precog.communicator.Communicator;
@@ -12,7 +13,7 @@ class SharingModule extends Module {
 
     override public function connect(communicator: Communicator) {
         communicator
-            .demand(ToolsHtmlPanelGroupMessage)
+            .request(new RequestToolsHtmlPanelGroupMessage(), ToolsHtmlPanelGroupMessage)
             .await(communicator.demand(Locale))
             .then(onMessage);
     }
