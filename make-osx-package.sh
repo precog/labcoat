@@ -12,6 +12,7 @@ if [ ! -d $APPNAME ]; then
     rm $NWZIP
 fi
 
+cp $OLDPWD/bin/osx/Info.plist $OLDPWD/$APPNAME/Contents/
+
 cd bin/debug/node-webkit
 zip -r $OLDPWD/$APPNAME/Contents/Resources/app.nw *
-
