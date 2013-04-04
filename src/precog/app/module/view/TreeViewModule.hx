@@ -13,7 +13,7 @@ using thx.react.Promise;
 
 using precog.html.JQuerys;
 
-class FileSystemModule extends Module {
+class TreeViewModule extends Module {
 
     override public function connect(communicator: Communicator) {
         communicator
@@ -28,8 +28,6 @@ class FileSystemModule extends Module {
         message.value.addItem(item);
         item.activate();
         createTree(item.panel);
-
-
     }
 
     function createTree(panel : HtmlPanel)

@@ -2,6 +2,7 @@ package precog.app;
 
 import precog.communicator.ModuleManager;
 import precog.app.module.config.*;
+import precog.app.module.model.*;
 import precog.app.module.view.*;
 import precog.app.module.api.*;
 import precog.editor.*;
@@ -22,7 +23,7 @@ class Main
         manager.addModule(new LayoutModule());
         manager.addModule(new MainLayoutModule());
 
-        manager.addModule(new FileSystemModule());
+        manager.addModule(new TreeViewModule());
 ///* NOT IMPLEMENTED PANELS
         manager.addModule(new TutorialModule());
         manager.addModule(new ReferenceModule());
@@ -35,6 +36,9 @@ class Main
 //*/
         manager.addModule(new EditorModule());
         manager.addModule(new EditorToolbarModule());
+
+        // Model
+        manager.addModule(new FileSystemModule());
 
         // API
         manager.addModule(new JavaScriptAPIModule());
