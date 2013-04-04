@@ -4,6 +4,7 @@ import thx.react.Responder;
 import thx.react.Provider;
 import thx.react.Promise;
 import thx.react.Dispatcher;
+import thx.react.Buffer;
 
 #if macro
 import haxe.macro.Expr;
@@ -14,11 +15,13 @@ class Communicator
 	@:noDoc @:noDisplay public var provider(default, null)   : Provider;
 	@:noDoc @:noDisplay public var responder(default, null)  : Responder;
 	@:noDoc @:noDisplay public var dispatcher(default, null) : Dispatcher;
+	@:noDoc @:noDisplay public var buffer(default, null)     : Buffer;
 	public function new()
 	{
 		provider   = new Provider();
 		responder  = new Responder();
 		dispatcher = new Dispatcher();
+		buffer     = new Buffer();
 	}
 
 	macro public function on(ethis : ExprOf<Communicator>, handler : Expr)
@@ -66,5 +69,21 @@ class Communicator
 	public function respond<TRequest, TResponse>(handler : TRequest -> Null<Promise<TResponse -> Void>>, requestType : Class<TRequest>, responseType : Class<TResponse>)
 	{
 		return responder.respond(handler, requestType, responseType);
+	}
+
+	public function queue<T>(value : T)
+	{
+		buffer.queueMany([value]);
+	}
+
+	public function queueMany<T>(values : Iterable<T>)
+	{
+		buffer.queueMany(values);
+	}
+
+	macro public function consume<T>(ethis : ExprOf<Communicator>, handler : Expr)
+	{
+		var name = Buffer.getArrayArgumentType(handler);
+		return macro $ethis.buffer.consumeImpl($v{name}, $handler);
 	}
 }
