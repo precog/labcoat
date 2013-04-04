@@ -61,6 +61,12 @@ class Communicator
 		return this;
 	}
 
+	public function provideLazy<T>(type : Class<T>, handler : Deferred<T> -> Void)
+	{
+		provider.provideLazy(type, handler);
+		return this;
+	}
+
 	public function request<TRequest, TResponse>(payload : TRequest, responseType : Class<TResponse>) : Promise<TResponse -> Void>
 	{
 		return responder.request(payload, responseType);

@@ -1,6 +1,5 @@
 package precog.app.module.view;
 
-import precog.app.message.RequestSystemHtmlPanelGroupMessage;
 import precog.app.message.SystemHtmlPanelGroupMessage;
 import precog.util.Locale;
 import precog.communicator.Communicator;
@@ -17,7 +16,7 @@ class TreeViewModule extends Module {
 
     override public function connect(communicator: Communicator) {
         communicator
-            .request(new RequestSystemHtmlPanelGroupMessage(), SystemHtmlPanelGroupMessage)
+            .demand(SystemHtmlPanelGroupMessage)
             .await(communicator.demand(Locale))
             .then(onMessage);
     }

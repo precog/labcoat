@@ -9,11 +9,8 @@ import precog.layout.Extent;
 import precog.html.HtmlPanel;
 import precog.app.message.ApplicationHtmlContainerMessage;
 import precog.app.message.MainHtmlPanelMessage;
-import precog.app.message.RequestSystemHtmlPanelGroupMessage;
 import precog.app.message.SystemHtmlPanelGroupMessage;
-import precog.app.message.RequestSupportHtmlPanelGroupMessage;
 import precog.app.message.SupportHtmlPanelGroupMessage;
-import precog.app.message.RequestToolsHtmlPanelGroupMessage;
 import precog.app.message.ToolsHtmlPanelGroupMessage;
 import precog.geom.Rectangle;
 
@@ -91,37 +88,34 @@ class LayoutModule extends Module
 			contextLayout.rectangle.set(rect.x, rect.y, rect.width, rect.height);
 		});
 
-        comm.respond(
-        	function(_ : RequestSystemHtmlPanelGroupMessage)
+        comm.provideLazy(
+        	SystemHtmlPanelGroupMessage,
+        	function(deferred : Deferred<SystemHtmlPanelGroupMessage>)
         	{
         		var g = new SystemHtmlPanelGroupMessage(groups.ensureGroup("system", Left, updateLayouts).group);
         		updateLayouts();
-	        	return Promise.value(g);
-        	},
-        	RequestSystemHtmlPanelGroupMessage,
-        	SystemHtmlPanelGroupMessage
+	        	deferred.resolve(g);
+        	}
         );
 
-        comm.respond(
-        	function(_ : RequestSupportHtmlPanelGroupMessage)
+        comm.provideLazy(
+        	SupportHtmlPanelGroupMessage,
+        	function(deferred : Deferred<SupportHtmlPanelGroupMessage>)
         	{
         		var g = new SupportHtmlPanelGroupMessage(groups.ensureGroup("support", Right, updateLayouts).group);
         		updateLayouts();
-	        	return Promise.value(g);
-        	},
-        	RequestSupportHtmlPanelGroupMessage,
-        	SupportHtmlPanelGroupMessage
+	        	deferred.resolve(g);
+        	}
         );
 
-        comm.respond(
-        	function(_ : RequestToolsHtmlPanelGroupMessage)
+        comm.provideLazy(
+        	ToolsHtmlPanelGroupMessage,
+        	function(deferred : Deferred<ToolsHtmlPanelGroupMessage>)
         	{
         		var g = new ToolsHtmlPanelGroupMessage(groups.ensureGroup("tools", Bottom, updateLayouts).group);
         		updateLayouts();
-	        	return Promise.value(g);
-        	},
-        	RequestToolsHtmlPanelGroupMessage,
-        	ToolsHtmlPanelGroupMessage
+	        	deferred.resolve(g);
+        	}
         );
 
         comm.provide(new MainHtmlPanelMessage(mainHtmlPanel));

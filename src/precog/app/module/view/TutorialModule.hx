@@ -1,6 +1,5 @@
 package precog.app.module.view;
 
-import precog.app.message.RequestSupportHtmlPanelGroupMessage;
 import precog.app.message.SupportHtmlPanelGroupMessage;
 import precog.util.Locale;
 import precog.communicator.Communicator;
@@ -16,7 +15,7 @@ class TutorialModule extends Module {
 
     override public function connect(communicator: Communicator) {
         communicator
-            .request(new RequestSupportHtmlPanelGroupMessage(), SupportHtmlPanelGroupMessage)
+            .demand(SupportHtmlPanelGroupMessage)
             .await(communicator.demand(Locale))
             .then(onMessage);
     }
