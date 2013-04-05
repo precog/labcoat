@@ -2,6 +2,7 @@ package precog.app.module.model;
 
 import precog.communicator.*;
 import precog.util.fs.*;
+import thx.react.Promise;
 
 class FileSystemModule extends Module
 {
@@ -10,10 +11,12 @@ class FileSystemModule extends Module
 		super();		
 	}
 
-
 	override function connect(communicator : Communicator)
 	{
-		var fs = new FileSystem();
-		communicator.provide(fs);
+		communicator.provideLazy(
+			FileSystem,
+			function(deferred : Deferred<FileSystem>) {
+				deferred.resolve(new FileSystem());
+			});
 	}
 }
