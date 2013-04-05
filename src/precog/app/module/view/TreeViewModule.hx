@@ -1,5 +1,6 @@
 package precog.app.module.view;
 
+import precog.app.message.MenuItemMessage;
 import precog.app.message.SystemHtmlPanelGroupMessage;
 import precog.util.Locale;
 import precog.communicator.Communicator;
@@ -8,8 +9,8 @@ import precog.html.HtmlPanelGroup;
 import precog.html.HtmlPanel;
 import precog.html.HtmlTree;
 import jQuery.JQuery;
-using thx.react.Promise;
 
+using thx.react.Promise;
 using precog.html.JQuerys;
 
 class TreeViewModule extends Module {
@@ -18,15 +19,20 @@ class TreeViewModule extends Module {
         communicator
             .demand(SystemHtmlPanelGroupMessage)
             .await(communicator.demand(Locale))
-            .then(onMessage);
+            .then(onMessage.bind(communicator));
     }
 
-    function onMessage(message: SystemHtmlPanelGroupMessage, locale : Locale)
+    function onMessage(communicator: Communicator, message: SystemHtmlPanelGroupMessage, locale : Locale)
     {
     	var item = new HtmlPanelGroupItem(locale.singular("file system"));
         message.value.addItem(item);
         item.activate();
         createTree(item.panel);
+
+        communicator.queueMany([
+            new MenuItemMessage(new MenuItem(MenuFile(SubgroupFileLocal), "Open File...", function(_){}, 0)),
+            new MenuItemMessage(new MenuItem(MenuFile(SubgroupFileLocal), "Close", function(_){}, 1))
+        ]);
     }
 
     function createTree(panel : HtmlPanel)

@@ -1,6 +1,7 @@
 package precog.app.module.view;
 
 import precog.app.message.*;
+import precog.app.message.MenuItemMessage;
 import precog.util.Locale;
 import precog.communicator.Communicator;
 import precog.communicator.Module;
@@ -40,6 +41,11 @@ class EditorModule extends Module {
         communicator.on(function(_ : EditorNotebookRequestCloseCurrent) closeNotebook());
         communicator.on(function(e : EditorRegionRequestCreate) appendRegion(e.region));
         communicator.on(function(e : EditorNotebookUpdate) changeNotebook(e.current));
+
+        communicator.queueMany([
+            new MenuItemMessage(new MenuItem(MenuEdit(SubgroupEditHistory), "Undo", function(_){}, 0)),
+            new MenuItemMessage(new MenuItem(MenuEdit(SubgroupEditHistory), "Redo", function(_){}, 1))
+        ]);
     }
 
     public function init(editorPanelMessage: MainEditorHtmlPanelMessage, locale : Locale) {

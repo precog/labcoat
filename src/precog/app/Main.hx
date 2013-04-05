@@ -19,6 +19,12 @@ class Main
         manager.addModule(new LocalizationModule());
 
         // View
+#if (html5 || cordova)
+        manager.addModule(new Html5MenuModule());
+#else
+        manager.addModule(new NodeWebkitMenuModule());
+#end
+
         manager.addModule(new ContainerModule());
         manager.addModule(new LayoutModule());
         manager.addModule(new MainLayoutModule());

@@ -36,7 +36,7 @@ class EditorToolbarModule extends Module {
             DropdownDivider,
             DropdownButton(locale.singular('insert region'), '', createRegion)
         ];
-        new HtmlDropdown('', 'cog', Mini, items, DropdownAlignRight).element.appendTo(element);
+        new HtmlDropdown('', 'cog', '', Mini, items, DropdownAlignRight).element.appendTo(element);
     }
 
     function updateNotebooks(event: EditorNotebookUpdate) {

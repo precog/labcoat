@@ -9,6 +9,7 @@ import precog.layout.Extent;
 import precog.html.HtmlPanel;
 import precog.app.message.ApplicationHtmlContainerMessage;
 import precog.app.message.MainHtmlPanelMessage;
+import precog.app.message.MenuHtmlPanelMessage;
 import precog.app.message.SystemHtmlPanelGroupMessage;
 import precog.app.message.SupportHtmlPanelGroupMessage;
 import precog.app.message.ToolsHtmlPanelGroupMessage;
@@ -118,6 +119,9 @@ class LayoutModule extends Module
         	}
         );
 
+#if (html5 || cordova)
+        comm.provide(new MenuHtmlPanelMessage(menu));
+#end
         comm.provide(new MainHtmlPanelMessage(mainHtmlPanel));
 
 		new JQuery(Browser.window).resize(function(_) updateLayouts());

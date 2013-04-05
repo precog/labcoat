@@ -31,7 +31,7 @@ class RegionButtons {
             DropdownButton(locale.singular('delete'), '', deleteRegion)
         ]);
 
-        element = new HtmlDropdown('', 'cog', Mini, items, DropdownAlignRight).element;
+        element = new HtmlDropdown('', 'cog', '', Mini, items, DropdownAlignRight).element;
     }
 
     function changeTo(mode: RegionMode) {
