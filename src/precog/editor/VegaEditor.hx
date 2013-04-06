@@ -14,7 +14,7 @@ class VegaEditor implements RegionEditor {
     public function new(region: Region) {
         this.region = region;
 
-        var options: Dynamic = {mode: {name: 'javascript', json: true}, region: region};
+        var options: Dynamic = { lineNumber: true, mode: {name: 'javascript', json: true}, region: region};
 
         element = document.createElement('div');
 
