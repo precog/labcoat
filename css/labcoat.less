@@ -209,37 +209,53 @@ body {
 
     .CodeMirror {
         height: 100% !important;
+        font-size: 11.5px;
     }
 
     .editor {
         height: 100%;
 
-        .region {
-            background: #fff;
-            border: 1px solid #ddd;
-            margin: 1em 1em 2em;
+        .edit-area {
+            overflow: auto;
+            .region {
+                border-bottom: 1px solid #ddd;
+                margin: 0;
+                margin-bottom: 0px;
 
-            clear: right;
+                clear: right;
 
-            @buttonwidth: 25px;
+                @buttonwidth: 25px;
 
-            .buttons {
-                float: right;
+                .buttons {
+                    float: right;
 
-                button {
-                    display: block;
-                    width: @buttonwidth;
+                    button {
+                        display: block;
+                        width: @buttonwidth;
+                    }
+                }
+
+                .output {
+                    padding: 2px 10px;
+                    #gradient.radial(#fafafa, #f0f0f0);
+                }
+
+                .cm-header {
+                    font-size: 1.5em;
                 }
             }
-
-            .output {
-                background: #fdd;
-                padding: 0.5em;
-            }
-
-            .cm-header {
-                font-size: 1.5em;
-            }
         }
+    }
+
+    // VEGA
+    .axis path, .axis line {
+        fill: none;
+        stroke: black;
+        stroke-width: 1px;
+        shape-rendering: crispEdges;
+    }
+    .axis text {
+        font-family: sans-serif;
+        font-size: 11px;
     }
 }

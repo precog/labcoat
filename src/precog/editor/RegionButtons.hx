@@ -25,6 +25,9 @@ class RegionButtons {
         if(region.mode != JSONRegionMode) {
             items.push(DropdownButton(locale.format('switch to {0}', ['JSON']), '', changeTo(JSONRegionMode)));
         }
+        if(region.mode != VegaRegionMode) {
+            items.push(DropdownButton(locale.format('switch to {0}', ['Vega']), '', changeTo(VegaRegionMode)));
+        }
 
         items = items.concat([
             DropdownDivider,

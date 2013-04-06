@@ -4,4 +4,5 @@ enum RegionMode {
     QuirrelRegionMode;
     MarkdownRegionMode;
     JSONRegionMode;
+    VegaRegionMode;
 }

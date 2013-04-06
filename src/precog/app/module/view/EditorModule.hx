@@ -90,6 +90,7 @@ class EditorModule extends Module {
             item = new HtmlPanelGroupItem(notebook.name, Icons.book);
         main.addItem(item);
         panels.set(notebook, item);
+        item.panel.element.addClass("edit-area");
         item.panel.element.append(notebook.element);
         notebooks.push(notebook);
         notebook.events.changeName.on(function(old : String, notebook : Notebook) {
