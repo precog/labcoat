@@ -9,7 +9,7 @@ class MenuItem implements ValueClass {
     var group: TopLevelGroup;
     var label: String;
     var callback: Event -> Void;
-    var index: Int;
+    var weight: Int;
 }
 
 enum TopLevelGroup {

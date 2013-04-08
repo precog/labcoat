@@ -13,9 +13,14 @@ import jQuery.JQuery;
 
 using thx.react.Promise;
 
+class WeightedDropdownItem implements ValueClass {
+    var weight: Int;
+    var item: DropdownItem;
+}
+
 class Html5MenuGroup implements ValueClass {
     var dropdown: HtmlDropdown;
-    var subgroups: Array<Array<DropdownItem>>;
+    var subgroups: Array<Array<WeightedDropdownItem>>;
 
     public function replaceDropdown(newDropdown: HtmlDropdown) {
         dropdown.element.replaceWith(newDropdown.element);
@@ -41,8 +46,6 @@ class Html5MenuModule extends Module {
 
     function onMessage(communicator: Communicator, message: MenuHtmlPanelMessage, locale: Locale) {
         var panel = message.value;
-        //var element = new JQuery('<div class="btn-group"></div>').appendTo(panel.element);
-
         for(index in 0...Type.getEnumConstructs(TopLevelGroup).length) {
             var group = new Html5MenuGroup(createDropdown('', []), []);
             group.dropdown.element.appendTo(panel.element);
@@ -67,9 +70,30 @@ class Html5MenuModule extends Module {
             group.subgroups[subIndex] = [];
         }
 
-        var dropdownItems = group.subgroups[subIndex];
-        dropdownItems[item.index] = DropdownButton(item.label, '', item.callback);
-        group.replaceDropdown(createDropdown(TopLevelGroups.name(item.group), dropdownItems));
+        var weightedDropdownItems = group.subgroups[subIndex];
+        weightedDropdownItems.push(new WeightedDropdownItem(item.weight, DropdownButton(item.label, '', item.callback)));
+        weightedDropdownItems.sort(byWeight);
+
+        group.replaceDropdown(dropdownFromGroup(TopLevelGroups.name(item.group), group));
+    }
+
+    function fromWeighted(weighted: WeightedDropdownItem) {
+        return weighted.item;
+    }
+
+    function byWeight(a: WeightedDropdownItem, b: WeightedDropdownItem) {
+        return a.weight - b.weight;
+    }
+
+    function dropdownFromGroup(name: String, group: Html5MenuGroup) {
+        var items = [].concat(group.subgroups[0].map(fromWeighted));
+
+        for(subgroup in group.subgroups.slice(1)) {
+            items.push(DropdownDivider);
+            items = items.concat(subgroup.map(fromWeighted));
+        }
+
+        return createDropdown(name, items);
     }
 
     function createDropdown(name: String, items: Array<DropdownItem>) {
