@@ -25,6 +25,9 @@ class Main
         manager.addModule(new NodeWebkitMenuModule());
 #end
 
+        manager.addModule(new CollaborateMenuModule());
+        manager.addModule(new HelpMenuModule());
+
         manager.addModule(new ContainerModule());
         manager.addModule(new LayoutModule());
         manager.addModule(new MainLayoutModule());

@@ -15,10 +15,10 @@ class MenuItem implements ValueClass {
 enum TopLevelGroup {
     MenuFile(subgroup: SubgroupFile);
     MenuEdit(subgroup: SubgroupEdit);
-    MenuView;
-    MenuCode;
-    MenuCollaborate;
-    MenuHelp;
+    MenuView(subgroup: SubgroupView);
+    MenuCode(subgroup: SubgroupCode);
+    MenuCollaborate(subgroup: SubgroupCollaborate);
+    MenuHelp(subgroup: SubgroupHelp);
 }
 
 enum SubgroupFile {
@@ -31,15 +31,40 @@ enum SubgroupEdit {
     SubgroupEditHistory;
 }
 
+enum SubgroupView {
+}
+
+enum SubgroupCode {
+    SubgroupCodeVariables;
+    SubgroupCodeComments;
+    SubgroupCodeDeclarations;
+    SubgroupCodeFormating;
+    SubgroupCodeInsert;
+    SubgroupCodeRun;
+}
+
+enum SubgroupCollaborate {
+    SubgroupCollaborateChannels;
+    SubgroupCollaborateSharing;
+    SubgroupCollaborateComments;
+}
+
+enum SubgroupHelp {
+    SubgroupHelpLookup;
+    SubgroupHelpQuirrel;
+    SubgroupHelpSupport;
+}
+
+
 class TopLevelGroups {
     public static function name(group: TopLevelGroup) {
         return switch(group) {
         case MenuFile(_): 'File';
         case MenuEdit(_): 'Edit';
-        case MenuView: 'View';
-        case MenuCode: 'Code';
-        case MenuCollaborate: 'Collaboration';
-        case MenuHelp: 'Edit';
+        case MenuView(_): 'View';
+        case MenuCode(_): 'Code';
+        case MenuCollaborate(_): 'Collaborate';
+        case MenuHelp(_): 'Help';
         }
     }
 
@@ -48,7 +73,10 @@ class TopLevelGroups {
         var value: EnumValue = switch(group) {
         case MenuFile(subgroup): subgroup;
         case MenuEdit(subgroup): subgroup;
-        default: null;
+        case MenuView(subgroup): subgroup;
+        case MenuCode(subgroup): subgroup;
+        case MenuCollaborate(subgroup): subgroup;
+        case MenuHelp(subgroup): subgroup;
         }
         return Type.enumIndex(value);
     }
