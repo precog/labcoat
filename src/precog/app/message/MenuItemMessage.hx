@@ -15,6 +15,7 @@ class MenuItem implements ValueClass {
 enum TopLevelGroup {
     MenuFile(subgroup: SubgroupFile);
     MenuEdit(subgroup: SubgroupEdit);
+    MenuFind(subgroup: SubgroupFind);
     MenuView(subgroup: SubgroupView);
     MenuCode(subgroup: SubgroupCode);
     MenuCollaborate(subgroup: SubgroupCollaborate);
@@ -29,6 +30,9 @@ enum SubgroupFile {
 
 enum SubgroupEdit {
     SubgroupEditHistory;
+}
+
+enum SubgroupFind {
 }
 
 enum SubgroupView {
@@ -61,6 +65,7 @@ class TopLevelGroups {
         return switch(group) {
         case MenuFile(_): 'File';
         case MenuEdit(_): 'Edit';
+        case MenuFind(_): 'Find';
         case MenuView(_): 'View';
         case MenuCode(_): 'Code';
         case MenuCollaborate(_): 'Collaborate';
@@ -73,6 +78,7 @@ class TopLevelGroups {
         var value: EnumValue = switch(group) {
         case MenuFile(subgroup): subgroup;
         case MenuEdit(subgroup): subgroup;
+        case MenuFind(subgroup): subgroup;
         case MenuView(subgroup): subgroup;
         case MenuCode(subgroup): subgroup;
         case MenuCollaborate(subgroup): subgroup;
