@@ -109,7 +109,7 @@ class NodeWebkitMenuModule extends Module {
 
     function addSubgroup(items: Array<WeightedMenuItem>, menu: Menu) {
         for(item in items.map(fromWeighted)) {
-            menu.append(MenuItemFactory.create({label: item.label}));
+            menu.append(MenuItemFactory.create({label: item.label, click: item.callback}));
         }
     }
 }

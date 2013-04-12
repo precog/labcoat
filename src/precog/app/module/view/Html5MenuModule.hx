@@ -71,7 +71,7 @@ class Html5MenuModule extends Module {
         }
 
         var weightedDropdownItems = group.subgroups[subIndex];
-        weightedDropdownItems.push(new WeightedDropdownItem(item.weight, DropdownButton(item.label, '', item.callback)));
+        weightedDropdownItems.push(new WeightedDropdownItem(item.weight, DropdownButton(item.label, '', function(_) { item.callback(); })));
         weightedDropdownItems.sort(byWeight);
 
         group.replaceDropdown(dropdownFromGroup(TopLevelGroups.name(item.group), group));

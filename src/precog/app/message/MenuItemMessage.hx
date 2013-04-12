@@ -1,14 +1,13 @@
 package precog.app.message;
 
 import precog.macro.ValueClass;
-import jQuery.Event;
 
 class MenuItemMessage extends Message<MenuItem> { }
 
 class MenuItem implements ValueClass {
     var group: TopLevelGroup;
     var label: String;
-    var callback: Event -> Void;
+    var callback: Void -> Void;
     var weight: Int;
 }
 
