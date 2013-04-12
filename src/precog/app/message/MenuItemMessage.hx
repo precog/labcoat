@@ -80,4 +80,14 @@ class TopLevelGroups {
         }
         return Type.enumIndex(value);
     }
+
+    public static function isHidden(group: TopLevelGroup, platform: String) {
+        if(platform == "darwin") {
+            return switch(group) {
+            case MenuEdit(_): true;
+            case _: false;
+            }
+        }
+        return false;
+    }
 }

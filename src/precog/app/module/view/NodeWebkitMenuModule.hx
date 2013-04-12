@@ -44,6 +44,8 @@ class NodeWebkitMenuModule extends Module {
     }
 
     function addItem(item: MenuItem) {
+        if(TopLevelGroups.isHidden(item.group, Process.platform)) return;
+
         var index = Type.enumIndex(item.group);
         var group = groups[index];
 
