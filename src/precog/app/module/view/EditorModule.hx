@@ -43,8 +43,8 @@ class EditorModule extends Module {
         communicator.on(function(e : EditorNotebookUpdate) changeNotebook(e.current));
 
         communicator.queueMany([
-            new MenuItemMessage(new MenuItem(MenuEdit(SubgroupEditHistory), "Undo", function(_){}, 0)),
-            new MenuItemMessage(new MenuItem(MenuEdit(SubgroupEditHistory), "Redo", function(_){}, 1))
+            // new MenuItemMessage(new MenuItem(MenuEdit(SubgroupEditHistory), "Undo", function(){}, 0)),
+            // new MenuItemMessage(new MenuItem(MenuEdit(SubgroupEditHistory), "Redo", function(){}, 1))
         ]);
     }
 

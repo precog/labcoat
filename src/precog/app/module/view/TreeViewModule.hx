@@ -30,8 +30,8 @@ class TreeViewModule extends Module {
         createTree(item.panel);
 
         communicator.queueMany([
-            new MenuItemMessage(new MenuItem(MenuFile(SubgroupFileLocal), "Open File...", function(_){}, 0)),
-            new MenuItemMessage(new MenuItem(MenuFile(SubgroupFileLocal), "Close", function(_){}, 1))
+            // new MenuItemMessage(new MenuItem(MenuFile(SubgroupFileLocal), "Open File...", function(){}, 0)),
+            // new MenuItemMessage(new MenuItem(MenuFile(SubgroupFileLocal), "Close", function(){}, 1))
         ]);
     }
 
