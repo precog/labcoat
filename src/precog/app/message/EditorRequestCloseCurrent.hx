@@ -1,6 +1,6 @@
 package precog.app.message;
 
-class EditorNotebookRequestCloseCurrent
+class EditorRequestCloseCurrent
 {
 	public function new() { }
 }	

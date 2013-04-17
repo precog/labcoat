@@ -1,9 +1,10 @@
 package precog.editor;
 
+import precog.editor.Editor;
 import jQuery.JQuery;
 import thx.react.Signal;
 
-class Notebook {
+class Notebook implements Editor {
     @:isVar public var name(get, set) : String;
     public var events(default, null) : {
         public var changeName(default, null) : Signal2<String, Notebook>;
@@ -29,6 +30,10 @@ class Notebook {
         this.name = name;
     }
 
+    public function clear()
+        for(region in regions)
+            region.events.clear();
+
     public function deleteRegion(region: Region) {
         regions.remove(region);
         region.element.remove();
@@ -49,9 +54,6 @@ class Notebook {
             region.editor.focus();
         }
     }
-
-    public function iterator()
-        return regions.iterator();
 
     function get_name()
         return name;

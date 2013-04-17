@@ -13,7 +13,7 @@ import jQuery.Event;
 
 class EditorToolbarModule extends Module {
     public static var element = new JQuery('<div class="toolbar"></div>');
-    static var closeNotebookClass = 'close-notebook';
+    static var closeEditorClass = 'close-editor';
 
     var communicator : Communicator;
     var locale : Locale;
@@ -32,21 +32,27 @@ class EditorToolbarModule extends Module {
 
         var items = [
             DropdownButton(locale.singular('new notebook'), '', createNotebook),
-            DropdownButton(locale.singular('close notebook'), closeNotebookClass, closeNotebook),
+            DropdownButton(locale.singular('new file'), '', createCodeEditor),
+            DropdownButton(locale.singular('close editor'), closeEditorClass, closeEditor),
             DropdownDivider,
             DropdownButton(locale.singular('insert region'), '', createRegion)
         ];
         new HtmlDropdown('', 'cog', '', Mini, items, DropdownAlignRight).element.appendTo(element);
     }
 
-    function updateNotebooks(event: EditorNotebookUpdate) {
+    function updateNotebooks(event: EditorUpdate) {
         // TODO: This could be made nicer.
-        var closeNotebookItem = new JQuery('.${closeNotebookClass}');
+        var closeEditorItem = new JQuery('.${closeEditorClass}');
         if(event.all.length <= 1) {
-            closeNotebookItem.addClass('disabled');
+            closeEditorItem.addClass('disabled');
         } else {
-            closeNotebookItem.removeClass('disabled');
+            closeEditorItem.removeClass('disabled');
         }
+    }
+
+    function createCodeEditor(event: Event) {
+        event.preventDefault();
+        communicator.trigger(new EditorCodeRequestCreate());
     }
 
     function createNotebook(event: Event) {
@@ -54,9 +60,9 @@ class EditorToolbarModule extends Module {
         communicator.trigger(new EditorNotebookRequestCreate());
     }
 
-    function closeNotebook(event: Event) {
+    function closeEditor(event: Event) {
         event.preventDefault();
-        communicator.trigger(new EditorNotebookRequestCloseCurrent());
+        communicator.trigger(new EditorRequestCloseCurrent());
     }
 
     function createRegion(event: Event) {
