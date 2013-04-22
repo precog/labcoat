@@ -84,14 +84,10 @@ extern class Precog
 	// *** ANALYSIS ***
 	// ****************
 
-	// TODO needs typing
-    public function executeFile(info : PrecogExecuteFile, ?success : PrecogSuccess, ?failure : PrecogFailure) : Future<PrecogSuccess, PrecogFailure>;
-	// TODO needs typing
-    public function execute(info : PrecogQuery, ?success : PrecogSuccess, ?failure : PrecogFailure) : Future<PrecogSuccess, PrecogFailure>;
-	// TODO needs typing
-    public function asyncQuery(info : PrecogQuery, ?success : PrecogSuccess, ?failure : PrecogFailure) : Future<PrecogSuccess, PrecogFailure>;
-	// TODO needs typing
-    public function asyncQueryResults(jobId : String, ?success : PrecogSuccess, ?failure : PrecogFailure) : Future<PrecogSuccess, PrecogFailure>;
+    public function executeFile(info : PrecogExecuteFile, ?success : PrecogQueryResultProcedure, ?failure : PrecogFailure) : Future<PrecogQueryResultProcedure, PrecogFailure>;
+    public function execute(info : PrecogQuery, ?success : PrecogQueryResultProcedure, ?failure : PrecogFailure) : Future<PrecogQueryResultProcedure, PrecogFailure>;
+    public function asyncQuery(info : PrecogQuery, ?success : PrecogAsyncQueryProcedure, ?failure : PrecogFailure) : Future<PrecogAsyncQueryProcedure, PrecogFailure>;
+    public function asyncQueryResults(jobId : String, ?success : PrecogQueryResultDetailedProcedure, ?failure : PrecogFailure) : Future<PrecogQueryResultDetailedProcedure, PrecogFailure>;
 
 	static function __init__() : Void
 	{
@@ -159,23 +155,35 @@ typedef PrecogDescribeApiKeyProcedure = PrecogDescribeApiKey -> Void;
 typedef PrecogListDescribeApiKeyProcedure = Array<PrecogDescribeApiKey> -> Void;
 
 typedef PrecogUploadError = {
-	// TODO type me
-}
+				// TODO type me
+			}
 typedef PrecogUploadReport = {
-	errors : Array<PrecogUploadError>,
-	failed : Int,
-	ingestId : String,
-	ingested : Int,
-	skipped : Int,
-	total : Int
-}
+				errors : Array<PrecogUploadError>,
+				failed : Int,
+				ingestId : String,
+				ingested : Int,
+				skipped : Int,
+				total : Int
+			}
 typedef PrecogUploadReportProcedure = PrecogUploadReport -> Void;
 typedef PrecogMetadata = {
-	size : Float,
-	children : Dynamic, // TODO type me
-	structure : Dynamic // TODO type me
-}
+				size : Float,
+				children : Dynamic, // TODO type me
+				structure : Dynamic // TODO type me
+			}
 typedef PrecogMetadataProcedure = PrecogMetadata -> Void;
+typedef PrecogAsyncQuery = {
+				jobId : String
+			}
+typedef PrecogAsyncQueryProcedure = PrecogAsyncQuery -> Void;
+typedef PrecogQueryResult = Array<Dynamic>;
+typedef PrecogQueryResultProcedure = PrecogQueryResult -> Void;
+typedef PrecogQueryResultDetailed = {
+				errors : Array<Dynamic>, // TODO type me
+				warnings : Array<Dynamic>, // TODO type me
+				data : PrecogQueryResult
+			}
+typedef PrecogQueryResultDetailedProcedure = PrecogQueryResultDetailed -> Void;
 
 // ****************
 // *** CONFIG ***
