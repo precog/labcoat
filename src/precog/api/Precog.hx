@@ -4,7 +4,7 @@ import precog.api.PrecogHttp;
 
 extern class Precog 
 {
-	public function new(?options : PrecogConfig) : Void;
+	public function new(?options : Config) : Void;
 
 	public function serviceUrl(serviceName : String, serviceVersion : String, path : String) : String;
 	public function accountsUrl(path : String) : String;
@@ -19,75 +19,63 @@ extern class Precog
     // *** ACCOUNTS ***
     // ****************
 
-	public function createAccount(account : PrecogAccount, ?success : AccountIdProcedure, ?failure : PrecogFailure) : Future<AccountIdProcedure, PrecogFailure>;
-	public function requestPasswordReset(email : String, ?success : StringProcedure, ?failure : PrecogFailure) : Future<StringProcedure, PrecogFailure>;
-	public function lookupAccountId(email : String, ?success : AccountIdProcedure, ?failure : PrecogFailure) : Future<AccountIdProcedure, PrecogFailure>;
-	public function describeAccount(account : PrecogAccount, ?success : PrecogSuccessDescribeAccount, ?failure : PrecogFailure) : Future<PrecogSuccessDescribeAccount, PrecogFailure>;
-	// TODO needs typing
-	public function addGrantToAccount(info : PrecogGrantInfo, ?success : PrecogSuccess, ?failure : PrecogFailure) : Future<PrecogSuccess, PrecogFailure>;
-	public function currentPlan(account : PrecogAccount, ?success : StringProcedure, ?failure : PrecogFailure) : Future<StringProcedure, PrecogFailure>;
-	public function changePlan(account : PrecogAccountPlan, ?success : VoidProcedure, ?failure : PrecogFailure) : Future<VoidProcedure, PrecogFailure>;
-	public function deletePlan(account : PrecogAccount, ?success : PrecogPlanProcedure, ?failure : PrecogFailure) : Future<PrecogPlanProcedure, PrecogFailure>;
+	public function createAccount(account : OptAccount, ?success : ProcAccountId, ?failure : ProcFailure) : Future<ProcAccountId, ProcFailure>;
+	public function requestPasswordReset(email : String, ?success : ProcT<String>, ?failure : ProcFailure) : Future<ProcT<String>, ProcFailure>;
+	public function lookupAccountId(email : String, ?success : ProcAccountId, ?failure : ProcFailure) : Future<ProcAccountId, ProcFailure>;
+	public function describeAccount(account : OptAccount, ?success : ProcDescribeAccount, ?failure : ProcFailure) : Future<ProcDescribeAccount, ProcFailure>;
+	public function addGrantToAccount(info : OptGrantInfo, ?success : ProcT<Void>, ?failure : ProcFailure) : Future<ProcT<Void>, ProcFailure>;
+	public function currentPlan(account : OptAccount, ?success : ProcT<String>, ?failure : ProcFailure) : Future<ProcT<String>, ProcFailure>;
+	public function changePlan(account : OptAccountPlan, ?success : ProcT<Void>, ?failure : ProcFailure) : Future<ProcT<Void>, ProcFailure>;
+	public function deletePlan(account : OptAccount, ?success : ProcPlan, ?failure : ProcFailure) : Future<ProcPlan, ProcFailure>;
 
     // ****************
     // *** SECURITY ***
     // ****************
 
-    public function listApiKeys(?success : PrecogListApiKeyProcedure, ?failure : PrecogFailure) : Future<PrecogListApiKeyProcedure, PrecogFailure>;
+    public function listApiKeys(?success : ProcListApiKey, ?failure : ProcFailure) : Future<ProcListApiKey, ProcFailure>;
     // TODO define grants type
-    public function createApiKey(grants : Dynamic, ?success : PrecogCreatedApiKeyProcedure, ?failure : PrecogFailure) : Future<PrecogCreatedApiKeyProcedure, PrecogFailure>;
-    public function describeApiKey(apiKey : String, ?success : PrecogDescribeApiKeyProcedure, ?failure : PrecogFailure) : Future<PrecogDescribeApiKeyProcedure, PrecogFailure>;
-    public function deleteApiKey(apiKey : String, ?success : VoidProcedure, ?failure : PrecogFailure) : Future<VoidProcedure, PrecogFailure>;
-    public function retrieveApiKeyGrants(apiKey : String, ?success : PrecogListDescribeApiKeyProcedure, ?failure : PrecogFailure) : Future<PrecogListDescribeApiKeyProcedure, PrecogFailure>;
-	// TODO needs typing
-    public function addGrantToApiKey(info : PrecogAddGrantToApiKey, ?success : PrecogSuccess, ?failure : PrecogFailure) : Future<PrecogSuccess, PrecogFailure>;
-	// TODO needs typing
-    public function removeGrantFromApiKey(info : PrecogRemoveGrantFromApiKey, ?success : PrecogSuccess, ?failure : PrecogFailure) : Future<PrecogSuccess, PrecogFailure>;
-	// TODO needs typing
-    public function createGrant(grant : PrecogCreateGrant, ?success : PrecogSuccess, ?failure : PrecogFailure) : Future<PrecogSuccess, PrecogFailure>;
-	// TODO needs typing
-    public function describeGrant(grantId : String, ?success : PrecogSuccess, ?failure : PrecogFailure) : Future<PrecogSuccess, PrecogFailure>;
-	// TODO needs typing
-    public function deleteGrant(grantId : String, ?success : PrecogSuccess, ?failure : PrecogFailure) : Future<PrecogSuccess, PrecogFailure>;
-	// TODO needs typing
-    public function listGrantChildren(grantId : String, ?success : PrecogSuccess, ?failure : PrecogFailure) : Future<PrecogSuccess, PrecogFailure>;
-	// TODO needs typing
-    public function createGrantChild(info : PrecogCreateGrantChild, ?success : PrecogSuccess, ?failure : PrecogFailure) : Future<PrecogSuccess, PrecogFailure>;
+    public function createApiKey(grants : Array<Dynamic>, ?success : ProcResCreatedApiKey, ?failure : ProcFailure) : Future<ProcResCreatedApiKey, ProcFailure>;
+    public function describeApiKey(apiKey : String, ?success : ProcDescribeApiKey, ?failure : ProcFailure) : Future<ProcDescribeApiKey, ProcFailure>;
+    public function deleteApiKey(apiKey : String, ?success : ProcT<Void>, ?failure : ProcFailure) : Future<ProcT<Void>, ProcFailure>;
+    public function retrieveApiKeyGrants(apiKey : String, ?success : ProcListDescribeApiKey, ?failure : ProcFailure) : Future<ProcListDescribeApiKey, ProcFailure>;
+    public function addGrantToApiKey(info : OptAddGrantToApiKey, ?success : ProcT<Void>, ?failure : ProcFailure) : Future<ProcT<Void>, ProcFailure>;
+    public function removeGrantFromApiKey(info : OptRemoveGrantFromApiKey, ?success : ProcT<Void>, ?failure : ProcFailure) : Future<ProcT<Void>, ProcFailure>;
+    public function createGrant(grant : OptCreateGrant, ?success : ProcT<Void>, ?failure : ProcFailure) : Future<ProcT<Void>, ProcFailure>;
+    public function describeGrant(grantId : String, ?success : ProcResGrant, ?failure : ProcFailure) : Future<ProcResGrant, ProcFailure>;
+    public function deleteGrant(grantId : String, ?success : ProcT<Void>, ?failure : ProcFailure) : Future<ProcT<Void>, ProcFailure>;
+    public function createGrantChild(info : OptCreateGrantChild, ?success : ProcCreateGrant, ?failure : ProcFailure) : Future<ProcCreateGrant, ProcFailure>;
 
 	// ****************
 	// *** METADATA ***
 	// ****************
 
-	// TODO needs typing
-    public function retrieveMetadata(path : String, ?success : PrecogSuccess, ?failure : PrecogFailure) : Future<PrecogSuccess, PrecogFailure>;
-    public function listChildren(path0 : String, ?success : ArrayProcedure<String>, ?failure : PrecogFailure) : Future<ArrayProcedure<String>, PrecogFailure>;
-    public function listDescendants(path0 : String, ?success : ArrayProcedure<String>, ?failure : PrecogFailure) : Future<ArrayProcedure<String>, PrecogFailure>;
-	// TODO needs typing
-    public function existsFile(path : String, ?success : PrecogSuccess, ?failure : PrecogFailure) : Future<PrecogSuccess, PrecogFailure>;
+    public function retrieveMetadata(path : String, ?success : ProcMetadata, ?failure : ProcFailure) : Future<ProcMetadata, ProcFailure>;
+    public function listChildren(path0 : String, ?success : ProcArray<String>, ?failure : ProcFailure) : Future<ProcArray<String>, ProcFailure>;
+    public function listDescendants(path0 : String, ?success : ProcArray<String>, ?failure : ProcFailure) : Future<ProcArray<String>, ProcFailure>;
+    public function existsFile(path : String, ?success : ProcT<Bool>, ?failure : ProcFailure) : Future<ProcT<Bool>, ProcFailure>;
 
 	// ************
 	// *** DATA ***
 	// ************
 
-    public function uploadFile(info : PrecogUploadFile, ?success : PrecogUploadReportProcedure, ?failure : PrecogFailure) : Future<PrecogUploadReportProcedure, PrecogFailure>;
-    public function createFile(info : PrecogUploadFile, ?success : PrecogUploadReportProcedure, ?failure : PrecogFailure) : Future<PrecogUploadReportProcedure, PrecogFailure>;
+    public function uploadFile(info : OptUploadFile, ?success : ProcUploadReport, ?failure : ProcFailure) : Future<ProcUploadReport, ProcFailure>;
+    public function createFile(info : OptUploadFile, ?success : ProcUploadReport, ?failure : ProcFailure) : Future<ProcUploadReport, ProcFailure>;
+    public function retrieveFile(path0 : String, ?success : ProcFile, ?failure : ProcFailure) : Future<ProcFile, ProcFailure>;
+    public function append(info : OptAppend, ?success : ProcUploadReport, ?failure : ProcFailure) : Future<ProcUploadReport, ProcFailure>;
+    public function appendAll(info : OptAppendAll, ?success : ProcUploadReport, ?failure : ProcFailure) : Future<ProcUploadReport, ProcFailure>;
 	// TODO needs typing
-    public function retrieveFile(path0 : String, ?success : PrecogSuccess, ?failure : PrecogFailure) : Future<PrecogSuccess, PrecogFailure>;
-    public function append(info : PrecogAppend, ?success : PrecogUploadReportProcedure, ?failure : PrecogFailure) : Future<PrecogUploadReportProcedure, PrecogFailure>;
-    public function appendAll(info : PrecogAppendAll, ?success : PrecogUploadReportProcedure, ?failure : PrecogFailure) : Future<PrecogUploadReportProcedure, PrecogFailure>;
+    public function delete0(path0 : String, ?success : ProcT<Dynamic>, ?failure : ProcFailure) : Future<ProcT<Dynamic>, ProcFailure>;
 	// TODO needs typing
-    public function delete0(path0 : String, ?success : PrecogSuccess, ?failure : PrecogFailure) : Future<PrecogSuccess, PrecogFailure>;
-	// TODO needs typing
-    public function deleteAll(path : String, ?success : PrecogSuccess, ?failure : PrecogFailure) : Future<PrecogSuccess, PrecogFailure>;
+    public function deleteAll(path : String, ?success : ProcT<Dynamic>, ?failure : ProcFailure) : Future<ProcT<Dynamic>, ProcFailure>;
 
 	// ****************
 	// *** ANALYSIS ***
 	// ****************
 
-    public function executeFile(info : PrecogExecuteFile, ?success : PrecogQueryResultProcedure, ?failure : PrecogFailure) : Future<PrecogQueryResultProcedure, PrecogFailure>;
-    public function execute(info : PrecogQuery, ?success : PrecogQueryResultProcedure, ?failure : PrecogFailure) : Future<PrecogQueryResultProcedure, PrecogFailure>;
-    public function asyncQuery(info : PrecogQuery, ?success : PrecogAsyncQueryProcedure, ?failure : PrecogFailure) : Future<PrecogAsyncQueryProcedure, PrecogFailure>;
-    public function asyncQueryResults(jobId : String, ?success : PrecogQueryResultDetailedProcedure, ?failure : PrecogFailure) : Future<PrecogQueryResultDetailedProcedure, PrecogFailure>;
+    public function executeFile(info : OptExecuteFile, ?success : ProcQuery, ?failure : ProcFailure) : Future<ProcQuery, ProcFailure>;
+    public function execute(info : ResQuery, ?success : ProcQuery, ?failure : ProcFailure) : Future<ProcQuery, ProcFailure>;
+    public function asyncQuery(info : ResQuery, ?success : ProcAsyncQuery, ?failure : ProcFailure) : Future<ProcAsyncQuery, ProcFailure>;
+    public function asyncQueryResults(jobId : String, ?success : ProcQueryDetailed, ?failure : ProcFailure) : Future<ProcQueryDetailed, ProcFailure>;
 
 	static function __init__() : Void
 	{
@@ -105,91 +93,102 @@ extern class Precog
 // ****************
 // *** HANDLERS ***
 // ****************
-typedef PrecogSuccess = Dynamic -> Void;
-typedef StringProcedure = String -> Void;
-typedef ArrayProcedure<T> = T -> Void;
-typedef VoidProcedure = Void -> Void;
-typedef AccountIdProcedure = {
+typedef ProcT<T> = T -> Void;
+typedef ProcArray<T> = ProcT<Array<T>>;
+typedef ResAccountId = {
 				accountId : String
-			} -> Void;
-typedef PrecogPlan = {
+			}
+typedef ProcAccountId = ProcT<ResAccountId>;
+typedef ResPlan = {
 				type : String
 			};
-typedef PrecogPlanProcedure = PrecogPlan -> Void;
-typedef PrecogSuccessDescribeAccount = {
+typedef ProcPlan = ProcT<ResPlan>;
+typedef ResDescribeAccount = {
 				accountCreationDate : String,
 				accountId : String,
 				apiKey : String,
 				email : String,
 				lastPasswordChangeTime : String,
 				rootPath : String,
-				plan : PrecogPlan
-			} -> Void;
-typedef PrecogFailure = Dynamic -> Void;
-typedef PrecogPermission = {
+				plan : ResPlan
+			}
+typedef ProcDescribeAccount = ProcT<ResDescribeAccount>;
+typedef ProcFailure = ProcT<Dynamic>;
+typedef ResPermission = {
 				accessType : String,
 				path : String,
 				schemaVersion : String,
 				ownerAccountIds : Array<String>
 			};
-typedef PrecogGrant = {
+typedef ResCreateGrant = {
 				createdAt : String,
-				description : String,
 				grantId : String,
-				name : String,
-				permissions : Array<PrecogPermission>
+				permissions : Array<ResPermission>
 			};
-typedef PrecogCreatedApiKey = {
-				apiKey : String,
-				grants : Array<PrecogGrant>,
-				issuerChain : Array<Dynamic> // TODO type me
-			};
-typedef PrecogCreatedApiKeyProcedure = PrecogCreatedApiKey -> Void;
-typedef PrecogListApiKeyProcedure = Array<PrecogCreatedApiKey> -> Void;
-typedef PrecogDescribeApiKey = {
-				>PrecogCreatedApiKey,
+typedef ProcCreateGrant = ProcT<ResCreateGrant>;
+typedef ProcListGrant = ProcArray<ResCreateGrant>;
+typedef ResGrant = {
+				>ResCreateGrant,
 				description : String,
 				name : String
 			};
-typedef PrecogDescribeApiKeyProcedure = PrecogDescribeApiKey -> Void;
-typedef PrecogListDescribeApiKeyProcedure = Array<PrecogDescribeApiKey> -> Void;
+typedef ProcResGrant = ResGrant -> Void;
+typedef ResCreatedApiKey = {
+				apiKey : String,
+				grants : Array<ResGrant>,
+				issuerChain : Array<Dynamic> // TODO type me
+			};
+typedef ProcResCreatedApiKey = ProcT<ResCreatedApiKey>;
+typedef ProcListApiKey = ProcArray<ResCreatedApiKey>;
+typedef ResDescribeApiKey = {
+				>ResCreatedApiKey,
+				description : String,
+				name : String
+			};
+typedef ProcDescribeApiKey = ProcT<ResDescribeApiKey>;
+typedef ProcListDescribeApiKey = ProcArray<ResDescribeApiKey>;
 
-typedef PrecogUploadError = {
+typedef ResUploadError = {
 				// TODO type me
 			}
-typedef PrecogUploadReport = {
-				errors : Array<PrecogUploadError>,
+typedef ResUploadReport = {
+				errors : Array<ResUploadError>,
 				failed : Int,
 				ingestId : String,
 				ingested : Int,
 				skipped : Int,
 				total : Int
 			}
-typedef PrecogUploadReportProcedure = PrecogUploadReport -> Void;
-typedef PrecogMetadata = {
-				size : Float,
-				children : Dynamic, // TODO type me
+typedef ProcUploadReport = ProcT<ResUploadReport>;
+typedef ResMetadata = {
+				size : Int,
+				children : Array<String>,
 				structure : Dynamic // TODO type me
 			}
-typedef PrecogMetadataProcedure = PrecogMetadata -> Void;
-typedef PrecogAsyncQuery = {
+typedef ProcMetadata = ProcT<ResMetadata>;
+typedef ResAsyncQuery = {
 				jobId : String
 			}
-typedef PrecogAsyncQueryProcedure = PrecogAsyncQuery -> Void;
-typedef PrecogQueryResult = Array<Dynamic>;
-typedef PrecogQueryResultProcedure = PrecogQueryResult -> Void;
-typedef PrecogQueryResultDetailed = {
+typedef ProcAsyncQuery = ProcT<ResAsyncQuery>;
+typedef ResQuery = Array<Dynamic>;
+typedef ProcQuery = ProcT<ResQuery>;
+typedef ResQueryDetailed = {
 				errors : Array<Dynamic>, // TODO type me
 				warnings : Array<Dynamic>, // TODO type me
-				data : PrecogQueryResult
+				data : ResQuery
 			}
-typedef PrecogQueryResultDetailedProcedure = PrecogQueryResultDetailed -> Void;
+typedef ProcQueryDetailed = ProcT<ResQueryDetailed>;
+typedef ResFile = {
+				content : String,
+				type : String
+			}
+typedef ProcFile = ProcT<ResFile>;
 
 // ****************
 // *** CONFIG ***
 // ****************
 
-typedef PrecogConfig = {
+typedef Config = {
 	analyticsService : String,
 	?apiKey : String
 }
@@ -197,64 +196,64 @@ typedef PrecogConfig = {
 // ****************
 // *** ARGUMENTS ***
 // ****************
-typedef PrecogAccount = {
+typedef OptAccount = {
 	email		: String,
 	password	: String
 }
 
-typedef PrecogAccountPlan = {
-	> PrecogAccount,
+typedef OptAccountPlan = {
+	> OptAccount,
 	plan : String
 }
 
-typedef PrecogGrantInfo = {
+typedef OptGrantInfo = {
 	accountId	: String,
 	grantId		: String
 }
 
-typedef PrecogAddGrantToApiKey = {
+typedef OptAddGrantToApiKey = {
 	grant	: Dynamic, // TODO type this
 	apiKey	: String
 }
 
-typedef PrecogRemoveGrantFromApiKey = {
+typedef OptRemoveGrantFromApiKey = {
 	grantId	: String,
 	apiKey	: String
 }
 
-typedef PrecogCreateGrant = {
+typedef OptCreateGrant = {
 	name			: String,
 	description		: String,
-	parentIds		: String,
-	expirationDate	: String,
+	?parentIds		: String,
+	?expirationDate	: String,
 	permissions		: Array<{
 	  accessType		: String,
 	  path				: String,
-	  ownerAccountIds	: String
+	  ownerAccountIds	: Array<String>
 	}>
 }
 
-typedef PrecogCreateGrantChild = {
+typedef OptCreateGrantChild = {
 	parentGrantId	: String,
 	childGrant		: Dynamic // TODO type this
 }
 
-typedef PrecogUploadFile = {
+typedef OptUploadFile = {
 	path		: String,
 	type		: String, // TODO Type this
 	contents	: String
 }
 
-typedef PrecogAppend = {
+typedef OptAppend = {
 	path	: String,
 	value	: Dynamic
 }
 
-typedef PrecogAppendAll = {
+typedef OptAppendAll = {
 	path	: String,
 	values	: Array<Dynamic>
 }
 
-typedef PrecogExecuteFile = {
+typedef OptExecuteFile = {
 	path	: String
 }
