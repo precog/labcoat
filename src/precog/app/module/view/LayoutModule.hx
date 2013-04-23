@@ -7,12 +7,12 @@ import precog.layout.DockLayout;
 import precog.layout.Panel;
 import precog.layout.Extent;
 import precog.html.HtmlPanel;
-import precog.app.message.ApplicationHtmlContainerMessage;
-import precog.app.message.MainHtmlPanelMessage;
-import precog.app.message.MenuHtmlPanelMessage;
-import precog.app.message.SystemHtmlPanelGroupMessage;
-import precog.app.message.SupportHtmlPanelGroupMessage;
-import precog.app.message.ToolsHtmlPanelGroupMessage;
+import precog.app.message.ApplicationHtmlContainer;
+import precog.app.message.MainHtmlPanel;
+import precog.app.message.MenuHtmlPanel;
+import precog.app.message.SystemHtmlPanelGroup;
+import precog.app.message.SupportHtmlPanelGroup;
+import precog.app.message.ToolsHtmlPanelGroup;
 import precog.geom.Rectangle;
 
 using precog.html.HtmlPanelGroup;
@@ -67,10 +67,10 @@ class LayoutModule extends Module
 		contextLayout.update();
 	}
 
-	function onMessage(comm : Communicator, message : ApplicationHtmlContainerMessage)
+	function onMessage(comm : Communicator, msg : ApplicationHtmlContainer)
 	{
 
-		container = message.value;
+		container = msg.element;
 		container.addClass("labcoat");
 		groups = new LayoutGroups(container);
 		contextPanel = new Panel();
@@ -90,46 +90,46 @@ class LayoutModule extends Module
 		});
 
         comm.provideLazy(
-        	SystemHtmlPanelGroupMessage,
-        	function(deferred : Deferred<SystemHtmlPanelGroupMessage>)
+        	SystemHtmlPanelGroup,
+        	function(deferred : Deferred<SystemHtmlPanelGroup>)
         	{
-        		var g = new SystemHtmlPanelGroupMessage(groups.ensureGroup("system", Left, updateLayouts).group);
+        		var g = new SystemHtmlPanelGroup(groups.ensureGroup("system", Left, updateLayouts).group);
         		updateLayouts();
 	        	deferred.resolve(g);
         	}
         );
 
         comm.provideLazy(
-        	SupportHtmlPanelGroupMessage,
-        	function(deferred : Deferred<SupportHtmlPanelGroupMessage>)
+        	SupportHtmlPanelGroup,
+        	function(deferred : Deferred<SupportHtmlPanelGroup>)
         	{
-        		var g = new SupportHtmlPanelGroupMessage(groups.ensureGroup("support", Right, updateLayouts).group);
+        		var g = new SupportHtmlPanelGroup(groups.ensureGroup("support", Right, updateLayouts).group);
         		updateLayouts();
 	        	deferred.resolve(g);
         	}
         );
 
         comm.provideLazy(
-        	ToolsHtmlPanelGroupMessage,
-        	function(deferred : Deferred<ToolsHtmlPanelGroupMessage>)
+        	ToolsHtmlPanelGroup,
+        	function(deferred : Deferred<ToolsHtmlPanelGroup>)
         	{
-        		var g = new ToolsHtmlPanelGroupMessage(groups.ensureGroup("tools", Bottom, updateLayouts).group);
+        		var g = new ToolsHtmlPanelGroup(groups.ensureGroup("tools", Bottom, updateLayouts).group);
         		updateLayouts();
 	        	deferred.resolve(g);
         	}
         );
 
 #if (html5 || cordova)
-        comm.provide(new MenuHtmlPanelMessage(menu));
+        comm.provide(new MenuHtmlPanel(menu));
 #end
-        comm.provide(new MainHtmlPanelMessage(mainHtmlPanel));
+        comm.provide(new MainHtmlPanel(mainHtmlPanel));
 
 		new JQuery(Browser.window).resize(function(_) updateLayouts());
 	}
 
 	override public function connect(comm : Communicator)
 	{
-		comm.demand(ApplicationHtmlContainerMessage)
+		comm.demand(ApplicationHtmlContainer)
 			.then(onMessage.bind(comm, _));
 	}
 }

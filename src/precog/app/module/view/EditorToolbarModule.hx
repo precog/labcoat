@@ -20,15 +20,15 @@ class EditorToolbarModule extends Module {
     override public function connect(communicator: Communicator) {
         this.communicator = communicator;
         communicator
-            .demand(MainToolbarHtmlPanelMessage)
+            .demand(MainToolbarHtmlPanel)
             .await(communicator.demand(Locale))
             .then(init);
         communicator.on(updateNotebooks);
     }
 
-    function init(toolbarPanelMessage: MainToolbarHtmlPanelMessage, locale : Locale) {
+    function init(toolbarPanel: MainToolbarHtmlPanel, locale : Locale) {
         this.locale = locale;
-        toolbarPanelMessage.value.element.append(element);
+        toolbarPanel.panel.element.append(element);
 
         var items = [
             DropdownButton(locale.singular('new notebook'), '', createNotebook),

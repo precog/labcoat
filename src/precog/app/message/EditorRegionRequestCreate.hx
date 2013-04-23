@@ -2,11 +2,7 @@ package precog.app.message;
 
 import precog.editor.Region;
 
-class EditorRegionRequestCreate 
+class EditorRegionRequestCreate implements precog.macro.ValueClass
 {
-	public var region(default, null) : Region;
-	public function new(region : Region)
-	{
-		this.region = region;
-	}
+	public var region : Region;
 }

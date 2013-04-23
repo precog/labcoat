@@ -1,6 +1,5 @@
 package precog.app.message;
 
-class EditorRequestCloseCurrent
+class EditorRequestCloseCurrent implements precog.macro.ValueClass
 {
-	public function new() { }
 }	

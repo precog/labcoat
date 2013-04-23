@@ -1,8 +1,8 @@
 package precog.app.module.view;
 
-import precog.app.message.MainHtmlPanelMessage;
-import precog.app.message.MainEditorHtmlPanelMessage;
-import precog.app.message.MainToolbarHtmlPanelMessage;
+import precog.app.message.MainHtmlPanel;
+import precog.app.message.MainEditorHtmlPanel;
+import precog.app.message.MainToolbarHtmlPanel;
 import precog.communicator.Communicator;
 import precog.communicator.Module;
 import precog.html.HtmlPanel;
@@ -28,11 +28,11 @@ class MainLayoutModule extends Module {
 
     override public function connect(communicator: Communicator) {
         this.communicator = communicator;
-        communicator.demand(MainHtmlPanelMessage).then(onMessage);
+        communicator.demand(MainHtmlPanel).then(onMessage);
     }
 
-    function onMessage(message: MainHtmlPanelMessage) {
-        container = message.value.element;
+    function onMessage(message: MainHtmlPanel) {
+        container = message.panel.element;
 
         toolbar   = new HtmlPanel("toolbar", container);
         editor    = new HtmlPanel("editor", container);
@@ -45,11 +45,11 @@ class MainLayoutModule extends Module {
         layout.addPanel(editor).fill();
         layout.addPanel(statusbar).dockBottom(20);
 
-        message.value.rectangle.addListener(updateLayout);
-        updateLayout(message.value.rectangle);
+        message.panel.rectangle.addListener(updateLayout);
+        updateLayout(message.panel.rectangle);
 
-        communicator.provide(new MainToolbarHtmlPanelMessage(toolbar));
-        communicator.provide(new MainEditorHtmlPanelMessage(editor));
+        communicator.provide(new MainToolbarHtmlPanel(toolbar));
+        communicator.provide(new MainEditorHtmlPanel(editor));
     }
 
     function updateLayout(size : IRectangle) {

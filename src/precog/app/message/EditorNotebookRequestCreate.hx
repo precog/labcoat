@@ -1,6 +1,5 @@
 package precog.app.message;
 
-class EditorNotebookRequestCreate
+class EditorNotebookRequestCreate implements precog.macro.ValueClass
 {
-	public function new() { }
 }

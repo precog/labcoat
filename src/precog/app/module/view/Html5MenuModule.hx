@@ -1,7 +1,7 @@
 package precog.app.module.view;
 
-import precog.app.message.MenuHtmlPanelMessage;
-import precog.app.message.MenuItemMessage;
+import precog.app.message.MenuHtmlPanel;
+import precog.app.message.MenuItem;
 import precog.communicator.Communicator;
 import precog.communicator.Module;
 import precog.html.HtmlButton;
@@ -39,13 +39,13 @@ class Html5MenuModule extends Module {
 
     override public function connect(communicator: Communicator) {
         communicator
-            .demand(MenuHtmlPanelMessage)
+            .demand(MenuHtmlPanel)
             .await(communicator.demand(Locale))
             .then(onMessage.bind(communicator));
     }
 
-    function onMessage(communicator: Communicator, message: MenuHtmlPanelMessage, locale: Locale) {
-        var panel = message.value;
+    function onMessage(communicator: Communicator, message: MenuHtmlPanel, locale: Locale) {
+        var panel = message.panel;
         for(index in 0...Type.getEnumConstructs(TopLevelGroup).length) {
             var group = new Html5MenuGroup(createDropdown('', []), []);
             group.dropdown.element.appendTo(panel.element);
@@ -54,9 +54,9 @@ class Html5MenuModule extends Module {
         communicator.consume(onMenuItemMessages);
     }
 
-    function onMenuItemMessages(messages: Array<MenuItemMessage>) {
+    function onMenuItemMessages(messages: Array<MenuItem>) {
         for(message in messages) {
-            addItem(message.value);
+            addItem(message);
         }
     }
 

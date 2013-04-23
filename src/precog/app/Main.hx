@@ -47,6 +47,7 @@ class Main
         manager.addModule(new EditorToolbarModule());
 
         // Model
+        manager.addModule(new PrecogAuthModule());
         manager.addModule(new PrecogModule());
         manager.addModule(new FileSystemModule());
 

@@ -1,4 +1,4 @@
-package precog.app;
+package precog.macro;
 
 import haxe.macro.Context;
 

@@ -1,7 +1,7 @@
 package precog.app.module.view;
 
 import precog.app.message.*;
-import precog.app.message.MenuItemMessage;
+import precog.app.message.MenuItem;
 import precog.util.Locale;
 import precog.communicator.Communicator;
 import precog.communicator.Module;
@@ -35,7 +35,7 @@ class EditorModule extends Module {
     override public function connect(communicator: Communicator) {
         this.communicator = communicator;
         communicator
-            .demand(MainEditorHtmlPanelMessage)
+            .demand(MainEditorHtmlPanel)
             .await(communicator.demand(Locale))
             .then(init);
         communicator.on(function(_ : EditorNotebookRequestCreate) createNotebook());
@@ -45,12 +45,12 @@ class EditorModule extends Module {
         communicator.on(function(e : EditorUpdate) changeEditor(e.current));
 
         communicator.queueMany([
-            // new MenuItemMessage(new MenuItem(MenuEdit(SubgroupEditHistory), "Undo", function(){}, 0)),
-            // new MenuItemMessage(new MenuItem(MenuEdit(SubgroupEditHistory), "Redo", function(){}, 1))
+            // new MenuItem(MenuEdit(SubgroupEditHistory), "Undo", function(){}, 0),
+            // new MenuItem(MenuEdit(SubgroupEditHistory), "Redo", function(){}, 1)
         ]);
     }
 
-    public function init(editorPanelMessage: MainEditorHtmlPanelMessage, locale : Locale) {
+    public function init(editorPanel: MainEditorHtmlPanel, locale : Locale) {
         this.locale = locale;
 
         QuirrelMode.init();
@@ -63,9 +63,9 @@ class EditorModule extends Module {
 
                 // TODO: move out from here: TABS!!!
         var rect = new Rectangle();
-        editorPanelMessage.value.rectangle.addListener(rect.updateSize);
-        rect.updateSize(editorPanelMessage.value.rectangle);
-        main = new HtmlPanelGroup(editorPanelMessage.value.element, rect, true);
+        editorPanel.panel.rectangle.addListener(rect.updateSize);
+        rect.updateSize(editorPanel.panel.rectangle);
+        main = new HtmlPanelGroup(editorPanel.panel.element, rect, true);
         main.gutterMargin = 0;
         main.toggleSize = Default;
 //        main.toggleType = Primary;

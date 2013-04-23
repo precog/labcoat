@@ -2,13 +2,8 @@ package precog.app.message;
 
 import precog.editor.Notebook;
 
-class EditorNotebookUpdate 
+class EditorNotebookUpdate implements precog.macro.ValueClass
 {
-	public var current(default, null) : Notebook;
-	public var all(default, null) : Array<Notebook>;
-	public function new(current : Notebook, all : Array<Notebook>)
-	{
-		this.current = current;
-		this.all = all;
-	}
+	public var current : Notebook;
+	public var all : Array<Notebook>;
 }

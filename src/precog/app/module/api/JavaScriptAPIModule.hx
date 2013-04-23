@@ -10,6 +10,6 @@ class JavaScriptAPIModule extends Module
 		var api = Reflect.field(js.Browser.window, API_FIELD_NAME);
 		if(null == api)
 			Reflect.setField(js.Browser.window, API_FIELD_NAME, api = {});
-		comm.provide(new precog.app.message.JavaScriptAPIMessage(api));
+		comm.provide(new precog.app.message.JavaScriptAPI(api));
 	}
 }

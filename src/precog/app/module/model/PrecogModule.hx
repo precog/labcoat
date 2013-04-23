@@ -1,7 +1,6 @@
 package precog.app.module.model;
 
 import precog.communicator.*;
-import precog.util.fs.*;
 import thx.react.Promise;
 import precog.api.*;
 

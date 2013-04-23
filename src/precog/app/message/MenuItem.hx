@@ -2,8 +2,6 @@ package precog.app.message;
 
 import precog.macro.ValueClass;
 
-class MenuItemMessage extends Message<MenuItem> { }
-
 class MenuItem implements ValueClass {
     var group: TopLevelGroup;
     var label: String;
