@@ -67,7 +67,7 @@ class LayoutModule extends Module
 		contextLayout.update();
 	}
 
-	function onMessage(comm : Communicator, msg : ApplicationHtmlContainer)
+	function onMessage(msg : ApplicationHtmlContainer, comm : Communicator)
 	{
 
 		container = msg.element;
@@ -130,7 +130,8 @@ class LayoutModule extends Module
 	override public function connect(comm : Communicator)
 	{
 		comm.demand(ApplicationHtmlContainer)
-			.then(onMessage.bind(comm, _));
+			.with(comm)
+			.then(onMessage);
 	}
 }
 

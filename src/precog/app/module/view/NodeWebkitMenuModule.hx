@@ -30,10 +30,11 @@ class NodeWebkitMenuModule extends Module {
     override public function connect(communicator: Communicator) {
         communicator
             .demand(Locale)
-            .then(onMessage.bind(communicator));
+            .with(communicator)
+            .then(onMessage);
     }
 
-    function onMessage(communicator: Communicator, locale: Locale) {
+    function onMessage(locale: Locale, communicator: Communicator) {
         communicator.consume(onMenuItemMessages);
     }
 

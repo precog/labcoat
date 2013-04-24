@@ -21,17 +21,18 @@ class TreeViewModule extends Module {
         communicator
             .demand(SystemHtmlPanelGroup)
             .await(communicator.demand(Locale))
-            .then(onMessage.bind(communicator));
+            .with(communicator)
+            .then(onMessage);
     }
 
-    function onMessage(communicator: Communicator, message: SystemHtmlPanelGroup, locale : Locale)
+    function onMessage(message: SystemHtmlPanelGroup, locale : Locale, communicator: Communicator)
     {
     	var item = new HtmlPanelGroupItem(locale.singular("file system"));
         message.group.addItem(item);
         item.activate();
         createTree(item.panel);
         communicator.request(
-            new RequestMetadataChildren("/"),
+            new RequestMetadataChildren("/", "alt"),
             ResponseMetadataChildren)
             .then(function(response : ResponseMetadataChildren) {
 

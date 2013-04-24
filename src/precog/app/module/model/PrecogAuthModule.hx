@@ -20,10 +20,10 @@ class PrecogAuthModule extends Module
 			accountId			= "0000001476",
 			basePath			= "/0000001476/";
 
-		var config = new PrecogNamedConfig("default", new PrecogConfig(analyticsService, apiKey, basePath));
-		communicator.queue(config);
+		var config = new PrecogConfig(analyticsService, apiKey, basePath);
+		communicator.queue(new PrecogNamedConfig("default", config));
 
-		var config = new PrecogNamedConfig("alt", new PrecogConfig(analyticsService, apiKey, basePath));
-		communicator.queue(config);
+		var config = new PrecogConfig("https://nebula.precog.com/", "D99DFC4E-91F4-4F3A-BB07-51F0A5109F16", "/0000000094/");
+		communicator.queue(new PrecogNamedConfig("alt", config));
 	}
 }

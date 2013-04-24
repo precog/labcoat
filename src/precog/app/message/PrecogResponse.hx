@@ -37,6 +37,6 @@ class ResponseMetadataChildren extends PrecogResponse
 		var display = children.slice(0, 5);
 		if(display.length < children.length)
 			display.push('...');
-					this.description = 'metadata children at $parent: ${display.length == 0 ? "[none]" : display.join(", ")}';
+		this.description = 'metadata children at $parent: ${display.length == 0 ? "[none]" : display.join(", ")}';
 	}
 }

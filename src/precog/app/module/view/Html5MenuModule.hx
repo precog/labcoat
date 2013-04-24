@@ -41,10 +41,11 @@ class Html5MenuModule extends Module {
         communicator
             .demand(MenuHtmlPanel)
             .await(communicator.demand(Locale))
-            .then(onMessage.bind(communicator));
+            .with(communicator)
+            .then(onMessage);
     }
 
-    function onMessage(communicator: Communicator, message: MenuHtmlPanel, locale: Locale) {
+    function onMessage(message: MenuHtmlPanel, locale: Locale, communicator: Communicator) {
         var panel = message.panel;
         for(index in 0...Type.getEnumConstructs(TopLevelGroup).length) {
             var group = new Html5MenuGroup(createDropdown('', []), []);

@@ -6,6 +6,7 @@ import precog.api.*;
 import precog.app.message.*;
 import precog.app.message.PrecogRequest;
 import precog.app.message.PrecogResponse;
+using thx.core.Strings;
 
 class PrecogModule extends Module
 {
@@ -30,6 +31,17 @@ class PrecogModule extends Module
 		);
 	}
 
+	function getDirectoryFromRoot(api : String, path : String)
+	{
+		var basePath = configs.get(api).basePath,
+			segments = [basePath]
+				.concat(path.split('/'))
+				.filter(function(v) return null != v)
+				.map(Strings.trim.bind(_, "/"))
+				.filter(function(v) return v != "");
+		return segments.length == 0 ? '/' : '/${segments.join("/")}/';
+	}
+
 	override function connect(communicator : Communicator)
 	{
 		communicator.consume(function(configs : Array<PrecogNamedConfig>) {
@@ -51,7 +63,9 @@ class PrecogModule extends Module
 				if(null == api)
 					throw 'no api is set for ${request.api}';
 				communicator.trigger(request);
-				api.listChildren(request.path).then(
+				var path = getDirectoryFromRoot(request.api, request.path);
+				trace(path);
+				api.listChildren(path).then(
 					function(result) {
 						var response = new ResponseMetadataChildren(request.path, result, request);
 						deferred.resolve(response);
