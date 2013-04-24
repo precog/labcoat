@@ -1,7 +1,6 @@
 package precog.app.module.view;
 
-import precog.app.message.MenuItem;
-import precog.app.message.SystemHtmlPanelGroup;
+import precog.app.message.*;
 import precog.util.Locale;
 import precog.communicator.Communicator;
 import precog.communicator.Module;
@@ -12,6 +11,9 @@ import jQuery.JQuery;
 
 using thx.react.Promise;
 using precog.html.JQuerys;
+
+import precog.app.message.PrecogRequest;
+import precog.app.message.PrecogResponse;
 
 class TreeViewModule extends Module {
 
@@ -28,7 +30,12 @@ class TreeViewModule extends Module {
         message.group.addItem(item);
         item.activate();
         createTree(item.panel);
+        communicator.request(
+            new RequestMetadataChildren("/"),
+            ResponseMetadataChildren)
+            .then(function(response : ResponseMetadataChildren) {
 
+            });
         communicator.queueMany([
             // new MenuItem(MenuFile(SubgroupFileLocal), "Open File...", function(){}, 0),
             // new MenuItem(MenuFile(SubgroupFileLocal), "Close", function(){}, 1)
@@ -67,7 +74,6 @@ class TreeViewModule extends Module {
                         pick.expand();
             }
         }
-        trace(nodes.length);
 
         tree.update();
     }

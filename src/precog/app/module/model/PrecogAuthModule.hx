@@ -20,7 +20,10 @@ class PrecogAuthModule extends Module
 			accountId			= "0000001476",
 			basePath			= "/0000001476/";
 
-		var auth = new PrecogAuth(analyticsService);
-		communicator.provide(auth);
+		var config = new PrecogNamedConfig("default", new PrecogConfig(analyticsService, apiKey, basePath));
+		communicator.queue(config);
+
+		var config = new PrecogNamedConfig("alt", new PrecogConfig(analyticsService, apiKey, basePath));
+		communicator.queue(config);
 	}
 }

@@ -17,6 +17,7 @@ class Main
         // Config
         manager.addModule(new LocalizationAdvisorModule());
         manager.addModule(new LocalizationModule());
+        manager.addModule(new LogModule());
 
         // View
 #if (html5 || cordova)

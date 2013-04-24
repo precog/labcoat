@@ -16,7 +16,8 @@ class FileSystemModule extends Module
 		communicator.provideLazy(
 			FileSystem,
 			function(deferred : Deferred<FileSystem>) {
-				deferred.resolve(new FileSystem());
+				var fs = new FileSystem();
+				deferred.resolve(fs);
 			});
 	}
 }
