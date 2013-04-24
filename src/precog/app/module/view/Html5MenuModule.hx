@@ -31,6 +31,7 @@ class Html5MenuGroup implements ValueClass {
 class Html5MenuModule extends Module {
     var element: JQuery;
     var groups: Array<Html5MenuGroup>;
+    var panel : HtmlPanel;
 
     public function new() {
         super();
@@ -46,10 +47,9 @@ class Html5MenuModule extends Module {
     }
 
     function onMessage(message: MenuHtmlPanel, locale: Locale, communicator: Communicator) {
-        var panel = message.panel;
+        panel = message.panel;
         for(index in 0...Type.getEnumConstructs(TopLevelGroup).length) {
             var group = new Html5MenuGroup(createDropdown('', []), []);
-            group.dropdown.element.appendTo(panel.element);
             groups[index] = group;
         }
         communicator.consume(onMenuItemMessages);
@@ -69,6 +69,14 @@ class Html5MenuModule extends Module {
 
         if(subgroup == null) {
             group.subgroups[subIndex] = [];
+            var ref = panel.element.find('.dropdown:eq(${index-1})');
+            if(ref.length > 0) {
+                group.dropdown.element.insertAfter(ref);
+            } else if(index == 0) {
+                group.dropdown.element.prependTo(panel.element);
+            } else {
+                group.dropdown.element.appendTo(panel.element);
+            }
         }
 
         var weightedDropdownItems = group.subgroups[subIndex];
@@ -88,7 +96,6 @@ class Html5MenuModule extends Module {
 
     function dropdownFromGroup(name: String, group: Html5MenuGroup) {
         var items = [].concat(group.subgroups[0].map(fromWeighted));
-
         for(subgroup in group.subgroups.slice(1)) {
             items.push(DropdownDivider);
             items = items.concat(subgroup.map(fromWeighted));

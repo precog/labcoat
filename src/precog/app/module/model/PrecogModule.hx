@@ -39,7 +39,7 @@ class PrecogModule extends Module
 				.filter(function(v) return null != v)
 				.map(Strings.trim.bind(_, "/"))
 				.filter(function(v) return v != "");
-		return segments.length == 0 ? '/' : '/${segments.join("/")}/';
+		return segments.length == 0 ? '' : '${segments.join("/")}/';
 	}
 
 	override function connect(communicator : Communicator)
@@ -64,7 +64,6 @@ class PrecogModule extends Module
 					throw 'no api is set for ${request.api}';
 				communicator.trigger(request);
 				var path = getDirectoryFromRoot(request.api, request.path);
-				trace(path);
 				api.listChildren(path).then(
 					function(result) {
 						var response = new ResponseMetadataChildren(request.path, result, request);
