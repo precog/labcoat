@@ -38,11 +38,16 @@ class EditorModule extends Module {
             .demand(MainEditorHtmlPanel)
             .await(communicator.demand(Locale))
             .then(init);
-        communicator.on(function(_ : EditorNotebookRequestCreate) createNotebook());
-        communicator.on(function(_ : EditorCodeRequestCreate) createCodeEditor());
-        communicator.on(function(_ : EditorRequestCloseCurrent) closeEditor());
-        communicator.on(function(e : EditorRegionRequestCreate) appendRegion(e.region));
-        communicator.on(function(e : EditorUpdate) changeEditor(e.current));
+        communicator.on(function(_ : EditorNotebookRequestCreate)
+            createNotebook());
+        communicator.on(function(_ : EditorCodeRequestCreate)
+            createCodeEditor());
+        communicator.on(function(_ : EditorRequestCloseCurrent)
+            closeEditor());
+        communicator.on(function(e : EditorRegionRequestCreate)
+            appendRegion(e.region));
+        communicator.on(function(e : EditorUpdate)
+            changeEditor(e.current));
 
         communicator.queueMany([
             // new MenuItem(MenuEdit(SubgroupEditHistory), "Undo", function(){}, 0),

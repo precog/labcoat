@@ -14,9 +14,11 @@ using precog.html.JQuerys;
 
 import precog.app.message.PrecogRequest;
 import precog.app.message.PrecogResponse;
+import precog.util.fs.*;
 
-class TreeViewModule extends Module {
-
+class TreeViewModule extends Module
+{
+    var tree : HtmlTree<precog.util.fs.Node>;
     override public function connect(communicator: Communicator) {
         communicator
             .demand(SystemHtmlPanelGroup)
@@ -27,22 +29,68 @@ class TreeViewModule extends Module {
 
     function onMessage(message: SystemHtmlPanelGroup, locale : Locale, communicator: Communicator)
     {
-    	var item = new HtmlPanelGroupItem(locale.singular("file system"));
+        var item = new HtmlPanelGroupItem(locale.singular("file system"));
         message.group.addItem(item);
         item.activate();
-        createTree(item.panel);
+        var renderer = new BaseHtmlTreeRenderer(16);
+        tree = new HtmlTree(item.panel, renderer);
+        communicator.consume(function(fss : Array<NamedFileSystem>) {
+                fss.map(addTree.bind(communicator, _));
+            });
+//        createTree(item.panel);
+/*
         communicator.request(
             new RequestMetadataChildren("/", "alt"),
             ResponseMetadataChildren)
             .then(function(response : ResponseMetadataChildren) {
 
             });
+*/
         communicator.queueMany([
             // new MenuItem(MenuFile(SubgroupFileLocal), "Open File...", function(){}, 0),
             // new MenuItem(MenuFile(SubgroupFileLocal), "Close", function(){}, 1)
         ]);
     }
 
+    function addTree(communicator : Communicator, nfs : NamedFileSystem)
+    {
+        var name = nfs.name,
+            fs = nfs.fs;
+        wireFileSystem(fs);
+        communicator.request(
+            new RequestMetadataChildren("/", name),
+            ResponseMetadataChildren)
+            .then(function(response : ResponseMetadataChildren) {
+//                trace(response);
+                response.children.map(function(child : String) {
+                    fs.root.ensureDirectory(response.parent + child);
+                });
+            });
+//        trace(nfs);
+    }
+
+    function wireFileSystem(fs : FileSystem)
+    {
+        var root = tree.addRoot(fs.root);
+        fs.on(function(e : NodeAddEvent) {
+                var node = e.node;
+//                if(node.isDirectory) {
+                    root.appendChild(node);
+ //               } else {
+
+   //             }
+     //           trace(node);
+                tree.update();
+            });
+    }
+/*
+    function delayedTreeUpdate()
+    {
+
+    }
+    */
+
+/*
     function createTree(panel : HtmlPanel)
     {
         var renderer = new BaseHtmlTreeRenderer(16),
@@ -78,4 +126,5 @@ class TreeViewModule extends Module {
 
         tree.update();
     }
+    */
 }
