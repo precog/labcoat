@@ -40,3 +40,21 @@ class ResponseMetadataChildren extends PrecogResponse
 		this.description = 'metadata children at $parent: ${display.length == 0 ? "[none]" : display.join(", ")}';
 	}
 }
+
+class ResponseMetadataPath extends PrecogResponse
+{
+	public var path(default, null) : String;
+	public var children(default, null) : Array<DirectoryChild>;
+	public function new(path : String, children : Array<DirectoryChild>, request : PrecogRequest)
+	{
+		super(request);
+		this.children = children;
+		this.path = path;
+		this.description = 'metadata for $path: ${children.length}';
+	}
+}
+
+typedef DirectoryChild = {
+	type : String,
+	name : String
+}

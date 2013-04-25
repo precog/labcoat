@@ -7,7 +7,8 @@ class Files extends Nodes<File>
 		return switch (segment.getESegment()) {
 			case Literal(literal):
 				nodes.filter(function(node) return literal == node.name);
-			case Pattern(reg):
+			case Pattern(p, m):
+				var	reg = new EReg(p, m);
 				nodes.filter(function(node) return reg.match(node.name));
 			case _:
 				throw "cannot traverse directories to find files";

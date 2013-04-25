@@ -44,9 +44,9 @@ class Directory extends Node
 		if(node.isRoot) throw "root node cannot be added or removed";
 		node.remove();
 		var match = ESegment.Literal(node.name);
-		if(directories.find(match).length > 0)
+		if(node.isDirectory && directories.find(match).length > 0)
 			throw 'a directory with the same name already exist: ${node.name}';
-		if(files.find(match).length > 0)
+		if(node.isFile && files.find(match).length > 0)
 			throw 'a file with the same name already exist: ${node.name}';
 		node.parent = this;
 		node.filesystem = this.filesystem;
@@ -90,6 +90,8 @@ class Directory extends Node
 			segments = path.segments(),
 			last = segments.pop(),
 			results : Array<Node> = [];
+		if(segments.length == 0)
+			return cast dirs;
 		dirs = traverseImpl(dirs, segments);
 		for(dir in dirs)
 			results = results.concat(cast dir.directories.find(last)).concat(cast dir.files.find(last));

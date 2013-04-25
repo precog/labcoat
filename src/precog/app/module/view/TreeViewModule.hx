@@ -15,19 +15,25 @@ using precog.html.JQuerys;
 import precog.app.message.PrecogRequest;
 import precog.app.message.PrecogResponse;
 import precog.util.fs.*;
+using StringTools;
 
 class TreeViewModule extends Module
 {
+    static inline var UI_TREE_NODE = "ui_tree_node";
+
     var tree : HtmlTree<precog.util.fs.Node>;
+    var communicator : Communicator;
+    var fss : Map<String, FileSystem>;
     override public function connect(communicator: Communicator) {
+        fss = new Map();
+        this.communicator = communicator;
         communicator
             .demand(SystemHtmlPanelGroup)
             .await(communicator.demand(Locale))
-            .with(communicator)
             .then(onMessage);
     }
 
-    function onMessage(message: SystemHtmlPanelGroup, locale : Locale, communicator: Communicator)
+    function onMessage(message: SystemHtmlPanelGroup, locale : Locale)
     {
         var item = new HtmlPanelGroupItem(locale.singular("file system"));
         message.group.addItem(item);
@@ -37,49 +43,72 @@ class TreeViewModule extends Module
         communicator.consume(function(fss : Array<NamedFileSystem>) {
                 fss.map(addTree.bind(communicator, _));
             });
-//        createTree(item.panel);
-/*
-        communicator.request(
-            new RequestMetadataChildren("/", "alt"),
-            ResponseMetadataChildren)
-            .then(function(response : ResponseMetadataChildren) {
-
-            });
-*/
         communicator.queueMany([
-            // new MenuItem(MenuFile(SubgroupFileLocal), "Open File...", function(){}, 0),
-            // new MenuItem(MenuFile(SubgroupFileLocal), "Close", function(){}, 1)
-        ]);
+                // new MenuItem(MenuFile(SubgroupFileLocal), "Open File...", function(){}, 0),
+                // new MenuItem(MenuFile(SubgroupFileLocal), "Close", function(){}, 1)
+            ]);
     }
 
     function addTree(communicator : Communicator, nfs : NamedFileSystem)
     {
         var name = nfs.name,
             fs = nfs.fs;
+        fss.set(name, fs);
         wireFileSystem(fs);
+        loadDir("/", name, 2);
+    }
+
+    function loadDir(path : String, name : String, levels : Int)
+    {
+        if(levels == 0)
+            return;
+        var fs = fss.get(name);
         communicator.request(
-            new RequestMetadataChildren("/", name),
-            ResponseMetadataChildren)
-            .then(function(response : ResponseMetadataChildren) {
-//                trace(response);
-                response.children.map(function(child : String) {
-                    fs.root.ensureDirectory(response.parent + child);
+            new RequestMetadataPath(path, name),
+            ResponseMetadataPath)
+            .then(function(response : ResponseMetadataPath) {
+                response.children.map(function(child) {
+//trace(child);
+                    var subpath = response.path + child.name,
+                        node : Node = null;
+//trace(subpath + " " + child.type);
+                    switch (child.type) {
+                        case "file":
+                            node = fs.root.createFileAt(subpath);
+                        case "directory":
+                            node = fs.root.ensureDirectory(subpath);
+                            thx.react.promise.Timer.delay(0).then(
+                                loadDir.bind(subpath, name, levels-1)
+                            );
+                    }
+//                    node.meta.set(UI_TREE_NODE, 
+//trace(subpath);
                 });
-            });
-//        trace(nfs);
+
+/*
+                response.children.map(function(child : String) {
+                    var subpath = response.parent + child;
+                    communicator.request(
+                        new RequestMetadataPath(subpath, name),
+                        ResponseMetadataPath)
+                        .then(function(response : ResponseMetadataPath) {
+trace(response);
+                        });
+                });
+*/
+            })
+            ;
     }
 
     function wireFileSystem(fs : FileSystem)
     {
         var root = tree.addRoot(fs.root);
+        fs.root.meta.set(UI_TREE_NODE, root);
         fs.on(function(e : NodeAddEvent) {
-                var node = e.node;
-//                if(node.isDirectory) {
-                    root.appendChild(node);
- //               } else {
-
-   //             }
-     //           trace(node);
+            var node = e.node,
+                parent = node.parent.meta.get(UI_TREE_NODE),
+                tree_node = parent.appendChild(node);
+                node.meta.set(UI_TREE_NODE, tree_node);
                 tree.update();
             });
     }

@@ -42,7 +42,32 @@ abstract Path({ absolute : Bool, path : Array<Segment> })
 		var absolute = s[0] == "/";
 		if(absolute)
 			s.shift();
-		return new Path(absolute, s.map(Segment.fromString));
+		return new Path(absolute, s.map(Segment.fromString)).simplify();
+	}
+
+	public function simplify() : Path
+	{
+		var path : Array<Segment> = this.path.copy(),
+			pos  = 0;
+		while(pos < path.length) {
+			switch(path[pos].getESegment()) {
+				case Literal(_):
+					pos++;
+				case Pattern(_):
+					pos++;
+				case Up if(pos == 0 && !this.absolute):
+					throw 'cannot crawl above the root path for ';
+				case Up if(pos == 0):
+					pos++;
+				case Up if(switch(path[pos-1].getESegment()) { case Up: true; case _: false; }):
+					pos++;
+				case Up:
+					path.splice(pos-1, 2);
+				case Current:
+					path.splice(pos, 1);
+			}
+		}
+		return new Path(this.absolute, path);
 	}
 
 	public inline function absolute()
@@ -50,4 +75,7 @@ abstract Path({ absolute : Bool, path : Array<Segment> })
 
 	public inline function segments()
 		return this.path;
+
+	public inline function toString()
+		return (this.absolute ? "/" : "") + this.path.map(function(s : Segment) return s.toString()).join("/");
 }

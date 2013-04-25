@@ -24,3 +24,16 @@ class RequestMetadataChildren extends PrecogRequest
 		this.description = 'metadata children at $path';
 	}
 }
+
+class RequestMetadataPath extends PrecogRequest
+{
+	public var path(default, null) : String;
+	public var size(default, null) : Int;
+	public var children(default, null) : Array<String>;
+	public function new(path : String, ?api : String)
+	{
+		super(api);
+		this.path = path;
+		this.description = 'metadata for $path';
+	}	
+}

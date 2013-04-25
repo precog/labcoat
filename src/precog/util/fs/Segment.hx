@@ -1,5 +1,7 @@
 package precog.util.fs;
 
+using thx.core.Strings;
+
 abstract Segment(ESegment)
 {
 	public function new(v : ESegment)
@@ -8,8 +10,6 @@ abstract Segment(ESegment)
 	static var PATTERN = ~/^[|](.+?)[|](i?)$/;
 	@:from public static inline function fromESegment(segment : ESegment)
 		return new Segment(segment);
-	@:from public static inline function fromEReg(reg : EReg)
-		return new Segment(Pattern(reg));
 	@:from public static function fromString(s : String)
 	{
 		return switch (s) {
@@ -18,9 +18,9 @@ abstract Segment(ESegment)
 			case ".":
 				new Segment(Current);
 			case pattern if(PATTERN.match(pattern)):
-				new Segment(Pattern(new EReg(PATTERN.matched(1), PATTERN.matched(2))));
+				new Segment(Pattern(PATTERN.matched(1), PATTERN.matched(2)));
 			case v:
-				new Segment(Literal(v));
+				new Segment(Literal(v.trim("/")));
 		}
 	}
 
@@ -34,6 +34,16 @@ abstract Segment(ESegment)
 		switch (this) {
 			case Literal(v): return v;
 			case _: throw "expected a literal segment value";
+		}
+	}
+
+	public inline function toString()
+	{
+		return switch (this) {
+			case Literal(s):	s;
+			case Pattern(p, m):	'|$p|$m';
+			case Up:			"..";
+			case Current:		".";
 		}
 	}
 }

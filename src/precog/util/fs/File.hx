@@ -2,13 +2,11 @@ package precog.util.fs;
 
 class File extends Node
 {
-	public var meta(default, null) : Meta;
 	public var extension(get, set) : String;
 	public var baseName(get, set) : String;
 	public function new(name : String, parent : Directory)
 	{
 		super(name, parent);
-		meta = new Meta(this);
 	}
 
 	function get_extension()

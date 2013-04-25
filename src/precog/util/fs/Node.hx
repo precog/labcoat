@@ -2,6 +2,7 @@ package precog.util.fs;
 
 class Node
 {
+	public var meta(default, null) : Meta;
 	@:isVar public var name(get, set) : String;
 	public var filesystem(default, null) : FileSystem;
 	public var parent(default, null) : Directory;
@@ -11,12 +12,11 @@ class Node
 	public var isSystem(get, null) : Bool;
 	public function new(name : String, parent : Directory)
 	{
+		meta = new Meta(this);
 		this.init();
 		this.name = name;
 		if(null != parent)
-		{
 			parent.addNode(this);
-		}
 	}
 
 	function init() { }

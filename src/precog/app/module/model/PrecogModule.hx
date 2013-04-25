@@ -42,6 +42,9 @@ class PrecogModule extends Module
 		return segments.length == 0 ? '' : '${segments.join("/")}/';
 	}
 
+	
+
+
 	override function connect(communicator : Communicator)
 	{
 		communicator.consume(function(configs : Array<PrecogNamedConfig>) {
@@ -79,6 +82,58 @@ class PrecogModule extends Module
 			},
 			RequestMetadataChildren,
 			ResponseMetadataChildren
+		);
+
+		communicator.respond(
+			function(request : RequestMetadataPath) : Null<Promise<ResponseMetadataPath -> Void>> {
+				var deferred = new Deferred(),
+					api      = apis.get(request.api);
+				if(null == api)
+					throw 'no api is set for ${request.api}';
+				communicator.trigger(request);
+				var path = getDirectoryFromRoot(request.api, request.path);
+//				api.retrieveMetadata(path).then(
+//					function(result) {
+trace(path);
+						var children = switch(path) {
+							case "0000000094/" :
+								[{
+									type : "directory",
+									name : "001/"
+								}, {
+									type : "directory",
+									name : "002/"
+								}, {
+									type : "file",
+									name : "001"
+								}, {
+									type : "file",
+									name : "nebula"
+								}];
+							case "0000000094/002/" : 
+								[{
+									type : "directory",
+									name : "xxx"
+								}];
+							case "0000000094/001/" : 
+								[];
+							case _ : 
+								[];
+
+						}
+						var response = new ResponseMetadataPath(request.path, children, request);
+						deferred.resolve(response);
+						communicator.trigger(response);
+//					},
+//					function(err) {
+//						var response = new ResponseError(err, request);
+//						deferred.reject(response);
+//						communicator.trigger(response);
+//					});
+				return deferred.promise;
+			},
+			RequestMetadataPath,
+			ResponseMetadataPath
 		);
 
 		/*

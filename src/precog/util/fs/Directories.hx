@@ -7,7 +7,8 @@ class Directories extends Nodes<Directory>
 		return switch (segment.getESegment()) {
 			case Literal(literal):
 				nodes.filter(function(node) return literal == node.name);
-			case Pattern(reg):
+			case Pattern(p, m):
+				var reg = new EReg(p, m);
 				nodes.filter(function(node) return reg.match(node.name));
 			case Up:
 				if(directory.parent == null)
