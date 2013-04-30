@@ -87,11 +87,11 @@ class Directory extends Node
 	public function traverse(path : Path) : Array<Node>
 	{
 		var dirs = [path.absolute() ? filesystem.root : this],
-			segments = path.segments(),
-			last = segments.pop(),
-			results : Array<Node> = [];
+			segments = path.segments().copy();
 		if(segments.length == 0)
 			return cast dirs;
+		var last = segments.pop(),
+			results : Array<Node> = [];
 		dirs = traverseImpl(dirs, segments);
 		for(dir in dirs)
 			results = results.concat(cast dir.directories.find(last)).concat(cast dir.files.find(last));
