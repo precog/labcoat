@@ -51,8 +51,8 @@ extern class Precog
 
     public function getMetadata(path : String, ?success : ProcMetadata, ?failure : ProcFailure) : Future<ProcMetadata, ProcFailure>;
     public function _retrieveMetadata(path : String, ?success : ProcMetadata, ?failure : ProcFailure) : Future<ProcMetadata, ProcFailure>;
-    public function listChildren(path0 : String, ?success : ProcArray<String>, ?failure : ProcFailure) : Future<ProcArray<String>, ProcFailure>;
-    public function listDescendants(path0 : String, ?success : ProcArray<String>, ?failure : ProcFailure) : Future<ProcArray<String>, ProcFailure>;
+    public function listChildren(path0 : String, ?success : ProcListFileDescription, ?failure : ProcFailure) : Future<ProcListFileDescription, ProcFailure>;
+    public function listDescendants(path0 : String, ?success : ProcArrayT<String>, ?failure : ProcFailure) : Future<ProcArrayT<String>, ProcFailure>;
     public function existsFile(path : String, ?success : ProcT<Bool>, ?failure : ProcFailure) : Future<ProcT<Bool>, ProcFailure>;
 
 	// ************
@@ -96,7 +96,7 @@ extern class Precog
 // *** HANDLERS ***
 // ****************
 typedef ProcT<T> = T -> Void;
-typedef ProcArray<T> = ProcT<Array<T>>;
+typedef ProcArrayT<T> = ProcT<Array<T>>;
 typedef ResAccountId = {
 				accountId : String
 			}
@@ -128,7 +128,7 @@ typedef ResCreateGrant = {
 				permissions : Array<ResPermission>
 			};
 typedef ProcCreateGrant = ProcT<ResCreateGrant>;
-typedef ProcListGrant = ProcArray<ResCreateGrant>;
+typedef ProcListGrant = ProcArrayT<ResCreateGrant>;
 typedef ResGrant = {
 				>ResCreateGrant,
 				description : String,
@@ -141,14 +141,14 @@ typedef ResCreatedApiKey = {
 				issuerChain : Array<Dynamic> // TODO type me
 			};
 typedef ProcResCreatedApiKey = ProcT<ResCreatedApiKey>;
-typedef ProcListApiKey = ProcArray<ResCreatedApiKey>;
+typedef ProcListApiKey = ProcArrayT<ResCreatedApiKey>;
 typedef ResDescribeApiKey = {
 				>ResCreatedApiKey,
 				description : String,
 				name : String
 			};
 typedef ProcDescribeApiKey = ProcT<ResDescribeApiKey>;
-typedef ProcListDescribeApiKey = ProcArray<ResDescribeApiKey>;
+typedef ProcListDescribeApiKey = ProcArrayT<ResDescribeApiKey>;
 
 typedef ResUploadError = {
 				// TODO type me
@@ -185,6 +185,12 @@ typedef ResFile = {
 				type : String
 			}
 typedef ProcFile = ProcT<ResFile>;
+typedef ResFileDescription = {
+				name : String,
+				type : String
+			}
+typedef ProcFileDescription = ProcT<ResFileDescription>;
+typedef ProcListFileDescription = ProcArrayT<ResFileDescription>;
 
 // ****************
 // *** CONFIG ***

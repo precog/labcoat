@@ -28,24 +28,24 @@ class ResponseError extends PrecogResponse
 class ResponseMetadataChildren extends PrecogResponse
 {
 	public var parent(default, null) : String;
-	public var children(default, null) : Array<String>;
-	public function new(parent : String, children : Array<String>, request : PrecogRequest)
+	public var children(default, null) : Array<FileDescription>;
+	public function new(parent : String, children : Array<FileDescription>, request : PrecogRequest)
 	{
 		super(request);
 		this.parent = parent;
 		this.children = children;
-		var display = children.slice(0, 5);
+		var display = children.slice(0, 5).map(function(o) return o.name);
 		if(display.length < children.length)
 			display.push('...');
 		this.description = 'metadata children at $parent: ${display.length == 0 ? "[none]" : display.join(", ")}';
 	}
 }
-
+/*
 class ResponseMetadataPath extends PrecogResponse
 {
 	public var path(default, null) : String;
-	public var children(default, null) : Array<DirectoryChild>;
-	public function new(path : String, children : Array<DirectoryChild>, request : PrecogRequest)
+	public var children(default, null) : Array<FileDescription>;
+	public function new(path : String, children : Array<FileDescription>, request : PrecogRequest)
 	{
 		super(request);
 		this.children = children;
@@ -53,8 +53,8 @@ class ResponseMetadataPath extends PrecogResponse
 		this.description = 'metadata for $path: ${children.length}';
 	}
 }
-
-typedef DirectoryChild = {
+*/
+typedef FileDescription = {
 	type : String,
 	name : String
 }

@@ -1587,7 +1587,7 @@
     };
     Util.merge = function(o1, o2) {
       var r, key, index;
-      if (o1 === undefined) return o2;
+      if (o1 === undefined) return o1;
       else if (o2 === undefined) return o1;
       else if (o1 instanceof Array && o2 instanceof Array) {
         r = [];
@@ -2143,29 +2143,7 @@
     // *** METADATA ***
     // ****************
   
-    /**
-     * Retrieves metadata for the specified path.
-     *
-     * @example
-     * Precog.getMetadata('/foo');
-     */
-    Precog.prototype.getMetadata = Util.addCallbacks(function(path) {
-      var self = this;
   
-      Util.requireParam(path, 'path');
-  
-      self.requireConfig('apiKey');
-  
-      return PrecogHttp.get({
-        url:      self.metadataUrl("fs/" + path),
-        query:    {apiKey: self.config.apiKey},
-        success:  Util.extractContent
-      });
-    });
-  
-    /**
-     * Legacy method (retrieves raw API results).
-     */   
     Precog.prototype._retrieveMetadata = Util.addCallbacks(function(path) {
       var self = this;
   
@@ -2227,15 +2205,95 @@
       if (typeof localStorage !== 'undefined') {
         var path = Util.sanitizePath(path0);
   
-        var data0 = self._getEmulateData(path);
-  
-        var merged = Util.merge(data0, data);
-  
-        localStorage.setItem('Precog.' + path, JSON.stringify(merged));
+        localStorage.setItem('Precog.' + path, JSON.stringify(data));
       } else {
         if (console && console.error) console.error('Missing local storage!');
       }
     };
+  
+    /**
+     * Retrieves metadata for the specified path.
+     *
+     * @example
+     * Precog.getMetadata('/foo');
+     */
+    Precog.prototype.getMetadata = Util.addCallbacks(function(path) {
+      // FIXME: EMULATION
+      var self = this;
+  
+      Util.requireParam(path, 'path');
+  
+      self.requireConfig('apiKey');
+  
+      return self.listChildren(path).then(function(children) {
+        return self.getNodeType(path).then(function(nodeType) {
+          var metadata = {};
+  
+          if (Util.acontains(nodeType, 'directory')) {
+            metadata.defaultFiles = {
+              'text/x-quirrel-script': 'index.qrl',
+              'text/html': 'index.html'
+            };
+  
+            metadata.children = children;
+          }
+  
+          if (Util.acontains(nodeType, 'file')) {
+            if (self._isEmulateData(path)) {
+              var data = self._getEmulateData(path);
+  
+              metadata.type = data.type;
+            } else {
+              metadata.type = 'application/json';
+            }
+          }
+  
+          return metadata;
+        });
+      });
+      // END EMULATION
+    });
+  
+    /**
+     * Retrieves the type of a node in the file system, whether file or directory.
+     *
+     * @example
+     * Precog.getNodeType('/foo/bar');
+     */
+    Precog.prototype.getNodeType = Util.addCallbacks(function(path0) {
+      // FIXME: EMULATION
+      var self = this;
+  
+      Util.requireParam(path0, 'path');
+  
+      self.requireConfig('apiKey');
+  
+      var path = Util.sanitizePath(path0);
+  
+      var countPath = function(path) {
+        return self.execute({query: 'count(load("' + path + '"))'}).then(function(results) {
+          return results.data && results.data[0] || 0;
+        });
+      };
+  
+      var listRawChildren = function(path) {
+        return self._retrieveMetadata(path).then(function(metadata) {
+          return metadata.children;
+        });
+      };
+  
+      return listRawChildren(path).then(function(children) {
+        return countPath(path).then(function(count) {
+          var types = [];
+  
+          if (children.length > 0) types.push('directory');
+          if (count > 0 || self._isEmulateData(path)) types.push('file');
+  
+          return types;
+        });
+      });
+      // END EMULATION
+    });
   
     /**
      * Retrieves all children of the specified path.
@@ -2252,14 +2310,36 @@
       // Get extra children not stored in file system:
       var nodeData = self._getEmulateData(path);
   
-      var extraChildren = nodeData.children || [];
+      var extraChildren = Util.amap(nodeData.children || [], function(childName) {
+        return {type: 'file', name: childName};
+      });
+      
+      return this._retrieveMetadata(path).then(function(metadata) {
+        var childNames = metadata.children || [];
   
-      function addExtraChildren(metadata) {
-        return metadata.children.concat(extraChildren);
-      }
-       // END EMULATION
+        return Vow.all(Util.amap(childNames, function(childName) {
+          return self.getNodeType(path + '/' + childName);
+        })).then(function(childTypes) {
+          var flattened = [];
   
-      return this._retrieveMetadata(path).then(addExtraChildren);
+          for (var i = 0; i < childNames.length; i++) {
+            var name  = Util.removeTrailingSlash(childNames[i]);
+            var types = childTypes[i];
+  
+            for (var j = 0; j < types.length; j++) {
+              var type = types[j];
+  
+              flattened.push({
+                type: type,
+                name: name
+              });
+            }
+          }
+  
+          return flattened.concat(extraChildren);
+        });
+      });
+      // END EMULATION
     });
   
     /**
@@ -2268,29 +2348,46 @@
      * @example
      * Precog.listDescendants('/foo');
      */
-    Precog.prototype.listDescendants = Util.addCallbacks(function(path) {
+    Precog.prototype.listDescendants = Util.addCallbacks(function(path0) {
       var self = this;
   
-      Util.requireParam(path, 'path');
+      Util.requireParam(path0, 'path');
+  
+      var path = Util.sanitizePath(path0 + '/');
   
       function listDescendants0(root, prefix) {
         return self.listChildren(root).then(function(children) {
-          var futures = Util.amap(children, function(child) {
-            var fullPath = root + '/' + child;
   
-            return listDescendants0(fullPath, prefix + child);
+          var absolutePaths0 = Util.amap(children, function(child) {
+            if (child.name === '/' || child.name === '') Util.error('Infinite recursion');
+  
+            return Util.sanitizePath(root + '/' + child.name);
           });
   
-          return Vow.all(futures).then(function(arrays) {
-            var prefixed = Util.amap(children, function(child) {
-              return prefix + child;
-            });
-            return [].concat.apply(prefixed, arrays);
+          var absolutePaths = [];
+  
+          Util.amap(absolutePaths0, function(path) {
+            if (!Util.acontains(absolutePaths, path)) {
+              absolutePaths.push(path);
+            }
+          });
+  
+          var relativePaths = Util.amap(absolutePaths, function(absolute) {
+            // Always return path relative to prefix:
+            return absolute.substr(prefix.length);
+          });
+  
+          var futures = Util.amap(absolutePaths, function(absolute) {
+            return listDescendants0(absolute, prefix);
+          });
+  
+          return Vow.all(futures).then(function(arrays) {          
+            return [].concat.apply(relativePaths, arrays);
           });
         });
       }
   
-      return listDescendants0(path, '');
+      return listDescendants0(path, path);
     });
   
     /**
@@ -2309,8 +2406,10 @@
   
       if (targetName === '') Util.error('To determine if a file exists, the file name must be specified');
   
-      return self.listChildren(targetDir).then(function(children) {
-        return Util.acontains(children, targetName);
+      return self.listChildren(targetDir).then(function(children0) {
+        var names = Util.amap(children0, function(child) { return child.name; });
+  
+        return Util.acontains(names, targetName);
       });
     });
   
@@ -2365,12 +2464,11 @@
         // FIXME: EMULATION
         var parentNode = self._getEmulateData(targetDir);
   
-        var children = parentNode.children || [];
-  
-        children.push(targetName);
+        parentNode.children = parentNode.children || [];
+        parentNode.children.push(targetName);
   
         // Keep track of children inside parent node:
-        self._setEmulateData(targetDir, {children: children});
+        self._setEmulateData(targetDir, parentNode);
   
         // Keep track of the contents & type of this file:
         var fileNode = self._getEmulateData(fullPath);
@@ -2455,9 +2553,9 @@
      * Retrieves the contents of the specified file.
      *
      * @example
-     * Precog.retrieveFile('/foo/bar.qrl');
+     * Precog.getFile('/foo/bar.qrl');
      */
-    Precog.prototype.retrieveFile = Util.addCallbacks(function(path) {
+    Precog.prototype.getFile = Util.addCallbacks(function(path) {
       var self = this;
   
       Util.requireParam(path, 'path');
@@ -2484,7 +2582,7 @@
     });
   
     /**
-     * Appends a JSON value to the specified file.
+     * Appends a single JSON value to the specified data file.
      *
      * @example
      * Precog.append({path: '/website/clicks.json', value: clickEvent});
@@ -2565,12 +2663,12 @@
   
       self.requireConfig('apiKey');
   
-      var path = Util.sanitizePath(path0 + '/');
+      var path = Util.sanitizePath(path0);
   
-      return self.listDescendants(path).then(function(children0) {
+      return self.listDescendants(path).then(function(descendants) {
         // Convert relative paths to absolute paths:
-        var absolutePaths = (Util.amap(children0, function(child) {
-          return path + child;
+        var absolutePaths = (Util.amap(descendants, function(child) {
+          return Util.sanitizePath(path + '/' + child);
         })).concat([path]);
   
         return Vow.all(Util.amap(absolutePaths, function(child) {
@@ -2591,7 +2689,7 @@
       Util.requireField(info, 'source');
       Util.requireField(info, 'dest');
   
-      return self.retrieveFile(info.source).then(function(file) {
+      return self.getFile(info.source).then(function(file) {
         return self.uploadFile({
           path:     info.dest,
           type:     file.type,
@@ -2601,8 +2699,7 @@
     });
   
     /**
-     * Copies then deletes a file from specified source to specified
-     * destination.
+     * Moves a file from one location to another.
      *
      * @example
      * Precog.moveFile({source: '/foo/helloo.qrl', dest: '/foo/hello.qrl'})
@@ -2619,8 +2716,7 @@
     });
   
     /**
-     * Copies then deletes a whole directory from specified source to
-     * specified destination.
+     * Moves a directory and its contents from one location to another.
      *
      * @example
      * Precog.moveDirectory({source: '/foo/helloo', dest: '/foo/hello'})
@@ -2636,9 +2732,12 @@
   
         // Copy each file
         for(var i = 0; i < descendants.length; i++) {
+          var absSource = info.source + '/' + descendants[i];
+          var absDest   = info.dest   + '/' + descendants[i];
+  
           resolvers.push(self.copyFile({
-            source: info.source + '/' + descendants[i],
-            dest:   info.dest + '/' + descendants[i]
+            source: absSource,
+            dest:   absDest
           }));
         }
   
@@ -2653,7 +2752,8 @@
     // ****************
   
     /**
-     * Executes the specified file, which must be a Quirrel script.
+     * Executes the specified file, which must be a Quirrel script. The
+     * maxAge and maxStale settings can be used to accept older analyses.
      *
      * @example
      * Precog.executeFile({path: '/foo/script.qrl'});
@@ -2688,7 +2788,7 @@
       // FIXME: EMULATION
   
       // Pull back the contents of the file:
-      return self.retrieveFile(info.path).then(function(file) {
+      return self.getFile(info.path).then(function(file) {
         // See if the file is executable:
         if (file.type === 'text/x-quirrel-script') {
           var executeRequest = {

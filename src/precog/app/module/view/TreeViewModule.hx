@@ -64,6 +64,15 @@ class TreeViewModule extends Module
             return;
         var fs = fss.get(name);
         communicator.request(
+                new RequestMetadataChildren(path, name),
+                ResponseMetadataChildren
+            ).then(function(response : ResponseMetadataChildren) {
+                trace(response);
+            });
+
+        
+        /*
+        communicator.request(
             new RequestMetadataPath(path, name),
             ResponseMetadataPath)
             .then(function(response : ResponseMetadataPath) {
@@ -85,19 +94,20 @@ class TreeViewModule extends Module
 //trace(subpath);
                 });
 
-/*
-                response.children.map(function(child : String) {
-                    var subpath = response.parent + child;
-                    communicator.request(
-                        new RequestMetadataPath(subpath, name),
-                        ResponseMetadataPath)
-                        .then(function(response : ResponseMetadataPath) {
-trace(response);
-                        });
-                });
-*/
+
+//                response.children.map(function(child : String) {
+//                    var subpath = response.parent + child;
+//                    communicator.request(
+//                        new RequestMetadataPath(subpath, name),
+//                        ResponseMetadataPath)
+//                        .then(function(response : ResponseMetadataPath) {
+//trace(response);
+//                        });
+//                });
+
             })
             ;
+            */
     }
 
     function wireFileSystem(fs : FileSystem)
