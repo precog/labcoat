@@ -309,10 +309,14 @@ class BaseHtmlTreeRenderer<T> implements IHtmlTreeRenderer<T>
 	}
 	public function updateRow(el : JQuery, node : TreeNode<T>) : JQuery
 	{
-		var hwidth = (1 + node.level) * connectorWidth + margin;
+		var hwidth = (1 + node.level) * connectorWidth + margin,
+			label  = Std.string(node.data).split("/").pop();
+//		if(label == "")
+//			label = "/";
+
 		el.find(".tree-content")
 			.css("margin-left", '${hwidth}px')
-			.html('<i class="' + (node.hasChildren ? 'icon-folder-${node.collapsed ? "close" : "open"}-alt' : 'icon-file' ) + '"></i> ' + Std.string(node.data));
+			.html('<i class="' + (node.hasChildren ? 'icon-folder-${node.collapsed ? "close" : "open"}-alt' : 'icon-file' ) + '"></i> ' + label);
 
 		var toggle = el.find(".tree-toggle");
 		if(node.collapsed || node.hasChildren) {

@@ -55,7 +55,7 @@ class TreeViewModule extends Module
             fs = nfs.fs;
         fss.set(name, fs);
         wireFileSystem(fs);
-        loadDir("/", name, 2);
+        loadDir("/", name, 3);
     }
 
     function loadDir(path : String, name : String, levels : Int)
@@ -71,10 +71,8 @@ class TreeViewModule extends Module
                     var path = response.parent + item.name;
                     switch (item.type) {
                         case "file":
-                        trace('createFileAt: ' + path);
                             fs.root.createFileAt(path);
                         case "directory":
-                            trace('ensureDirectory: ' + path);
                             fs.root.ensureDirectory(path);
                             // TODO, removing the timer will break the second load.communicator
                             // Very possible but in thx.react request/respond

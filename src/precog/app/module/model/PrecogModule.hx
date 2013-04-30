@@ -3,6 +3,7 @@ package precog.app.module.model;
 import precog.communicator.*;
 import thx.react.Promise;
 import precog.api.*;
+import precog.api.Precog;
 import precog.app.message.*;
 import precog.app.message.PrecogRequest;
 import precog.app.message.PrecogResponse;
@@ -31,19 +32,23 @@ class PrecogModule extends Module
 		);
 	}
 
-	function getDirectoryFromRoot(api : String, path : String)
+	function normalizeDirectory(path : String)
 	{
-		var basePath = configs.get(api).basePath,
-			segments = [basePath]
-				.concat(path.split('/'))
-				.filter(function(v) return null != v)
-				.map(Strings.trim.bind(_, "/"))
-				.filter(function(v) return v != "");
+		var segments = path.split('/')
+						.filter(function(v) return null != v)
+						.map(Strings.trim.bind(_, "/"))
+						.filter(function(v) return v != "");
 		return segments.length == 0 ? '' : '${segments.join("/")}/';
 	}
 
-	
-
+	function normalizeFilePath(path : String)
+	{
+		var segments = path.split('/')
+						.filter(function(v) return null != v)
+						.map(Strings.trim.bind(_, "/"))
+						.filter(function(v) return v != "");
+		return segments.length == 0 ? '' : '${segments.join("/")}';
+	}
 
 	override function connect(communicator : Communicator)
 	{
@@ -59,29 +64,160 @@ class PrecogModule extends Module
 				communicator.trigger(new Log("response: " + response.description));		
 			});
 
+		function errorResponse(request : PrecogRequest, deferred : Deferred<Dynamic>) {
+			return function(err) {
+				var response = new ResponseError(err, request);
+				deferred.reject(response);
+				communicator.trigger(response);
+			};
+		}
+
 		communicator.respond(
 			function(request : RequestMetadataChildren) : Null<Promise<ResponseMetadataChildren -> Void>> {
 				var deferred = new Deferred(),
-					api      = apis.get(request.api);
-				if(null == api)
-					throw 'no api is set for ${request.api}';
+					api      = getApi(request.api);
 				communicator.trigger(request);
-				var path = getDirectoryFromRoot(request.api, request.path);
+				var path = normalizeDirectory(request.path);
 				api.listChildren(path).then(
 					function(result) {
 						var response = new ResponseMetadataChildren(request.path, result, request);
 						deferred.resolve(response);
 						communicator.trigger(response);
 					},
-					function(err) {
-						var response = new ResponseError(err, request);
-						deferred.reject(response);
-						communicator.trigger(response);
-					});
+					errorResponse(request, deferred)
+				);
 				return deferred.promise;
 			},
 			RequestMetadataChildren,
 			ResponseMetadataChildren
 		);
+
+		communicator.respond(
+			function(request : RequestFileGet) : Null<Promise<ResponseFileGet -> Void>> {
+				var deferred = new Deferred(),
+					api      = getApi(request.api);
+				communicator.trigger(request);
+				var path = normalizeFilePath(request.filePath);
+				api.getFile(path).then(
+					function(result) {
+						var response = new ResponseFileGet(request.filePath, result, request);
+						deferred.resolve(response);
+						communicator.trigger(response);
+					},
+					errorResponse(request, deferred)
+				);
+				return deferred.promise;
+			},
+			RequestFileGet,
+			ResponseFileGet
+		);
+
+		communicator.respond(
+			function(request : RequestFileCreate) : Null<Promise<ResponseFileCreate -> Void>> {
+				var deferred = new Deferred(),
+					api      = getApi(request.api);
+				communicator.trigger(request);
+				var path = normalizeFilePath(request.filePath);
+				api.createFile({
+						type : request.type,
+						path : path,
+						contents : request.contents
+					}).then(
+					function(result) {
+						var response = new ResponseFileCreate(request.filePath, request);
+						deferred.resolve(response);
+						communicator.trigger(response);
+					},
+					errorResponse(request, deferred)
+				);
+				return deferred.promise;
+			},
+			RequestFileCreate,
+			ResponseFileCreate
+		);
+
+		communicator.respond(
+			function(request : RequestFileUpload) : Null<Promise<ResponseFileUpload -> Void>> {
+				var deferred = new Deferred(),
+					api      = getApi(request.api);
+				communicator.trigger(request);
+				var path = normalizeFilePath(request.filePath);
+				api.uploadFile({
+						type : request.type,
+						path : path,
+						contents : request.contents
+					}).then(
+					function(result) {
+						var response = new ResponseFileUpload(request.filePath, request);
+						deferred.resolve(response);
+						communicator.trigger(response);
+					},
+					errorResponse(request, deferred)
+				);
+				return deferred.promise;
+			},
+			RequestFileUpload,
+			ResponseFileUpload
+		);
+
+		communicator.respond(
+			function(request : RequestFileExecute) : Null<Promise<ResponseFileExecute -> Void>> {
+				var deferred = new Deferred(),
+					api      = getApi(request.api);
+				communicator.trigger(request);
+				var info : OptExecuteFile = { path : normalizeFilePath(request.filePath) };
+				if(null != request.maxAge)
+					info.maxAge = request.maxAge;
+				if(null != request.maxStale)
+					info.maxStale = request.maxStale;
+				api.executeFile(info).then(
+					function(result) {
+						var response = new ResponseFileExecute(request.filePath, result, request);
+						deferred.resolve(response);
+						communicator.trigger(response);
+					},
+					errorResponse(request, deferred)
+				);
+				return deferred.promise;
+			},
+			RequestFileExecute,
+			ResponseFileExecute
+		);
+
+		communicator.respond(
+			function(request : RequestDirectoryMove) : Null<Promise<ResponseDirectoryMove -> Void>> {
+				var deferred = new Deferred(),
+					api      = getApi(request.api);
+				communicator.trigger(request);
+				api.moveDirectory({
+						source : normalizeDirectory(request.src),
+						dest   : normalizeDirectory(request.dst)
+					}).then(
+					function() {
+						var response = new ResponseDirectoryMove(request.src, request.dst, request);
+						deferred.resolve(response);
+						communicator.trigger(response);
+					},
+					errorResponse(request, deferred)
+				);
+				return deferred.promise;
+			},
+			RequestDirectoryMove,
+			ResponseDirectoryMove
+		);
+/*
+
+ResponseFileExecute
+ResponseDirectoryMove
+
+*/
+	}
+
+	function getApi(name : String)
+	{
+		var api = apis.get(name);
+		if(null == api)
+			throw 'no api is set for $name';
+		return api;
 	}
 }

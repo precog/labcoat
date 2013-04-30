@@ -23,9 +23,9 @@ extern class Precog
 	public function requestPasswordReset(email : String, ?success : ProcT<String>, ?failure : ProcFailure) : Future<ProcT<String>, ProcFailure>;
 	public function lookupAccountId(email : String, ?success : ProcAccountId, ?failure : ProcFailure) : Future<ProcAccountId, ProcFailure>;
 	public function describeAccount(account : OptAccount, ?success : ProcDescribeAccount, ?failure : ProcFailure) : Future<ProcDescribeAccount, ProcFailure>;
-	public function addGrantToAccount(info : OptGrantInfo, ?success : ProcT<Void>, ?failure : ProcFailure) : Future<ProcT<Void>, ProcFailure>;
+	public function addGrantToAccount(info : OptGrantInfo, ?success : ProcVoid, ?failure : ProcFailure) : Future<ProcVoid, ProcFailure>;
 	public function currentPlan(account : OptAccount, ?success : ProcT<String>, ?failure : ProcFailure) : Future<ProcT<String>, ProcFailure>;
-	public function changePlan(account : OptAccountPlan, ?success : ProcT<Void>, ?failure : ProcFailure) : Future<ProcT<Void>, ProcFailure>;
+	public function changePlan(account : OptAccountPlan, ?success : ProcVoid, ?failure : ProcFailure) : Future<ProcVoid, ProcFailure>;
 	public function deletePlan(account : OptAccount, ?success : ProcPlan, ?failure : ProcFailure) : Future<ProcPlan, ProcFailure>;
 
     // ****************
@@ -36,13 +36,13 @@ extern class Precog
     // TODO define grants type
     public function createApiKey(grants : Array<Dynamic>, ?success : ProcResCreatedApiKey, ?failure : ProcFailure) : Future<ProcResCreatedApiKey, ProcFailure>;
     public function describeApiKey(apiKey : String, ?success : ProcDescribeApiKey, ?failure : ProcFailure) : Future<ProcDescribeApiKey, ProcFailure>;
-    public function deleteApiKey(apiKey : String, ?success : ProcT<Void>, ?failure : ProcFailure) : Future<ProcT<Void>, ProcFailure>;
+    public function deleteApiKey(apiKey : String, ?success : ProcVoid, ?failure : ProcFailure) : Future<ProcVoid, ProcFailure>;
     public function retrieveApiKeyGrants(apiKey : String, ?success : ProcListDescribeApiKey, ?failure : ProcFailure) : Future<ProcListDescribeApiKey, ProcFailure>;
-    public function addGrantToApiKey(info : OptAddGrantToApiKey, ?success : ProcT<Void>, ?failure : ProcFailure) : Future<ProcT<Void>, ProcFailure>;
-    public function removeGrantFromApiKey(info : OptRemoveGrantFromApiKey, ?success : ProcT<Void>, ?failure : ProcFailure) : Future<ProcT<Void>, ProcFailure>;
-    public function createGrant(grant : OptCreateGrant, ?success : ProcT<Void>, ?failure : ProcFailure) : Future<ProcT<Void>, ProcFailure>;
+    public function addGrantToApiKey(info : OptAddGrantToApiKey, ?success : ProcVoid, ?failure : ProcFailure) : Future<ProcVoid, ProcFailure>;
+    public function removeGrantFromApiKey(info : OptRemoveGrantFromApiKey, ?success : ProcVoid, ?failure : ProcFailure) : Future<ProcVoid, ProcFailure>;
+    public function createGrant(grant : OptCreateGrant, ?success : ProcVoid, ?failure : ProcFailure) : Future<ProcVoid, ProcFailure>;
     public function describeGrant(grantId : String, ?success : ProcResGrant, ?failure : ProcFailure) : Future<ProcResGrant, ProcFailure>;
-    public function deleteGrant(grantId : String, ?success : ProcT<Void>, ?failure : ProcFailure) : Future<ProcT<Void>, ProcFailure>;
+    public function deleteGrant(grantId : String, ?success : ProcVoid, ?failure : ProcFailure) : Future<ProcVoid, ProcFailure>;
     public function createGrantChild(info : OptCreateGrantChild, ?success : ProcCreateGrant, ?failure : ProcFailure) : Future<ProcCreateGrant, ProcFailure>;
 
 	// ****************
@@ -58,7 +58,7 @@ extern class Precog
 	// ************
 	// *** DATA ***
 	// ************
-
+	public function getFile(path : String, ?success : ProcFile, ?failure : ProcFailure) : Future<ProcFile, ProcFailure>;
     public function uploadFile(info : OptUploadFile, ?success : ProcUploadReport, ?failure : ProcFailure) : Future<ProcUploadReport, ProcFailure>;
     public function createFile(info : OptUploadFile, ?success : ProcUploadReport, ?failure : ProcFailure) : Future<ProcUploadReport, ProcFailure>;
     public function retrieveFile(path0 : String, ?success : ProcFile, ?failure : ProcFailure) : Future<ProcFile, ProcFailure>;
@@ -68,6 +68,8 @@ extern class Precog
     public function delete0(path0 : String, ?success : ProcT<Dynamic>, ?failure : ProcFailure) : Future<ProcT<Dynamic>, ProcFailure>;
 	// TODO needs typing
     public function deleteAll(path : String, ?success : ProcT<Dynamic>, ?failure : ProcFailure) : Future<ProcT<Dynamic>, ProcFailure>;
+    public function moveDirectory(info : OptMove, ?success : ProcVoid, ?failure : ProcFailure) : Future<ProcVoid, ProcFailure>;
+    public function moveFile(info : OptMove, ?success : ProcVoid, ?failure : ProcFailure) : Future<ProcVoid, ProcFailure>;
 
 	// ****************
 	// *** ANALYSIS ***
@@ -95,6 +97,7 @@ extern class Precog
 // ****************
 // *** HANDLERS ***
 // ****************
+typedef ProcVoid = Void -> Void;
 typedef ProcT<T> = T -> Void;
 typedef ProcArrayT<T> = ProcT<Array<T>>;
 typedef ResAccountId = {
@@ -181,7 +184,7 @@ typedef ResQueryDetailed = {
 			}
 typedef ProcQueryDetailed = ProcT<ResQueryDetailed>;
 typedef ResFile = {
-				content : String,
+				contents : String,
 				type : String
 			}
 typedef ProcFile = ProcT<ResFile>;
@@ -263,5 +266,12 @@ typedef OptAppendAll = {
 }
 
 typedef OptExecuteFile = {
-	path	: String
+	path	: String,
+	?maxAge : Float,
+	?maxStale : Float
+}
+
+typedef OptMove = {
+	source : String,
+	dest : String
 }
