@@ -20,6 +20,7 @@ class Main
         manager.addModule(new LogModule());
 
         // View
+        manager.addModule(new LoginModule());
 #if (html5 || cordova)
         manager.addModule(new Html5MenuModule());
 #else
