@@ -49,7 +49,8 @@ extern class Precog
 	// *** METADATA ***
 	// ****************
 
-    public function retrieveMetadata(path : String, ?success : ProcMetadata, ?failure : ProcFailure) : Future<ProcMetadata, ProcFailure>;
+    public function getMetadata(path : String, ?success : ProcMetadata, ?failure : ProcFailure) : Future<ProcMetadata, ProcFailure>;
+    public function _retrieveMetadata(path : String, ?success : ProcMetadata, ?failure : ProcFailure) : Future<ProcMetadata, ProcFailure>;
     public function listChildren(path0 : String, ?success : ProcArray<String>, ?failure : ProcFailure) : Future<ProcArray<String>, ProcFailure>;
     public function listDescendants(path0 : String, ?success : ProcArray<String>, ?failure : ProcFailure) : Future<ProcArray<String>, ProcFailure>;
     public function existsFile(path : String, ?success : ProcT<Bool>, ?failure : ProcFailure) : Future<ProcT<Bool>, ProcFailure>;
@@ -74,11 +75,12 @@ extern class Precog
 
     public function executeFile(info : OptExecuteFile, ?success : ProcQuery, ?failure : ProcFailure) : Future<ProcQuery, ProcFailure>;
     public function execute(info : ResQuery, ?success : ProcQuery, ?failure : ProcFailure) : Future<ProcQuery, ProcFailure>;
-    public function asyncQuery(info : ResQuery, ?success : ProcAsyncQuery, ?failure : ProcFailure) : Future<ProcAsyncQuery, ProcFailure>;
-    public function asyncQueryResults(jobId : String, ?success : ProcQueryDetailed, ?failure : ProcFailure) : Future<ProcQueryDetailed, ProcFailure>;
+    public function _asyncQuery(info : ResQuery, ?success : ProcAsyncQuery, ?failure : ProcFailure) : Future<ProcAsyncQuery, ProcFailure>;
+    public function _asyncQueryResults(jobId : String, ?success : ProcQueryDetailed, ?failure : ProcFailure) : Future<ProcQueryDetailed, ProcFailure>;
 
 	static function __init__() : Void
 	{
+		haxe.macro.Compiler.includeFile("precog/api/precog.js");
 		var api = untyped __js__('(precog || (precog = {})) && (precog.api || (precog.api = {}))');
 		if(untyped window)
 			api.Precog = untyped window.Precog.api;
