@@ -1,5 +1,6 @@
 package precog.editor;
 
+import precog.communicator.Communicator;
 import precog.editor.codemirror.Externs;
 import jQuery.JQuery;
 import jQuery.Event;
@@ -8,6 +9,9 @@ import thx.react.Signal;
 import precog.util.Locale;
 
 class Region {
+    public var index: Int;
+    public var path: String;
+
     public var mode: RegionMode;
     public var element: JQuery;
     public var editor: RegionEditor;
@@ -18,17 +22,18 @@ class Region {
     };
 
     var buttons: RegionButtons;
+    var communicator: Communicator;
 
     function createEditor() {
         return switch(this.mode) {
-            case QuirrelRegionMode: new QuirrelEditor(this);
+            case QuirrelRegionMode: new QuirrelEditor(communicator, this);
             case MarkdownRegionMode: new MarkdownEditor(this);
             case JSONRegionMode: new JSONEditor(this);
             case VegaRegionMode: new VegaEditor(this);
         }
     }
 
-    public function new(mode: RegionMode, locale : Locale) {
+    public function new(communicator: Communicator, path: String, mode: RegionMode, locale : Locale) {
         this.events = {
             changeMode : new Signal2(),
             remove : new Signal1(),
@@ -43,6 +48,8 @@ class Region {
         };
 
         this.mode = mode;
+        this.communicator = communicator;
+        this.path = path;
 
         element = new JQuery('<div class="region"></div>');
         buttons = new RegionButtons(this, locale);

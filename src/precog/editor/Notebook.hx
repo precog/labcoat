@@ -11,9 +11,11 @@ class Notebook implements Editor {
         public function clear() : Void;
     };
     public var element(default, null): JQuery;
+    public var path(default, null): String;
     var regions: Array<Region>;
+    var regionCounter: Int;
 
-    public function new(name : String) {
+    public function new(path: String, name : String) {
         element = new JQuery('<div class="notebook"></div>');
         regions = [];
         events = {
@@ -27,7 +29,9 @@ class Notebook implements Editor {
                 }
             }
         };
+        this.path = path;
         this.name = name;
+        regionCounter = 0;
     }
 
     public function clear()
@@ -53,6 +57,10 @@ class Notebook implements Editor {
         for(region in regions) {
             region.editor.focus();
         }
+    }
+
+    public function incrementRegionCounter() {
+        return ++regionCounter;
     }
 
     function get_name()

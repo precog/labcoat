@@ -45,7 +45,7 @@ class EditorModule extends Module {
         communicator.on(function(_ : EditorRequestCloseCurrent)
             closeEditor());
         communicator.on(function(e : EditorRegionRequestCreate)
-            appendRegion(e.region));
+            createRegion(e.regionMode));
         communicator.on(function(e : EditorUpdate)
             changeEditor(e.current));
 
@@ -63,8 +63,8 @@ class EditorModule extends Module {
         // Global keyhandlers
         Reflect.setField(CodeMirror.keyMap.macDefault, "Shift-Enter", evaluateRegion);
         Reflect.setField(CodeMirror.keyMap.pcDefault, "Shift-Enter", evaluateRegion);
-        Reflect.setField(CodeMirror.keyMap.macDefault, "Cmd-Enter", createRegion);
-        Reflect.setField(CodeMirror.keyMap.pcDefault, "Ctrl-Enter", createRegion);
+        Reflect.setField(CodeMirror.keyMap.macDefault, "Cmd-Enter", createRegionFromEditor);
+        Reflect.setField(CodeMirror.keyMap.pcDefault, "Ctrl-Enter", createRegionFromEditor);
 
                 // TODO: move out from here: TABS!!!
         var rect = new Rectangle();
@@ -92,14 +92,15 @@ class EditorModule extends Module {
 
     var fileCounter: Int = 0;
     function createCodeEditor() {
-        var codeEditor = new CodeEditor(locale.format("file #{0}", [++fileCounter]), locale);
+        var codeEditor = new CodeEditor(communicator, locale.format("file #{0}", [++fileCounter]), locale);
 
         addEditor(codeEditor);
     }
 
     var notebookCounter : Int = 0;
     function createNotebook() {
-        var notebook = new Notebook(locale.format("notebook #{0}", [++notebookCounter]));
+        var index = ++notebookCounter;
+        var notebook = new Notebook('0000000094/temp/notebook${index}', locale.format("notebook #{0}", [index]));
 
         addEditor(notebook);
     }
@@ -126,7 +127,7 @@ class EditorModule extends Module {
         );
 
         communicator.trigger(new EditorUpdate(editor, editors));
-        communicator.trigger(new EditorRegionRequestCreate(new Region(QuirrelRegionMode, locale)));
+        communicator.trigger(new EditorRegionRequestCreate(QuirrelRegionMode));
     }
 
     function changeEditor(editor: Editor) {
@@ -160,28 +161,43 @@ class EditorModule extends Module {
     }
 
     function changeRegionMode(oldRegion: Region, mode: RegionMode) {
-        oldRegion.events.clear();
+        current.cata(
+            function(codeEditor: CodeEditor) {
+                // Can't change single editor modes
+            },
+            function(notebook: Notebook) {
+                oldRegion.events.clear();
 
-        var content = oldRegion.editor.getContent();
-        var region = new Region(mode, locale);
-        region.editor.setContent(content);
-        appendRegion(region, oldRegion.element);
+                var content = oldRegion.editor.getContent();
+                var region = new Region(communicator, oldRegion.path, mode, locale);
+                region.editor.setContent(content);
+                appendRegion(region, notebook, oldRegion.element);
 
-        deleteRegion(oldRegion);
+                deleteRegion(oldRegion);
+            }
+        );
     }
 
-    function appendRegion(region: Region, ?target: JQuery) {
+    function appendRegion(region: Region, notebook: Notebook, ?target: JQuery) {
         region.events.changeMode.on(changeRegionMode);
         region.events.remove.on(deleteRegion);
+        notebook.appendRegion(region, target);
+    }
+
+    function createRegion(regionMode: RegionMode, ?target: JQuery) {
         current.cata(
-            function(codeEditor: CodeEditor) {},
-            function(notebook: Notebook) { notebook.appendRegion(region, target); }
+            function(codeEditor: CodeEditor) {
+                // Can't create regions in a single editor
+            },
+            function(notebook: Notebook) {
+                appendRegion(new Region(communicator, '${notebook.path}/region${notebook.incrementRegionCounter()}', regionMode, locale), notebook, target);
+            }
         );
     }
     
-    function createRegion(editor: CodeMirror) {
+    function createRegionFromEditor(editor: CodeMirror) {
         var region : Region = editor.getOption('region');
-        appendRegion(new Region(region.mode, locale), region.element);
+        createRegion(region.mode, region.element);
     }
 
     function evaluateRegion(editor: CodeMirror) {

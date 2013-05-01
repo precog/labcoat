@@ -1,8 +1,8 @@
 package precog.app.message;
 
-import precog.editor.Region;
+import precog.editor.RegionMode;
 
 class EditorRegionRequestCreate implements precog.macro.ValueClass
 {
-	public var region : Region;
+	public var regionMode : RegionMode;
 }

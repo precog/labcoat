@@ -67,6 +67,6 @@ class EditorToolbarModule extends Module {
 
     function createRegion(event: Event) {
         event.preventDefault();
-        communicator.trigger(new EditorRegionRequestCreate(new Region(QuirrelRegionMode, locale)));
+        communicator.trigger(new EditorRegionRequestCreate(QuirrelRegionMode));
     }
 }

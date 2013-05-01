@@ -175,7 +175,7 @@ typedef ResAsyncQuery = {
 				jobId : String
 			}
 typedef ProcAsyncQuery = ProcT<ResAsyncQuery>;
-typedef ResQuery = Array<Dynamic>;
+typedef ResQuery = {data: Array<Dynamic>};
 typedef ProcQuery = ProcT<ResQuery>;
 typedef ResQueryDetailed = {
 				errors : Array<Dynamic>, // TODO type me

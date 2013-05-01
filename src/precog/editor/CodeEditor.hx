@@ -1,7 +1,8 @@
 package precog.editor;
 
-import jQuery.JQuery;
+import precog.communicator.Communicator;
 import precog.editor.Editor;
+import jQuery.JQuery;
 
 class CodeEditor implements Editor {
     @:isVar public var name(get, set): String;
@@ -9,9 +10,9 @@ class CodeEditor implements Editor {
 
     public var element(default, null): JQuery;
 
-    public function new(name: String, locale: precog.util.Locale) {
+    public function new(communicator: Communicator, name: String, locale: precog.util.Locale) {
         element = new JQuery('<div class="code-editor"></div>');
-        region = new Region(MarkdownRegionMode, locale);
+        region = new Region(communicator, name, MarkdownRegionMode, locale);
         element.append(region.element);
         this.name = name;
     }

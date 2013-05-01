@@ -79,13 +79,17 @@ class ResponseFileUpload extends ResponseFileBase
 
 }
 
+typedef FileExecution = {
+    data: Array<Dynamic>
+};
+
 class ResponseFileExecute extends ResponseFileBase 
 {
-	public var results(default, null) : Array<Dynamic>;
-	public function new(filePath : String, results : Array<Dynamic>, request : PrecogRequest)
+	public var result(default, null) : FileExecution;
+	public function new(filePath : String, result : FileExecution, request : PrecogRequest)
 	{
 		super(filePath, request);
-		this.results = results;
+		this.result = result;
 	}
 }
 

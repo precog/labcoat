@@ -1,5 +1,8 @@
 package precog.editor;
 
+import precog.app.message.PrecogRequest;
+import precog.app.message.PrecogResponse;
+import precog.communicator.Communicator;
 import precog.editor.codemirror.Externs;
 import js.Browser.document;
 import js.html.Element;
@@ -8,10 +11,12 @@ class QuirrelEditor implements RegionEditor {
     public var element: Element;
     var outputElement: Element;
     var region: Region;
+    var communicator: Communicator;
     var editor: CodeMirror;
 
-    public function new(region: Region) {
+    public function new(communicator: Communicator, region: Region) {
         this.region = region;
+        this.communicator = communicator;
 
         var options: Dynamic = {lineNumbers: true, mode: 'quirrel', region: region};
 
@@ -33,7 +38,17 @@ class QuirrelEditor implements RegionEditor {
     }
 
     public function evaluate() {
-        outputElement.innerHTML = editor.getValue();
+        communicator.request(
+            new RequestFileUpload(region.path, "text/x-quirrel-script", editor.getValue()),
+            ResponseFileUpload
+        ).then(function(response: ResponseFileUpload) {
+            return communicator.request(
+                new RequestFileExecute(region.path),
+                ResponseFileExecute
+            ).then(function(response: ResponseFileExecute) {
+                outputElement.innerHTML = haxe.Json.stringify(response.result.data);
+            });
+        });
     }
 
     public function focus() {
