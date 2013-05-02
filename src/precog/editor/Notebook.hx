@@ -47,14 +47,17 @@ class Notebook implements Editor {
             ResponseFileGet
         ).then(function(response: ResponseFileGet) {
             var metadata = haxe.Json.parse(response.content.contents)[0];
+            if(metadata == null) return;
 
             name = metadata.name;
             regionCounter = metadata.regionCounter;
 
+            var metadataRegions: Array<{path: String, mode: Int}> = metadata.regions;
+            if(metadata.regions.length == 0) return;
+
             // Clear any regions which were added before loading metadata
             clearInitialRegions();
 
-            var metadataRegions: Array<{path: String, mode: Int}> = metadata.regions;
             for(region in metadataRegions) {
                 appendRegion(new Region(communicator, region.path, Type.createEnumIndex(RegionMode, region.mode), locale));
             }
