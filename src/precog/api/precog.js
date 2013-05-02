@@ -2198,6 +2198,10 @@
     // *** METADATA ***
     // ****************
   
+    Precog.prototype._prefixKey = function(key) {
+      this.requireConfig('apiKey');
+      return 'Precog.' + this.config.apiKey + '.' + key;
+    };
   
     Precog.prototype._retrieveMetadata = Util.addCallbacks(function(path) {
       var self = this;
@@ -2219,7 +2223,7 @@
       if (typeof localStorage !== 'undefined') {
         var path = Util.sanitizePath(path0);
   
-        return localStorage.getItem('Precog.' + path) != null;
+        return localStorage.getItem(this._prefixKey(path)) != null;
       }
   
       return false;
@@ -2232,7 +2236,7 @@
       if (typeof localStorage !== 'undefined') {
         var path = Util.sanitizePath(path0);
   
-        data = JSON.parse(localStorage.getItem('Precog.' + path) || '{}');
+        data = JSON.parse(localStorage.getItem(this._prefixKey(path)) || '{}');
       } else {
         if (console && console.error) console.error('Missing local storage!');
       }
@@ -2246,7 +2250,7 @@
       if (typeof localStorage !== 'undefined') {
         var path = Util.sanitizePath(path0);
   
-        localStorage.removeItem('Precog.' + path);
+        localStorage.removeItem(this._prefixKey(path));
       } else {
         if (console && console.error) console.error('Missing local storage!');
       }
@@ -2260,7 +2264,7 @@
       if (typeof localStorage !== 'undefined') {
         var path = Util.sanitizePath(path0);
   
-        localStorage.setItem('Precog.' + path, JSON.stringify(data));
+        localStorage.setItem(this._prefixKey(path), JSON.stringify(data));
       } else {
         if (console && console.error) console.error('Missing local storage!');
       }
@@ -2276,8 +2280,8 @@
         var path = Util.sanitizePath(path0);
   
         for (key in localStorage) {
-          if (key.indexOf('Precog.' + path0)) continue;
-          relative = key.substr(('Precog.' + path0).length);
+          if (key.indexOf(this._prefixKey(path0))) continue;
+          relative = key.substr(this._prefixKey(path0).length);
           filename = relative.substr(0, relative.indexOf('/') == -1 ? relative.length : relative.indexOf('/'));
           if (!filename || children.indexOf(filename) != -1) continue;
           children.push(filename);
