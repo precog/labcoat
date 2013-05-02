@@ -1,5 +1,7 @@
 package precog.editor;
 
+import precog.app.message.PrecogRequest;
+import precog.app.message.PrecogResponse;
 import precog.communicator.Communicator;
 import precog.editor.codemirror.Externs;
 import jQuery.JQuery;
@@ -59,5 +61,16 @@ class Region {
         var content = new JQuery('<div class="content"></div>');
         content.append(editor.element);
         element.append(content);
+
+        communicator.request(
+            new RequestFileGet(path),
+            ResponseFileGet
+        ).then(function(response: ResponseFileGet) {
+            // HACK: Precog API loves to send us back [] instead of 404
+            if(response.content.contents == '[]' && mode != JSONRegionMode)
+                return;
+
+            editor.setContent(response.content.contents);
+        });
     }
 }

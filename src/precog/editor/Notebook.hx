@@ -74,7 +74,6 @@ class Notebook implements Editor {
             regions: regions.map(function(region: Region) {
                 return {
                     path: region.path,
-                    content: 'TODO',
                     mode: Type.enumIndex(region.mode)
                 };
             }),
