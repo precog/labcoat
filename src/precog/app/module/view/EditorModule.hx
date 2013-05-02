@@ -1,6 +1,8 @@
 package precog.app.module.view;
 
 import precog.app.message.*;
+import precog.app.message.PrecogRequest;
+import precog.app.message.PrecogResponse;
 import precog.app.message.MenuItem;
 import precog.util.Locale;
 import precog.communicator.Communicator;
@@ -24,6 +26,7 @@ class EditorModule extends Module {
     var locale : Locale;
     var main : HtmlPanelGroup;
     var panels : Map<Editor, HtmlPanelGroupItem>;
+    var accountId : String;
 
     public function new()
     {
@@ -86,9 +89,26 @@ class EditorModule extends Module {
                 break;
             }
         });
-        
-        createNotebook();
+
+        communicator.consume(function(configs : Array<PrecogNamedConfig>) {
+            // TODO: Maybe check this is the "default" account
+            accountId = configs[0].config.accountId;
+            loadNotebooks();
+        });
     }
+
+    function loadNotebooks() {
+		var path = '${accountId}/temp';
+        communicator.request(
+            new RequestMetadataChildren(path),
+            ResponseMetadataChildren
+        ).then(function(response: ResponseMetadataChildren) {
+            for(file in response.children) {
+				if(file.type != 'directory') continue;
+				openNotebook('${path}/${file.name}');
+            }
+        });
+	}
 
     var fileCounter: Int = 0;
     function createCodeEditor() {
@@ -98,11 +118,15 @@ class EditorModule extends Module {
     }
 
     var notebookCounter : Int = 0;
-    function createNotebook() {
-        var index = ++notebookCounter;
-        var notebook = new Notebook('0000000094/temp/notebook${index}', locale.format("notebook #{0}", [index]));
+    function openNotebook(name: String) {
+        var notebook = new Notebook(communicator, name, locale.format("notebook #{0}", [notebookCounter]), locale);
 
         addEditor(notebook);
+    }
+
+    function createNotebook() {
+        ++notebookCounter;
+        openNotebook('${accountId}/temp/notebook${notebookCounter}');
     }
 
     function addEditor(editor: Editor) {

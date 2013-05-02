@@ -1,6 +1,10 @@
 package precog.editor;
 
+import precog.app.message.PrecogRequest;
+import precog.app.message.PrecogResponse;
+import precog.communicator.Communicator;
 import precog.editor.Editor;
+import precog.util.Locale;
 import jQuery.JQuery;
 import thx.react.Signal;
 
@@ -12,10 +16,12 @@ class Notebook implements Editor {
     };
     public var element(default, null): JQuery;
     public var path(default, null): String;
+    var metadataPath: String;
+    var communicator: Communicator;
     var regions: Array<Region>;
     var regionCounter: Int;
 
-    public function new(path: String, name : String) {
+    public function new(communicator: Communicator, path: String, name: String, locale: Locale) {
         element = new JQuery('<div class="notebook"></div>');
         regions = [];
         events = {
@@ -29,18 +35,68 @@ class Notebook implements Editor {
                 }
             }
         };
+        this.communicator = communicator;
         this.path = path;
         this.name = name;
+
+        metadataPath = '${path}/metadata.json';
         regionCounter = 0;
+
+        communicator.request(
+            new RequestFileGet(metadataPath),
+            ResponseFileGet
+        ).then(function(response: ResponseFileGet) {
+            var metadata = haxe.Json.parse(response.content.contents)[0];
+
+            name = metadata.name;
+            regionCounter = metadata.regionCounter;
+
+            // Clear any regions which were added before loading metadata
+            clearInitialRegions();
+
+            var metadataRegions: Array<{path: String, mode: Int}> = metadata.regions;
+            for(region in metadataRegions) {
+                appendRegion(new Region(communicator, region.path, Type.createEnumIndex(RegionMode, region.mode), locale));
+            }
+        });
+    }
+
+    function saveMetadata() {
+        communicator.request(
+            new RequestFileUpload(metadataPath, 'application/json', serializeMetadata()),
+            ResponseFileUpload
+        );
+    }
+
+    function serializeMetadata() {
+        return haxe.Json.stringify({
+            name: name,
+            regions: regions.map(function(region: Region) {
+                return {
+                    path: region.path,
+                    content: 'TODO',
+                    mode: Type.enumIndex(region.mode)
+                };
+            }),
+            regionCounter: regionCounter
+        });
     }
 
     public function clear()
         for(region in regions)
             region.events.clear();
 
+    public function clearInitialRegions() {
+        for(region in regions) {
+            regions.remove(region);
+            region.element.remove();
+        }
+    }
+
     public function deleteRegion(region: Region) {
         regions.remove(region);
         region.element.remove();
+        saveMetadata();
     }
 
     public function appendRegion(region: Region, ?target: JQuery) {
@@ -51,6 +107,7 @@ class Notebook implements Editor {
         }
         region.editor.focus();
         regions.push(region);
+        saveMetadata();
     }
 
     public function show() {
