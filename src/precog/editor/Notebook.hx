@@ -74,9 +74,9 @@ class Notebook implements Editor {
     function serializeMetadata() {
         return haxe.Json.stringify({
             name: name,
+            type: 'notebook',
             regions: regions.map(function(region: Region) {
                 return {
-                    type: 'notebook',
                     path: region.path,
                     mode: Type.enumIndex(region.mode)
                 };
