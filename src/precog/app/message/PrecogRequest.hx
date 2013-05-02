@@ -34,7 +34,7 @@ class RequestFileBase extends PrecogRequest
 	{
 		super(api);
 		this.filePath = filePath;
-		this.description = 'request ' + Type.getClassName(Type.getClass(this)).split(".").pop().substr(8).humanize() + ' for $filePath';
+		this.description = 'request ' + Type.getClassName(Type.getClass(this)).split(".").pop().substr(7).humanize() + ' for $filePath';
 	}
 }
 

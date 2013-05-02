@@ -55,7 +55,7 @@ class TreeViewModule extends Module
             fs = nfs.fs;
         fss.set(name, fs);
         wireFileSystem(fs);
-        loadDir("/", name, 3);
+        loadDir("/", name, 20);
     }
 
     function loadDir(path : String, name : String, levels : Int)

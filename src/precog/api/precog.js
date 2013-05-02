@@ -2198,10 +2198,6 @@
     // *** METADATA ***
     // ****************
   
-    Precog.prototype._prefixKey = function(key) {
-      this.requireConfig('apiKey');
-      return 'Precog.' + this.config.apiKey + '.' + key;
-    };
   
     Precog.prototype._retrieveMetadata = Util.addCallbacks(function(path) {
       var self = this;
@@ -2223,7 +2219,7 @@
       if (typeof localStorage !== 'undefined') {
         var path = Util.sanitizePath(path0);
   
-        return localStorage.getItem(this._prefixKey(path)) != null;
+        return localStorage.getItem('Precog.' + path) != null;
       }
   
       return false;
@@ -2236,7 +2232,7 @@
       if (typeof localStorage !== 'undefined') {
         var path = Util.sanitizePath(path0);
   
-        data = JSON.parse(localStorage.getItem(this._prefixKey(path)) || '{}');
+        data = JSON.parse(localStorage.getItem('Precog.' + path) || '{}');
       } else {
         if (console && console.error) console.error('Missing local storage!');
       }
@@ -2250,7 +2246,7 @@
       if (typeof localStorage !== 'undefined') {
         var path = Util.sanitizePath(path0);
   
-        localStorage.removeItem(this._prefixKey(path));
+        localStorage.removeItem('Precog.' + path);
       } else {
         if (console && console.error) console.error('Missing local storage!');
       }
@@ -2264,7 +2260,7 @@
       if (typeof localStorage !== 'undefined') {
         var path = Util.sanitizePath(path0);
   
-        localStorage.setItem(this._prefixKey(path), JSON.stringify(data));
+        localStorage.setItem('Precog.' + path, JSON.stringify(data));
       } else {
         if (console && console.error) console.error('Missing local storage!');
       }
@@ -2280,8 +2276,8 @@
         var path = Util.sanitizePath(path0);
   
         for (key in localStorage) {
-          if (key.indexOf(this._prefixKey(path0))) continue;
-          relative = key.substr(this._prefixKey(path0).length);
+          if (key.indexOf('Precog.' + path0)) continue;
+          relative = key.substr(('Precog.' + path0).length);
           filename = relative.substr(0, relative.indexOf('/') == -1 ? relative.length : relative.indexOf('/'));
           if (!filename || children.indexOf(filename) != -1) continue;
           children.push(filename);
@@ -2596,7 +2592,7 @@
             return self.uploadFile({
               path:     fullPath,
               type:     'application/json',
-              contents: results.data,
+              contents: JSON.stringify(results.data),
               saveEmulation: true // Don't delete the emulation data
             });
           }).then(function() {
