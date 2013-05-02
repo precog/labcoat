@@ -18,6 +18,7 @@ class LabcoatAccountWindow
 
 	public var processCreate : { email : String, password : String, profile : {name : String, company : String, title : String } } -> (Validation -> Void) -> Void;
 	public var processLogin : { email : String, password : String } -> (Validation -> Void) -> Void;
+	public var processReset : { email : String } -> (Validation -> Void) -> Void;
 
 	public function new() 
 	{
@@ -96,6 +97,27 @@ class LabcoatAccountWindow
 						el.remove();
 					case Error(msg):
 						formError.show().html(msg);
+				}
+			});
+		});
+
+		el.find("#reset-password").on("click", function() {
+			if(!email.isValid())
+				return;
+			el.find("#reset-password").hide();
+			el.find("#reset-loader").show();
+			formError.hide();
+			processReset({
+					email : email.get()
+				}, function(result) {
+				el.find("#account-login").attr("disabled", false);
+				switch (result) {
+					case Ok:
+						el.find("#reset-loader").html("The request was successful! Please check your email for further instructions.");
+					case Error(msg):
+						formError.show().html(msg);
+						el.find("#reset-password").show();
+						el.find("#reset-loader").hide();
 				}
 			});
 		});
@@ -205,7 +227,10 @@ class LabcoatAccountWindow
             		<div class="alert alert-error account-accept"></div>
             	</div>
             	<div class="actions-login">
-            		<small class="left-note"><a href="#" class="reset" id="reset-password">Forgot your password? Click to reset</a></small>
+            		<small class="left-note">
+            			<span id="reset-loader"><i class="icon-spin icon-spinner"></i> ... sending request, please wait</span>
+            			<a href="#" class="reset" id="reset-password">Forgot your password? Click to reset</a>
+            		</small>	
               		<button id="account-login" class="btn btn-primary">Login</button>
               	</div>
             </div>

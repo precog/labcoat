@@ -23,6 +23,8 @@ class LoginModule extends Module
 		// use localStorage to preserve email
 			// use on reload
 		// focus problems (starting input, precog image)
+		// prevent escape from keyboard
+		// check terms of agreement link
 
 		this.communicator = communicator;
 		communicator.demand(RequestPrecogCredentials).then(function(_ : RequestPrecogCredentials) {
@@ -101,11 +103,34 @@ class LoginModule extends Module
 		});
 	}
 
+	function processReset(data : { email : String}, handler : Validation -> Void)
+	{
+		findServiceAndAccount(data.email, function(info) {
+			if(null != info) {
+				var api = new Precog({ analyticsService : info.analyticsService });
+trace(data);
+trace(info);
+				api.requestPasswordReset(data.email)
+					.then(
+						function(r) {
+							handler(Ok);
+						},
+						function(e) {
+							handler(Error("an error occurred resetting the password: " + Std.string(e)));
+						}
+					);
+			} else {
+				handler(Error("this email doesn't seem to have an associated account"));
+			}
+		});
+	}
+
 	function displayForm() {
 		new jQuery.JQuery(function() {
 			var dialog = new LabcoatAccountWindow();
 			dialog.processCreate = processCreate;
 			dialog.processLogin = processLogin;
+			dialog.processReset = processReset;
 			dialog.show();
 		});
 	}
