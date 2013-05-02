@@ -21,7 +21,7 @@ class LoginModule extends Module
 		// keyboard input (enter button)
 		// tab index
 		// use localStorage to preserve email
-			// set on reload
+			// use on reload
 		// focus problems (starting input, precog image)
 
 		this.communicator = communicator;
