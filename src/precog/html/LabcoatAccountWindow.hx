@@ -5,6 +5,8 @@ using precog.html.Bootstrap;
 
 class LabcoatAccountWindow
 {
+	static var COOKIE_EMAIL = "labcoat2-email";
+	static var COOKIE_EXPIRATION = 10 * 365 * 24 * 60 * 60;
 	var dialog : Modal;
 	var el : JQuery;
 	var actionsCreate	: JQuery;
@@ -44,6 +46,10 @@ class LabcoatAccountWindow
 		var email    = new TextInputModel(el.find('#email'), el.find('.email.alert-error'), Validators.emailValidator()),
 			password = new TextInputModel(el.find('#password'),  el.find('.password.alert-error'), Validators.lengthValidator(6));
 
+		var cemail = js.Cookie.get(COOKIE_EMAIL);
+		if(null != cemail)
+			email.set(cemail);
+
 		createModel = new ObjectModel()
 				.addField("email", email)
 				.addField("password", password)
@@ -53,6 +59,11 @@ class LabcoatAccountWindow
 				.addField("title", new TextInputModel(el.find('#title'), el.find('.title.alert-error'), Validators.lengthValidator(2)))
 				.addField("accept", new BoolInputModel(el.find('#account-accept'), el.find('.account-accept.alert-error'), Validators.mustBeTrue("you must accept the terms")))
 				;
+
+		el.find("#password").keypress(function(e) {
+			if(e.which == 13 && currentModel == loginModel)
+				el.find("#account-login").click();
+		});
 
 		loginModel = new ObjectModel()
 				.addField("email", email)
@@ -75,6 +86,7 @@ class LabcoatAccountWindow
 				el.find("#account-create").attr("disabled", false);
 				switch (result) {
 					case Ok:
+						js.Cookie.set(COOKIE_EMAIL, email.get(), COOKIE_EXPIRATION);
 						dialog.hide();
 						el.remove();
 					case Error(msg):
@@ -95,6 +107,7 @@ class LabcoatAccountWindow
 				el.find("#account-login").attr("disabled", false);
 				switch (result) {
 					case Ok:
+						js.Cookie.set(COOKIE_EMAIL, email.get(), COOKIE_EXPIRATION);
 						dialog.hide();
 						el.remove();
 					case Error(msg):

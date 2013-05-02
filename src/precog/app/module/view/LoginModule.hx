@@ -13,9 +13,6 @@ class LoginModule extends Module
 
 	override public function connect(communicator : Communicator)
 	{
-		// use localStorage to preserve email
-			// use on reload
-
 		this.communicator = communicator;
 		communicator.demand(RequestPrecogCredentials).then(function(_ : RequestPrecogCredentials) {
 			displayForm();
