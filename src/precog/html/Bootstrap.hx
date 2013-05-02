@@ -46,7 +46,7 @@ abstract Modal(Dynamic) {
 }
 
 typedef OptBootstrapModal = {
-	?backdrop : Bool,
+	?backdrop : Dynamic,
 	?keyboard : Bool,
 	?show : Bool,
 	?remote : String

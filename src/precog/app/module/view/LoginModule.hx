@@ -13,18 +13,8 @@ class LoginModule extends Module
 
 	override public function connect(communicator : Communicator)
 	{
-		// reset password
-			// replace link with loader
-				// display ok message
-				// display error message
-
-		// keyboard input (enter button)
-		// tab index
 		// use localStorage to preserve email
 			// use on reload
-		// focus problems (starting input, precog image)
-		// prevent escape from keyboard
-		// check terms of agreement link
 
 		this.communicator = communicator;
 		communicator.demand(RequestPrecogCredentials).then(function(_ : RequestPrecogCredentials) {
@@ -108,8 +98,6 @@ class LoginModule extends Module
 		findServiceAndAccount(data.email, function(info) {
 			if(null != info) {
 				var api = new Precog({ analyticsService : info.analyticsService });
-trace(data);
-trace(info);
 				api.requestPasswordReset(data.email)
 					.then(
 						function(r) {

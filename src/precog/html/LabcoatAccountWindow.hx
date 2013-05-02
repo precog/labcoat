@@ -23,7 +23,9 @@ class LabcoatAccountWindow
 	public function new() 
 	{
 		dialog = new JQuery(MODAL_TEMPLATE).modal({
-				show : false
+				show : false,
+				keyboard : false,
+				backdrop : "static"
 			});
 		el = dialog.el();
 		actionsCreate = el.find(".actions-create");
@@ -128,6 +130,8 @@ class LabcoatAccountWindow
 		el.find("input.choose-ui").first().attr("checked", true);
 
 		updateForm();
+
+		thx.react.promise.Timer.delay(500).then(function() el.find("#email").focus());
 	}
 
 	function updateForm() {
@@ -148,7 +152,7 @@ class LabcoatAccountWindow
 		dialog.show();
 	}
 
-	static var MODAL_TEMPLATE = '<div class="modal hide fade in labcoat-dialog-account" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="false" style="display: block;">
+	static var MODAL_TEMPLATE = '<div class="modal hide fade in labcoat-dialog-account" role="dialog" aria-labelledby="myModalLabel" aria-hidden="false" style="display: block;">
             <div class="modal-header">
               Login to Labcoat
             </div>
@@ -222,8 +226,8 @@ class LabcoatAccountWindow
             </div>
             <div class="modal-footer">
             	<div class="actions-create">
-            		<label class="left-note"><input type="checkbox" name="account-accept" id="account-accept" tabindex="9"><small> I accept the <a href="http://www.precog.comterms-and-service/" target="_blank">terms of service agreement</a></small></label>
-            		<button id="account-create" class="btn btn-primary">Create Account</button>
+            		<label class="left-note"><input type="checkbox" name="account-accept" id="account-accept" tabindex="9"><small> I accept the <a href="http://www.precog.com/legal/" target="_blank">terms of service agreement</a></small></label>
+            		<button id="account-create" class="btn btn-primary" tabindex="10">Create Account</button>
             		<div class="alert alert-error account-accept"></div>
             	</div>
             	<div class="actions-login">
@@ -231,7 +235,7 @@ class LabcoatAccountWindow
             			<span id="reset-loader"><i class="icon-spin icon-spinner"></i> ... sending request, please wait</span>
             			<a href="#" class="reset" id="reset-password">Forgot your password? Click to reset</a>
             		</small>	
-              		<button id="account-login" class="btn btn-primary">Login</button>
+              		<button id="account-login" class="btn btn-primary" tabindex="10">Login</button>
               	</div>
             </div>
           </div>';
