@@ -102,6 +102,7 @@ class ResponseDirectoryMove extends PrecogResponse
 		super(request);
 		this.src = src;
 		this.dst = dst;
+		this.description = 'response move directory from ${this.src} to ${this.dst}';
 	}
 }
 

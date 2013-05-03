@@ -67,8 +67,8 @@ class TreeViewModule extends Module
         });
         communicator.on(function(res : ResponseDirectoryMove) {
             var fs = fss.get(res.api);
-
-            fs.root.pick(res.src).remove();
+            cast(fs.root.pick(res.src), Directory).removeRecursive();
+            fs.root.ensureDirectory(res.dst);
             fs.root.walk(res.dst, function(node : Node) {
                 if(node.isFile) return;
                 loadDir(node.toString(), res.api, 2);
@@ -127,8 +127,15 @@ class TreeViewModule extends Module
             var node = e.node,
                 parent = node.parent.meta.get(UI_TREE_NODE),
                 tree_node = parent.appendChild(node);
-                node.meta.set(UI_TREE_NODE, tree_node);
-                tree.update();
-            });
+            node.meta.set(UI_TREE_NODE, tree_node);
+            tree.update();
+        });
+
+        fs.on(function(e : NodeRemoveEvent) {
+            var node = e.node.meta.get(UI_TREE_NODE);
+            e.node.meta.remove(UI_TREE_NODE);
+            node.remove();
+            tree.update();
+        });
     }
 }

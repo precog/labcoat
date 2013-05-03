@@ -31,6 +31,7 @@ class Nodes<T>
 
 	public function list()
 		return nodes.copy();
+
 	public function iterator()
-		return nodes.iterator();
+		return nodes.copy().iterator();
 }

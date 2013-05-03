@@ -92,6 +92,9 @@ class TreeNode<T>
 		node.after = after;
 		if(null != after)
 			after.before = node;
+		else if(null != parent)
+			parent.lastChild = this;
+
 		after = node;
 		tree.dirty = true;
 		return node;
@@ -106,6 +109,8 @@ class TreeNode<T>
 		node.after = this;
 		if(null != before)
 			before.after = node;
+		else if(null != parent)
+			parent.firstChild = this;
 		before = node;
 		tree.dirty = true;
 		return node;
@@ -113,6 +118,12 @@ class TreeNode<T>
 
 	public function remove()
 	{
+		if(null != parent) {
+			if(parent.firstChild == this)
+				parent.firstChild = after;
+			if(parent.lastChild == this)
+				parent.lastChild = before;
+		}
 		if(null != before)
 			before.after = after;
 		if(null != after)
