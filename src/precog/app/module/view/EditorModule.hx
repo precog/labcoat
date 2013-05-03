@@ -98,7 +98,7 @@ class EditorModule extends Module {
     }
 
     function loadNotebooks() {
-		var path = '${accountId}/temp';
+        var path = '${accountId}/temp/notebooks';
         communicator.request(
             new RequestMetadataChildren(path),
             ResponseMetadataChildren
@@ -118,15 +118,15 @@ class EditorModule extends Module {
     }
 
     var notebookCounter : Int = 0;
-    function openNotebook(name: String) {
-        var notebook = new Notebook(communicator, name, locale.format("notebook #{0}", [notebookCounter]), locale);
+    function openNotebook(path: String) {
+        var notebook = new Notebook(communicator, path, locale.format("notebook #{0}", [notebookCounter]), locale);
 
         addEditor(notebook);
     }
 
     function createNotebook() {
         ++notebookCounter;
-        openNotebook('${accountId}/temp/notebook${notebookCounter}');
+        openNotebook('${accountId}/temp/notebooks/notebook${notebookCounter}');
     }
 
     function addEditor(editor: Editor) {
@@ -214,7 +214,7 @@ class EditorModule extends Module {
                 // Can't create regions in a single editor
             },
             function(notebook: Notebook) {
-                appendRegion(new Region(communicator, '${notebook.path}/region${notebook.incrementRegionCounter()}', regionMode, locale), notebook, target);
+                appendRegion(new Region(communicator, '${notebook.path}/out${notebook.incrementRegionCounter()}', regionMode, locale), notebook, target);
             }
         );
     }
