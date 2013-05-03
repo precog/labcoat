@@ -77,6 +77,7 @@ typedef StringStream = {
 
 @:native("CodeMirror") extern class CodeMirror {
     static var keyMap: {
+      basic: Dynamic,
       macDefault: Dynamic,
       pcDefault: Dynamic
     };
@@ -105,6 +106,8 @@ typedef StringStream = {
     function firstLine(): Int;
     function lastLine(): Int;
     function lineInfo(line: Int): {line: Int, text: String, widgets: Array<Widget>, gutterMarkers: Dynamic};
+
+    function moveV(dir: Int, unit: String): Void;
 
     function replaceSelection(text: String, ?collapse: String, ?origin: String): Void;
 

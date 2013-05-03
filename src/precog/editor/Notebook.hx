@@ -140,6 +140,18 @@ class Notebook implements Editor {
         deleteRegion(oldRegion);
     }
 
+    public function focusPreviousRegion(region: Region) {
+        var index = Lambda.indexOf(regions, region) - 1;
+		if(index < 0) return;
+		regions[index].editor.focus();
+    }
+
+    public function focusNextRegion(region: Region) {
+        var index = Lambda.indexOf(regions, region) + 1;
+		if(index >= regions.length) return;
+		regions[index].editor.focus();
+    }
+
     function appendUnsavedRegion(region: Region, ?target: JQuery) {
         region.events.changeMode.on(changeRegionMode);
         region.events.remove.on(deleteRegion);

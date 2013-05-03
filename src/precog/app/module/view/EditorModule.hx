@@ -66,8 +66,9 @@ class EditorModule extends Module {
         QuirrelMode.init();
 
         // Global keyhandlers
-        Reflect.setField(CodeMirror.keyMap.macDefault, "Shift-Enter", evaluateRegion);
-        Reflect.setField(CodeMirror.keyMap.pcDefault, "Shift-Enter", evaluateRegion);
+        Reflect.setField(CodeMirror.keyMap.basic, "Up", moveUpAcrossRegions);
+        Reflect.setField(CodeMirror.keyMap.basic, "Down", moveDownAcrossRegions);
+        Reflect.setField(CodeMirror.keyMap.basic, "Shift-Enter", evaluateRegion);
         Reflect.setField(CodeMirror.keyMap.macDefault, "Cmd-Enter", createRegionFromEditor);
         Reflect.setField(CodeMirror.keyMap.pcDefault, "Ctrl-Enter", createRegionFromEditor);
 
@@ -215,6 +216,30 @@ class EditorModule extends Module {
     function createRegionFromEditor(editor: CodeMirror) {
         var region : Region = editor.getOption('region');
         createRegion(region.mode, region.element);
+    }
+
+    function moveUpAcrossRegions(editor: CodeMirror) {
+        current.cata(
+            function(codeEditor: CodeEditor) {},
+            function(notebook: Notebook) {
+                if(editor.getCursor("start").line != editor.firstLine()) return;
+                var region: Region = editor.getOption('region');
+                notebook.focusPreviousRegion(region);
+            }
+        );
+        editor.moveV(-1, "line");
+    }
+
+    function moveDownAcrossRegions(editor: CodeMirror) {
+        current.cata(
+            function(codeEditor: CodeEditor) {},
+            function(notebook: Notebook) {
+                if(editor.getCursor("end").line != editor.lastLine()) return;
+                var region: Region = editor.getOption('region');
+                notebook.focusNextRegion(region);
+            }
+        );
+        editor.moveV(1, "line");
     }
 
     function evaluateRegion(editor: CodeMirror) {
