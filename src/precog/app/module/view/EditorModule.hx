@@ -49,6 +49,8 @@ class EditorModule extends Module {
             closeEditor());
         communicator.on(function(e : EditorRegionRequestCreate)
             createRegion(e.regionMode));
+        communicator.on(function(e : EditorSave)
+            saveEditor());
         communicator.on(function(e : EditorUpdate)
             changeEditor(e.current));
 
@@ -104,11 +106,11 @@ class EditorModule extends Module {
             ResponseMetadataChildren
         ).then(function(response: ResponseMetadataChildren) {
             for(file in response.children) {
-				if(file.type != 'directory') continue;
-				openNotebook('${path}/${file.name}');
+                if(file.type != 'directory') continue;
+                openNotebook('${path}/${file.name}');
             }
         });
-	}
+    }
 
     var fileCounter: Int = 0;
     function createCodeEditor() {
@@ -173,6 +175,10 @@ class EditorModule extends Module {
             function(notebook: Notebook) { notebook.events.clear(); }
         );
         main.removeItem(item);
+    }
+
+    function saveEditor() {
+        current.save('${accountId}');
     }
 
     function deleteRegion(region: Region) {

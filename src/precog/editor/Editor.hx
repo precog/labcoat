@@ -8,6 +8,7 @@ interface Editor {
     var name(get, set): String;
     var element(default, null): JQuery;
 
+    function save(dest: String): Void;
     function show(): Void;
     function clear(): Void;
 }

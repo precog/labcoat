@@ -95,6 +95,16 @@ class Notebook implements Editor {
         });
     }
 
+    public function save(dest: String) {
+        var destPath = '${dest}/${name}';
+        communicator.request(
+            new RequestDirectoryMove(path, destPath),
+            ResponseDirectoryMove
+        ).then(function(response: ResponseDirectoryMove) {
+            path = destPath;
+        });
+    }
+
     public function clear()
         for(region in regions)
             region.events.clear();

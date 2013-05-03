@@ -25,6 +25,8 @@ class CodeEditor implements Editor {
         return value;
     }
 
+    public function save(dest: String) {}
+
     public function show() {
         region.editor.focus();
     }

@@ -35,7 +35,8 @@ class EditorToolbarModule extends Module {
             DropdownButton(locale.singular('new file'), '', createCodeEditor),
             DropdownButton(locale.singular('close editor'), closeEditorClass, closeEditor),
             DropdownDivider,
-            DropdownButton(locale.singular('insert region'), '', createRegion)
+            DropdownButton(locale.singular('insert region'), '', createRegion),
+            DropdownButton(locale.singular('save'), '', saveEditor)
         ];
         new HtmlDropdown('', 'cog', '', Mini, items, DropdownAlignRight).element.appendTo(element);
     }
@@ -68,5 +69,10 @@ class EditorToolbarModule extends Module {
     function createRegion(event: Event) {
         event.preventDefault();
         communicator.trigger(new EditorRegionRequestCreate(QuirrelRegionMode));
+    }
+
+    function saveEditor(event: Event) {
+        event.preventDefault();
+        communicator.trigger(new EditorSave());
     }
 }
