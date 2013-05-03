@@ -43,6 +43,21 @@ class TreeViewModule extends Module
         communicator.consume(function(fss : Array<NamedFileSystem>) {
                 fss.map(addTree.bind(communicator, _));
             });
+
+        communicator.on(function(res : ResponseFileCreate) {
+            fss.get(res.api).root.createFileAt(res.filePath, true);
+        });
+        communicator.on(function(res : ResponseFileUpload) {
+            var fs = fss.get(res.api),
+                node = fs.root.pick(res.filePath);
+            if(null == node)
+                fs.root.createFileAt(res.filePath, true);
+        });
+        communicator.on(function(res : ResponseDirectoryMove) {
+            fss.get(res.api).root.pick(res.src).remove();
+            loadDir(res.dst, res.api, 2);
+        });
+
         communicator.queueMany([
                 // new MenuItem(MenuFile(SubgroupFileLocal), "Open File...", function(){}, 0),
                 // new MenuItem(MenuFile(SubgroupFileLocal), "Close", function(){}, 1)

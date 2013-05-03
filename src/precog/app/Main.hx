@@ -19,6 +19,8 @@ class Main
         manager.addModule(new LocalizationModule());
         manager.addModule(new LogModule());
 
+        manager.addModule(new JavascriptErrorInterceptModule());
+
         // View
         manager.addModule(new LoginModule());
 /*
