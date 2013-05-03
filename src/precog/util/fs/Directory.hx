@@ -84,6 +84,29 @@ class Directory extends Node
 		return traverse(path)[0];
 	}
 
+	public function exists(path : Path)
+	{
+		return null != pick(path);
+	}
+
+	public function existsFile(path : Path)
+	{
+		var ls = traverse(path);
+		for(node in ls)
+			if(node.isFile)
+				return true;
+		return false;
+	}
+
+	public function existsDirectory(path : Path)
+	{
+		var ls = traverse(path);
+		for(node in ls)
+			if(node.isDirectory)
+				return true;
+		return false;
+	}
+
 	public function traverse(path : Path) : Array<Node>
 	{
 		var dirs = [path.absolute() ? filesystem.root : this],
@@ -96,6 +119,20 @@ class Directory extends Node
 		for(dir in dirs)
 			results = results.concat(cast dir.directories.find(last)).concat(cast dir.files.find(last));
 		return results;
+	}
+
+	public function walk(path : Path, handler : Node -> Void)
+	{
+		if(path.length == 0)
+			return;
+		path = path.copy();
+		var fpath = path.shift(),
+			first = pick(fpath);
+		if(null == first) return;
+		handler(first);
+		if(first.isDirectory)
+			cast(first, Directory).walk(path, handler);
+//		var segment = path
 	}
 
 	function traverseImpl(dirs : Array<Directory>, segments : Array<Segment>)
@@ -134,7 +171,7 @@ class Directory extends Node
 		else
 			dir = cast traverse(path)[0];
 		if(dir == null)
-			throw "destination directory doesn't exist";
+			throw "destination directory doesn't exist for " + path;
 		return new File(name, dir);
 	}
 

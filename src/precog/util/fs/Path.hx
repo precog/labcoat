@@ -2,6 +2,7 @@ package precog.util.fs;
 
 abstract Path({ absolute : Bool, path : Array<Segment> })
 {
+	public var length(get, never) : Int;
 	public function new(absolute : Bool, path : Array<Segment>)
 	{
 		this = { absolute : absolute, path : path };
@@ -70,11 +71,24 @@ abstract Path({ absolute : Bool, path : Array<Segment> })
 		return new Path(this.absolute, path);
 	}
 
+	private inline function get_length()
+		return this.path.length;
+
 	public inline function absolute()
 		return this.absolute;
 
 	public inline function segments()
 		return this.path;
+
+	public inline function copy()
+		return new Path(this.absolute, this.path.copy());
+
+	public function shift()
+	{
+		var npath = new Path(this.absolute, [this.path.shift()]);
+		this.absolute = false;
+		return npath;
+	}
 
 	public inline function toString()
 		return (this.absolute ? "/" : "") + this.path.map(function(s : Segment) return s.toString()).join("/");

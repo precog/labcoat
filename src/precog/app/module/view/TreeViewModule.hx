@@ -7,6 +7,7 @@ import precog.communicator.Module;
 import precog.html.HtmlPanelGroup;
 import precog.html.HtmlPanel;
 import precog.html.HtmlTree;
+import precog.html.FSHtmlTreeRenderer;
 import jQuery.JQuery;
 
 using thx.react.Promise;
@@ -38,24 +39,40 @@ class TreeViewModule extends Module
         var item = new HtmlPanelGroupItem(locale.singular("file system"));
         message.group.addItem(item);
         item.activate();
-        var renderer = new BaseHtmlTreeRenderer(16);
+        var renderer = new FSHtmlTreeRenderer(16);
         tree = new HtmlTree(item.panel, renderer);
         communicator.consume(function(fss : Array<NamedFileSystem>) {
                 fss.map(addTree.bind(communicator, _));
             });
 
+
+        function ensureFileAt(path : String, api : String)
+        {
+            var fs   = fss.get(api),
+                node = fs.root.pick(path);
+            if(null == node) {
+                fs.root.createFileAt(path, true);
+                fs.root.walk(path, function(node : Node) {
+                    if(node.isFile) return;
+                    loadDir(node.toString(), api, 2);
+                });
+            }
+        }
+
         communicator.on(function(res : ResponseFileCreate) {
-            fss.get(res.api).root.createFileAt(res.filePath, true);
+            ensureFileAt(res.filePath, res.api);
         });
         communicator.on(function(res : ResponseFileUpload) {
-            var fs = fss.get(res.api),
-                node = fs.root.pick(res.filePath);
-            if(null == node)
-                fs.root.createFileAt(res.filePath, true);
+            ensureFileAt(res.filePath, res.api);
         });
         communicator.on(function(res : ResponseDirectoryMove) {
-            fss.get(res.api).root.pick(res.src).remove();
-            loadDir(res.dst, res.api, 2);
+            var fs = fss.get(res.api);
+
+            fs.root.pick(res.src).remove();
+            fs.root.walk(res.dst, function(node : Node) {
+                if(node.isFile) return;
+                loadDir(node.toString(), res.api, 2);
+            });
         });
 
         communicator.queueMany([
@@ -70,7 +87,7 @@ class TreeViewModule extends Module
             fs = nfs.fs;
         fss.set(name, fs);
         wireFileSystem(fs);
-        loadDir("/", name, 20);
+        loadDir("/", name, 3);
     }
 
     function loadDir(path : String, name : String, levels : Int)
@@ -84,10 +101,13 @@ class TreeViewModule extends Module
             ).then(function(response : ResponseMetadataChildren) {
                 response.children.map(function(item) {
                     var path = response.parent + item.name;
+
                     switch (item.type) {
                         case "file":
+                            if(fs.root.existsFile(path)) return;
                             fs.root.createFileAt(path);
                         case "directory":
+                            if(fs.root.existsDirectory(path)) return;
                             fs.root.ensureDirectory(path);
                             // TODO, removing the timer will break the second load.communicator
                             // Very possible but in thx.react request/respond

@@ -16,14 +16,30 @@ class PrecogRequest
 	}
 }
 
+class Helper
+{
+	public static function normalizeFilePath(p : String)
+	{
+		return "/" + p.trim("/");
+	}
+	public static function normalizeDirectoryPath(p : String)
+	{
+		var p = "/" + p.trim("/") + "/";
+		if(p == "//")
+			return "/";
+		else
+			return p;
+	}
+}
+
 class RequestMetadataChildren extends PrecogRequest
 {
 	public var path(default, null) : String;
 	public function new(path : String, ?api : String)
 	{
 		super(api);
-		this.path = path;
-		this.description = 'metadata children at $path';
+		this.path = Helper.normalizeDirectoryPath(path);
+		this.description = 'metadata children at ${this.path}';
 	}
 }
 
@@ -33,7 +49,7 @@ class RequestFileBase extends PrecogRequest
 	public function new(filePath : String, ?api : String)
 	{
 		super(api);
-		this.filePath = filePath;
+		this.filePath = Helper.normalizeFilePath(filePath);
 		this.description = 'request ' + Type.getClassName(Type.getClass(this)).split(".").pop().substr(7).humanize() + ' for $filePath';
 	}
 }
@@ -87,8 +103,8 @@ class RequestDirectoryMove extends PrecogRequest
 	public function new(src : String, dst : String, ?api : String)
 	{
 		super(api);
-		this.src = src;
-		this.dst = dst;
-		this.description = 'move directory from $src to $dst';
+		this.src = Helper.normalizeDirectoryPath(src);
+		this.dst = Helper.normalizeDirectoryPath(dst);
+		this.description = 'move directory from ${this.src} to ${this.dst}';
 	}
 }
