@@ -74,7 +74,6 @@ class Notebook implements Editor {
     }
 
     function saveMetadata() {
-        untyped __js__('debugger');
         communicator.request(
             new RequestFileUpload(metadataPath, 'application/json', serializeMetadata()),
             ResponseFileUpload
