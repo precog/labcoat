@@ -45,7 +45,7 @@ class LayoutModule extends Module
 
 		mainLayout.rectangle.set(0, 0, size.width, size.height);
 #if (html5 || cordova)
-		mainLayout.addPanel(menu).dockTop(20);
+//		mainLayout.addPanel(menu).dockTop(20);
 #end
 		groups.dockIfExists("tools", mainLayout, Bottom(groups.dockSize(["tools"], 100)));
 
