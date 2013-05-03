@@ -95,7 +95,8 @@ class Notebook implements Editor {
     }
 
     public function save(dest: String) {
-        var destPath = '${dest}/${name}';
+        var directoryName = path.split('/').pop();
+        var destPath = '${dest}/${directoryName}';
         communicator.request(
             new RequestDirectoryMove(path, destPath),
             ResponseDirectoryMove
