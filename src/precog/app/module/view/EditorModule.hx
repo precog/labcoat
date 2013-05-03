@@ -151,7 +151,6 @@ class EditorModule extends Module {
         );
 
         communicator.trigger(new EditorUpdate(editor, editors));
-        communicator.trigger(new EditorRegionRequestCreate(QuirrelRegionMode));
     }
 
     function changeEditor(editor: Editor) {
@@ -177,9 +176,10 @@ class EditorModule extends Module {
     }
 
     function deleteRegion(region: Region) {
-        region.events.clear();
         current.cata(
-            function(codeEditor: CodeEditor) {},
+            function(codeEditor: CodeEditor) {
+                // Can't delete regions in a single editor
+            },
             function(notebook: Notebook) { notebook.deleteRegion(region); }
         );
     }
@@ -189,22 +189,11 @@ class EditorModule extends Module {
             function(codeEditor: CodeEditor) {
                 // Can't change single editor modes
             },
-            function(notebook: Notebook) {
-                oldRegion.events.clear();
-
-                var content = oldRegion.editor.getContent();
-                var region = new Region(communicator, oldRegion.path, mode, locale);
-                region.editor.setContent(content);
-                appendRegion(region, notebook, oldRegion.element);
-
-                deleteRegion(oldRegion);
-            }
+            function(notebook: Notebook) { notebook.changeRegionMode(oldRegion, mode); }
         );
     }
 
     function appendRegion(region: Region, notebook: Notebook, ?target: JQuery) {
-        region.events.changeMode.on(changeRegionMode);
-        region.events.remove.on(deleteRegion);
         notebook.appendRegion(region, target);
     }
 
@@ -213,9 +202,7 @@ class EditorModule extends Module {
             function(codeEditor: CodeEditor) {
                 // Can't create regions in a single editor
             },
-            function(notebook: Notebook) {
-                appendRegion(new Region(communicator, '${notebook.path}/out${notebook.incrementRegionCounter()}', regionMode, locale), notebook, target);
-            }
+            function(notebook: Notebook) { notebook.createRegion(regionMode, target); }
         );
     }
     

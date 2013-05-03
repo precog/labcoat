@@ -16,8 +16,9 @@ class Notebook implements Editor {
     };
     public var element(default, null): JQuery;
     public var path(default, null): String;
-    var metadataPath: String;
     var communicator: Communicator;
+    var locale: Locale;
+    var metadataPath: String;
     var regions: Array<Region>;
     var regionCounter: Int;
 
@@ -36,18 +37,26 @@ class Notebook implements Editor {
             }
         };
         this.communicator = communicator;
+        this.locale = locale;
         this.path = path;
         this.name = name;
 
         metadataPath = '${path}/metadata.json';
         regionCounter = 0;
 
+        loadMetadata();
+    }
+
+    function loadMetadata() {
         communicator.request(
             new RequestFileGet(metadataPath),
             ResponseFileGet
         ).then(function(response: ResponseFileGet) {
             var metadata = haxe.Json.parse(response.content.contents)[0];
-            if(metadata == null) return;
+            if(metadata == null) {
+                createRegion(QuirrelRegionMode);
+                return;
+            }
 
             name = metadata.name;
             regionCounter = metadata.regionCounter;
@@ -58,13 +67,14 @@ class Notebook implements Editor {
             // Clear any regions which were added before loading metadata
             clearInitialRegions();
 
-            for(region in metadataRegions) {
-                appendRegion(new Region(communicator, region.path, Type.createEnumIndex(RegionMode, region.mode), locale));
+            for(metadataRegion in metadataRegions) {
+                appendUnsavedRegion(new Region(communicator, metadataRegion.path, Type.createEnumIndex(RegionMode, metadataRegion.mode), locale));
             }
         });
     }
 
     function saveMetadata() {
+        untyped __js__('debugger');
         communicator.request(
             new RequestFileUpload(metadataPath, 'application/json', serializeMetadata()),
             ResponseFileUpload
@@ -98,11 +108,31 @@ class Notebook implements Editor {
 
     public function deleteRegion(region: Region) {
         regions.remove(region);
+        region.events.clear();
         region.element.remove();
         saveMetadata();
+
+        // TODO: Actually delete the region
+        /*communicator.request(
+            new RequestFileDelete(region.path),
+            ResponseFileDelete
+        );*/
     }
 
-    public function appendRegion(region: Region, ?target: JQuery) {
+    public function changeRegionMode(oldRegion: Region, mode: RegionMode) {
+        oldRegion.events.clear();
+
+        var content = oldRegion.editor.getContent();
+        var region = new Region(communicator, oldRegion.path, mode, locale);
+        region.editor.setContent(content);
+        appendRegion(region, oldRegion.element);
+
+        deleteRegion(oldRegion);
+    }
+
+    function appendUnsavedRegion(region: Region, ?target: JQuery) {
+        region.events.changeMode.on(changeRegionMode);
+        region.events.remove.on(deleteRegion);
         if(target != null) {
             target.after(region.element);
         } else {
@@ -110,6 +140,14 @@ class Notebook implements Editor {
         }
         region.editor.focus();
         regions.push(region);
+    }
+
+    public function createRegion(regionMode: RegionMode, ?target: JQuery) {
+        appendRegion(new Region(communicator, '${path}/out${incrementRegionCounter()}', regionMode, locale), target);
+    }
+
+    public function appendRegion(region: Region, ?target: JQuery) {
+        appendUnsavedRegion(region, target);
         saveMetadata();
     }
 
