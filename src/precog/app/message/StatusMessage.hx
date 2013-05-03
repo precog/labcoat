@@ -20,4 +20,5 @@ enum MessageType
 {
 	Error;
 	Warning;
+	Info;
 }

@@ -272,6 +272,33 @@ body {
             margin-left: 0;
         }
     }
+
+    .panel.status {
+        overflow: auto;
+        font-size: @baseFontSize * 0.85;
+        padding: 3px;
+        .time.badge {
+            float: right;
+            font-size: @baseFontSize * 0.7;
+            background-color: #eee;
+            color: #666;
+            font-weight: normal;
+            text-shadow: none;
+        }
+        ul {
+            margin: 0;
+            padding: 0;
+        }
+        li {
+            border-bottom: 1px solid #e6e6e6;
+            margin-bottom: 2px;
+        }
+        li:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0px;
+        }
+    }
 }
 
 @import "module/login.less";

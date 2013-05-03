@@ -69,6 +69,7 @@ class PrecogModule extends Module
 				var response = new ResponseError(err, request);
 				deferred.reject(response);
 				communicator.trigger(response);
+				communicator.queue(new StatusMessage(err));
 			};
 		}
 
