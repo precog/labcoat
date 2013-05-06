@@ -155,14 +155,14 @@ class PrecogModule extends Module
 		);
 
 		communicator.respond(
-			function(request : RequestDirectoryDelete) : Null<Promise<ResponseDirectoryDelete -> Void>> {
+			function(request : RequestFileDelete) : Null<Promise<ResponseFileDelete -> Void>> {
 				var deferred = new Deferred(),
 					api      = getApi(request.api);
 				communicator.trigger(request);
 				var path = normalizeFilePath(request.filePath);
-				api.deleteAll(path).then(
+				api.delete0(path).then(
 					function(result) {
-						var response = new ResponseDirectoryDelete(request.filePath, request);
+						var response = new ResponseFileDelete(request.filePath, request);
 						deferred.resolve(response);
 						communicator.trigger(response);
 					},
@@ -170,8 +170,8 @@ class PrecogModule extends Module
 				);
 				return deferred.promise;
 			},
-			RequestDirectoryDelete,
-			ResponseDirectoryDelete
+			RequestFileDelete,
+			ResponseFileDelete
 		);
 
 		communicator.respond(
@@ -244,6 +244,26 @@ class PrecogModule extends Module
 			},
 			RequestFileExecute,
 			ResponseFileExecute
+		);
+
+		communicator.respond(
+			function(request : RequestDirectoryDelete) : Null<Promise<ResponseDirectoryDelete -> Void>> {
+				var deferred = new Deferred(),
+					api      = getApi(request.api);
+				communicator.trigger(request);
+				var path = normalizeFilePath(request.filePath);
+				api.deleteAll(path).then(
+					function(result) {
+						var response = new ResponseDirectoryDelete(request.filePath, request);
+						deferred.resolve(response);
+						communicator.trigger(response);
+					},
+					errorResponse(request, deferred)
+				);
+				return deferred.promise;
+			},
+			RequestDirectoryDelete,
+			ResponseDirectoryDelete
 		);
 
 		communicator.respond(

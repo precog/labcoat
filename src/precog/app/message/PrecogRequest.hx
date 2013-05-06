@@ -83,6 +83,11 @@ class RequestFileUpload extends RequestFileBase
 	}
 }
 
+class RequestFileDelete extends RequestFileBase
+{
+
+}
+
 class RequestFileExecute extends RequestFileBase 
 {
 	public var maxAge(default, null) : Null<Float>;

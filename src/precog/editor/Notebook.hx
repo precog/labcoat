@@ -122,11 +122,10 @@ class Notebook implements Editor {
         region.element.remove();
         saveMetadata();
 
-        // TODO: Actually delete the region
-        /*communicator.request(
+        communicator.request(
             new RequestFileDelete(region.path),
             ResponseFileDelete
-        );*/
+        );
     }
 
     public function changeRegionMode(oldRegion: Region, mode: RegionMode) {

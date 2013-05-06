@@ -74,6 +74,11 @@ class ResponseFileGet extends ResponseFileBase
 	}
 }
 
+class ResponseFileDelete extends ResponseFileBase
+{
+
+}
+
 class ResponseFileCreate extends ResponseFileBase 
 {
 
