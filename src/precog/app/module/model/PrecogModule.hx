@@ -53,16 +53,16 @@ class PrecogModule extends Module
 	override function connect(communicator : Communicator)
 	{
 		communicator.consume(function(configs : Array<PrecogNamedConfig>) {
-				configs.map(setConfig);
-			});
+			configs.map(setConfig);
+		});
 		
 		communicator.on(function(request : PrecogRequest) {
-				communicator.trigger(new Log("request: " + request.description));		
-			});
+			communicator.trigger(new Log("request: " + request.description));		
+		});
 		
 		communicator.on(function(response : PrecogResponse) {
-				communicator.trigger(new Log("response: " + response.description));		
-			});
+			communicator.trigger(new Log("response: " + response.description));		
+		});
 
 		function errorResponse(request : PrecogRequest, deferred : Deferred<Dynamic>) {
 			return function(err) {

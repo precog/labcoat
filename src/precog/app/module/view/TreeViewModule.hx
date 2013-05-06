@@ -34,6 +34,16 @@ class TreeViewModule extends Module
             .then(onMessage);
     }
 
+    function parentPath(s : String)
+    {
+        var p = s.split("/");
+        if("metadata.json" == p.pop())
+            p.pop();
+trace(s);
+trace(p);
+        return p.join("/");
+    }
+
     function onMessage(message: SystemHtmlPanelGroup, locale : Locale)
     {
         var item = new HtmlPanelGroupItem(locale.singular("file system"));
@@ -41,6 +51,12 @@ class TreeViewModule extends Module
         item.activate();
         var renderer = new FSHtmlTreeRenderer(16);
         tree = new HtmlTree(item.panel, renderer);
+        tree.events.select.on(function(node : TreeNode<Node>) {
+            trace("select ");
+        });
+        tree.events.trigger.on(function(node : TreeNode<Node>) {
+            trace("trigger ");
+        });
         communicator.consume(function(fss : Array<NamedFileSystem>) {
                 fss.map(addTree.bind(communicator, _));
             });
@@ -60,10 +76,18 @@ class TreeViewModule extends Module
         }
 
         communicator.on(function(res : ResponseFileCreate) {
-            ensureFileAt(res.filePath, res.api);
+trace(parentPath(res.filePath));
+            thx.react.promise.Timer.delay(0).then(function()
+                loadDir(parentPath(res.filePath), res.api, 1)
+            );
+//            ensureFileAt(res.filePath, res.api);
         });
         communicator.on(function(res : ResponseFileUpload) {
-            ensureFileAt(res.filePath, res.api);
+trace(parentPath(res.filePath));
+            thx.react.promise.Timer.delay(0).then(function()
+                loadDir(parentPath(res.filePath), res.api, 1)
+            );
+//            ensureFileAt(res.filePath, res.api);
         });
         communicator.on(function(res : ResponseDirectoryMove) {
             var fs = fss.get(res.api);
@@ -87,7 +111,7 @@ class TreeViewModule extends Module
             fs = nfs.fs;
         fss.set(name, fs);
         wireFileSystem(fs);
-        loadDir("/", name, 3);
+        loadDir("/", name, 4);
     }
 
     function loadDir(path : String, name : String, levels : Int)
@@ -99,6 +123,8 @@ class TreeViewModule extends Module
                 new RequestMetadataChildren(path, name),
                 ResponseMetadataChildren
             ).then(function(response : ResponseMetadataChildren) {
+                // filter out already existing nodes
+                // remove nodes that are not present anymore
                 response.children.map(function(item) {
                     var path = response.parent + item.name;
 
@@ -111,9 +137,9 @@ class TreeViewModule extends Module
 
                     switch (item.type) {
                         case "file":
-                            fs.root.createFileAt(path, item.metadata);
+                            fs.root.createFileAt(path, true, item.metadata);
                         case "directory" if(item.metadata.get("type") == "notebook"):
-                            fs.root.createFileAt(path, item.metadata);
+                            fs.root.createFileAt(path, true, item.metadata);
                         case "directory":
                             var n = fs.root.ensureDirectory(path, item.metadata);
                             // TODO, removing the timer will break the second load.communicator

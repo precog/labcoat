@@ -191,6 +191,9 @@ body {
         .tree-row {
             width: 100%;
         }
+        .tree-row.badge, .tree-row.label {
+            padding-left: 0;
+        }
         .tree-content, .tree-toggle {
             cursor: pointer;
         }
@@ -281,10 +284,7 @@ body {
         .time.badge {
             float: right;
             font-size: @baseFontSize * 0.7;
-            background-color: #eee;
             color: #666;
-            font-weight: normal;
-            text-shadow: none;
         }
         ul {
             margin: 0;
@@ -299,6 +299,15 @@ body {
             padding-bottom: 0;
             margin-bottom: 0px;
         }
+    }
+
+
+
+    .badge-light, .label-light {
+        background-color: #eee;
+        color: #000;
+        text-shadow: none;
+        font-weight: normal;
     }
 }
 

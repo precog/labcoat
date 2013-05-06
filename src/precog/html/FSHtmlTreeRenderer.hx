@@ -4,6 +4,7 @@ import precog.util.fs.Node;
 import precog.html.HtmlTree;
 import precog.geom.IRectangle;
 import jQuery.JQuery;
+using precog.html.JQuerys;
 
 class FSHtmlTreeRenderer implements IHtmlTreeRenderer<Node>
 {
@@ -20,16 +21,36 @@ class FSHtmlTreeRenderer implements IHtmlTreeRenderer<Node>
 	public function setTree(tree : HtmlTree<Node>) : Void
 	{
 		this.tree = tree;
+		tree.events.deselect.on(ondeselect);
+		tree.events.select.on(onselect);
 	}
 	public function getRowHeight(rect : IRectangle) : Float
 		return height;
 	public function initRow(el : JQuery) : JQuery
 	{
 		el.html('<div class="tree-toggle" style="position:absolute"><i></i></div><div class="tree-content" style="white-space:nowrap"></div>');
+		el.find(".tree-content")
+			.clickOrDblClick(
+				function(e) {
+					e.preventDefault();
+					tree.select(cast el.prop("data-node"));
+					return false;
+				},
+				function(e) {
+					e.preventDefault();
+					tree.trigger(cast el.prop("data-node"));
+					return false;
+				}
+			);
 		return el;
 	}
 	public function updateRow(el : JQuery, node : TreeNode<Node>) : JQuery
 	{
+		el.prop("data-node", node);
+
+		if(node == tree.selected)
+			el.addClass("badge badge-light");
+
 		var hwidth = (1 + node.level) * connectorWidth + margin,
 			label  = Std.string(node.data).split("/").pop();
 //		if(label == "")
@@ -49,6 +70,7 @@ class FSHtmlTreeRenderer implements IHtmlTreeRenderer<Node>
 		} else {
 			icon = 'icon-folder-open-alt';
 		}
+
 		el.find(".tree-content")
 			.css("margin-left", '${hwidth}px')
 			.html('<i class="$icon"></i> ' + label);
@@ -70,5 +92,21 @@ class FSHtmlTreeRenderer implements IHtmlTreeRenderer<Node>
 			toggle.hide();
 		}
 		return el;
+	}
+
+	function onselect(node : TreeNode<Node>)
+	{
+		if(null == node) return;
+		var el = tree.getElementForNode(node);
+		if(null == el) return;
+		el.addClass("badge badge-light");
+	}
+
+	function ondeselect(node : TreeNode<Node>)
+	{
+		if(null == node) return;
+		var el = tree.getElementForNode(node);
+		if(null == el) return;
+		el.removeClass("badge badge-light");
 	}
 }

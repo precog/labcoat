@@ -4,6 +4,7 @@ import jQuery.JQuery;
 import precog.geom.IRectangle;
 import haxe.Timer;
 using thx.react.IObservable;
+using thx.react.Signal;
 
 class TreeNode<T>
 {
@@ -137,6 +138,7 @@ class TreeNode<T>
 class Tree<T>
 {
 	public var root(default, null) : TreeNode<T>;
+
 	public function new() 
 	{
 		dirty = false;
@@ -185,6 +187,13 @@ class Tree<T>
 	public var dirty : Bool;
 }
 
+class TreeEvents<T> implements precog.macro.ValueClass
+{
+	var select : Signal1<TreeNode<T>>;
+	var deselect : Signal1<TreeNode<T>>;
+	var trigger : Signal1<TreeNode<T>>;
+}
+
 class HtmlTree<T>
 {
 	var tree : Tree<T>;
@@ -197,12 +206,21 @@ class HtmlTree<T>
 	var renderer : IHtmlTreeRenderer<T>;
 
 	public var panel : HtmlPanel;
+	public var events(default, null) : TreeEvents<T>;
+	public var selected(default, null) : Null<TreeNode<T>>;
 
 	public function new(panel : HtmlPanel, renderer : IHtmlTreeRenderer<T>)
 	{
 		this.panel = panel;
 		scroller = new JQuery('<div clss="tree-scroller" style="position:absolute;width:100%"></div>');
 		tree = new Tree();
+		
+		events = new TreeEvents(
+			new Signal1<TreeNode<T>>(),
+			new Signal1<TreeNode<T>>(),
+			new Signal1<TreeNode<T>>()
+		);
+
 		this.renderer = renderer;
 		renderer.setTree(this);
 		// init elements
@@ -240,6 +258,19 @@ class HtmlTree<T>
 		}, 15);
 	}
 
+	public function select(node : TreeNode<T>)
+	{
+		if(null != selected)
+			events.deselect.trigger(selected);
+		selected = node;
+		events.select.trigger(selected);
+	}
+
+	public function trigger(node : TreeNode<T>)
+	{
+		events.trigger.trigger(node);
+	}
+
 	public function update()
 	{
 		tree.update();
@@ -266,18 +297,26 @@ class HtmlTree<T>
 			scroller.css("height", height_scroller +"px");
 
 		var top = scroll - scroll % rowHeight;
+
+		nodeToElMap = new Map();
 		// render nodes
 		for(row in rows)
 		{
-			renderRow(row, top, start_index++);
+			var node = tree.list[start_index];
+			nodeToElMap.set(node, row);
+			row.css("top", top + "px");
+			renderer.updateRow(row, node);
+
+			start_index++;
 			top += rowHeight;
 		}
 	}
 
-	function renderRow(el : JQuery, top : Float, index : Int)
+	var nodeToElMap : Map<TreeNode<T>, JQuery>;
+	public function getElementForNode(node : TreeNode<T>)
 	{
-		el.css("top", top + "px");
-		renderer.updateRow(el, tree.list[index]);
+		if(null == nodeToElMap) return null;
+		return nodeToElMap.get(node);
 	}
 
 	// TODO implement
@@ -331,9 +370,11 @@ class BaseHtmlTreeRenderer<T> implements IHtmlTreeRenderer<T>
 
 		var toggle = el.find(".tree-toggle");
 		if(node.collapsed || node.hasChildren) {
-			toggle.get(0).onclick = function() {
+			toggle.get(0).onclick = function(e) {
+				e.preventDefault();
 				node.toggle();
 				tree.update();
+				return false;
 			};
 			if(node.collapsed) {
 				toggle.find("i").removeClass("icon-caret-down").addClass("icon-caret-right");
