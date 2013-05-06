@@ -34,7 +34,7 @@ class QuirrelEditor implements RegionEditor {
     }
 
     public function setContent(content: String) {
-        return editor.setValue(content);
+        editor.setValue(content);
     }
 
     public function evaluate() {

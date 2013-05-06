@@ -75,6 +75,7 @@ class Region {
                 return;
 
             editor.setContent(response.content.contents);
+            editor.evaluate();
         });
     }
 }
