@@ -35,6 +35,10 @@ class Region {
         }
     }
 
+    public function filename() {
+        return path.split('/').pop();
+    }
+
     public function new(communicator: Communicator, path: String, mode: RegionMode, locale : Locale) {
         this.events = {
             changeMode : new Signal2(),
