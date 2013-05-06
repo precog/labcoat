@@ -30,8 +30,8 @@ class ResponseError extends PrecogResponse
 class ResponseMetadataChildren extends PrecogResponse
 {
 	public var parent(default, null) : String;
-	public var children(default, null) : Array<FileDescription>;
-	public function new(parent : String, children : Array<FileDescription>, request : PrecogRequest)
+	public var children(default, null) : Array<FileDescriptionMeta>;
+	public function new(parent : String, children : Array<FileDescriptionMeta>, request : PrecogRequest)
 	{
 		super(request);
 		this.parent = parent;
@@ -46,6 +46,11 @@ class ResponseMetadataChildren extends PrecogResponse
 typedef FileDescription = {
 	type : String,
 	name : String
+}
+
+typedef FileDescriptionMeta = {
+	>FileDescription,
+	metadata : Map<String, Dynamic>
 }
 
 class ResponseFileBase extends PrecogResponse

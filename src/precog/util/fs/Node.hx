@@ -10,9 +10,11 @@ class Node
 	public var isDirectory(default, null) : Bool;
 	public var isRoot(default, null) : Bool;
 	public var isSystem(get, null) : Bool;
-	public function new(name : String, parent : Directory)
+	public function new(name : String, parent : Directory, ?metadata : Map<String, Dynamic>)
 	{
 		meta = new Meta(this);
+		if(null != metadata)
+			meta.setMap(metadata);
 		this.init();
 		this.name = name;
 		if(null != parent)

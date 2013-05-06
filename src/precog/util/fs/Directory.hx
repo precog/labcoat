@@ -8,9 +8,9 @@ class Directory extends Node
 
 	public var length(default, null) : Int;
 
-	public function new(name : String, parent : Directory)
+	public function new(name : String, parent : Directory, ?meta : Map<String, Dynamic>)
 	{
-		super(name, parent);
+		super(name, parent, meta);
 		files = new Files(this);
 		directories = new Directories(this);
 		length = 0;
@@ -162,7 +162,7 @@ class Directory extends Node
 		}
 	}
 
-	public function createFileAt(path : Path, ?autoCreateDirectories : Bool = false) : File
+	public function createFileAt(path : Path, ?autoCreateDirectories : Bool = false, ?meta : Map<String, Dynamic>) : File
 	{
 		var name = path.segments().pop().getLiteral();
 		var dir : Directory = null;
@@ -172,10 +172,10 @@ class Directory extends Node
 			dir = cast traverse(path)[0];
 		if(dir == null)
 			throw "destination directory doesn't exist for " + path;
-		return new File(name, dir);
+		return new File(name, dir, meta);
 	}
 
-	public function ensureDirectory(path : Path) : Directory
+	public function ensureDirectory(path : Path, ?meta : Map<String, Dynamic>) : Directory
 	{
 		var dir = path.absolute() ? filesystem.root : this,
 			segments = path.segments();
@@ -189,7 +189,7 @@ class Directory extends Node
 			dir = next;
 		}
 		while(segments.length > 0)
-			dir = new Directory(segments.shift().getLiteral(), dir);
+			dir = new Directory(segments.shift().getLiteral(), dir, meta);
 		return dir;
 	}
 

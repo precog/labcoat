@@ -35,8 +35,14 @@ class FSHtmlTreeRenderer implements IHtmlTreeRenderer<Node>
 //		if(label == "")
 //			label = "/";
 
-		var icon;
-		if(node.data.isFile) {
+		var icon,
+			metatype = node.data.meta.get("type");
+		if(null != metatype) {
+			icon = 'icon-' + switch(metatype) {
+				case "notebook" :	"book";
+				case _:				"file";
+			};
+		} else if(node.data.isFile) {
 			icon = 'icon-file';
 		} else if(node.collapsed) {
 			icon = 'icon-folder-close-alt';

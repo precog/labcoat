@@ -105,10 +105,17 @@ class TreeViewModule extends Module
                     switch (item.type) {
                         case "file":
                             if(fs.root.existsFile(path)) return;
-                            fs.root.createFileAt(path);
                         case "directory":
                             if(fs.root.existsDirectory(path)) return;
-                            fs.root.ensureDirectory(path);
+                    }
+
+                    switch (item.type) {
+                        case "file":
+                            fs.root.createFileAt(path, item.metadata);
+                        case "directory" if(item.metadata.get("type") == "notebook"):
+                            fs.root.createFileAt(path, item.metadata);
+                        case "directory":
+                            var n = fs.root.ensureDirectory(path, item.metadata);
                             // TODO, removing the timer will break the second load.communicator
                             // Very possible but in thx.react request/respond
                             thx.react.promise.Timer.delay(0).then(

@@ -17,6 +17,7 @@ class Meta
 		map.set(key, value);
 		return this;
 	}
+
 	public function remove(key : String)
 	{
 		trigger(new MetaChangeEvent(node, key, map.get(key), null));

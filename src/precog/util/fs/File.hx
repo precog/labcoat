@@ -4,9 +4,9 @@ class File extends Node
 {
 	public var extension(get, set) : String;
 	public var baseName(get, set) : String;
-	public function new(name : String, parent : Directory)
+	public function new(name : String, parent : Directory, ?meta : Map<String, Dynamic>)
 	{
-		super(name, parent);
+		super(name, parent, meta);
 	}
 
 	function get_extension()
