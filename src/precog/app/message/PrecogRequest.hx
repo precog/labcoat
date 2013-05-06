@@ -96,6 +96,11 @@ class RequestFileExecute extends RequestFileBase
 
 }
 
+class RequestDirectoryDelete extends RequestFileBase
+{
+
+}
+
 class RequestDirectoryMove extends PrecogRequest 
 {
 	public var src(default, null) : String;

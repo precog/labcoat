@@ -6,6 +6,7 @@ import jQuery.JQuery;
 @:autoBuild(precog.macro.Catamorphism.autoBuild(['CodeEditor', 'Notebook']))
 interface Editor {
     var name(get, set): String;
+    var path(default, null): String;
     var element(default, null): JQuery;
 
     function save(dest: String): Void;

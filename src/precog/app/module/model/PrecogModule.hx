@@ -155,6 +155,26 @@ class PrecogModule extends Module
 		);
 
 		communicator.respond(
+			function(request : RequestDirectoryDelete) : Null<Promise<ResponseDirectoryDelete -> Void>> {
+				var deferred = new Deferred(),
+					api      = getApi(request.api);
+				communicator.trigger(request);
+				var path = normalizeFilePath(request.filePath);
+				api.deleteAll(path).then(
+					function(result) {
+						var response = new ResponseDirectoryDelete(request.filePath, request);
+						deferred.resolve(response);
+						communicator.trigger(response);
+					},
+					errorResponse(request, deferred)
+				);
+				return deferred.promise;
+			},
+			RequestDirectoryDelete,
+			ResponseDirectoryDelete
+		);
+
+		communicator.respond(
 			function(request : RequestFileCreate) : Null<Promise<ResponseFileCreate -> Void>> {
 				var deferred = new Deferred(),
 					api      = getApi(request.api);

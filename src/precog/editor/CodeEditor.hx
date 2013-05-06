@@ -6,6 +6,7 @@ import jQuery.JQuery;
 
 class CodeEditor implements Editor {
     @:isVar public var name(get, set): String;
+    public var path(default, null): String;
     var region: Region;
 
     public var element(default, null): JQuery;

@@ -98,6 +98,11 @@ class ResponseFileExecute extends ResponseFileBase
 	}
 }
 
+class ResponseDirectoryDelete extends ResponseFileBase
+{
+
+}
+
 class ResponseDirectoryMove extends PrecogResponse 
 {
 	public var src(default, null) : String;
