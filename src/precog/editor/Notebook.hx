@@ -134,7 +134,7 @@ class Notebook implements Editor {
         var content = oldRegion.editor.getContent();
         var region = new Region(communicator, oldRegion.path, mode, locale);
         region.editor.setContent(content);
-        appendRegion(region, oldRegion.element);
+        appendUnsavedRegion(region, oldRegion.element);
 
         deleteRegion(oldRegion);
     }

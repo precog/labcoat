@@ -29,7 +29,7 @@ class Region {
     function createEditor() {
         return switch(this.mode) {
             case QuirrelRegionMode: new QuirrelEditor(communicator, this);
-            case MarkdownRegionMode: new MarkdownEditor(this);
+            case MarkdownRegionMode: new MarkdownEditor(communicator, this);
             case JSONRegionMode: new JSONEditor(this);
             case VegaRegionMode: new VegaEditor(this);
         }

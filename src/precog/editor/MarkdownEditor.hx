@@ -1,5 +1,8 @@
 package precog.editor;
 
+import precog.app.message.PrecogRequest;
+import precog.app.message.PrecogResponse;
+import precog.communicator.Communicator;
 import precog.editor.codemirror.Externs;
 import precog.editor.markdown.Externs;
 import js.Browser.document;
@@ -11,11 +14,13 @@ using StringTools;
 
 class MarkdownEditor implements RegionEditor {
     public var element: Element;
+    var communicator: Communicator;
     var editor: CodeMirror;
     var region: Region;
     var rendered: Element;
 
-    public function new(region: Region) {
+    public function new(communicator: Communicator, region: Region) {
+        this.communicator = communicator;
         this.region = region;
 
         var options: Dynamic = {mode: 'markdown', region: region};
@@ -47,6 +52,11 @@ class MarkdownEditor implements RegionEditor {
         editor.getWrapperElement().style.display = 'none';
         rendered.style.display = 'block';
         rendered.innerHTML = Markdown.toHTML(getContent());
+
+        communicator.request(
+            new RequestFileUpload(region.path, "text/x-markdown", getContent()),
+            ResponseFileUpload
+        );
     }
 
     public function getContent() {
