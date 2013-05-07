@@ -39,6 +39,8 @@ class Main
         manager.addModule(new MainLayoutModule());
 
         manager.addModule(new TreeViewModule());
+
+        manager.addModule(new precog.app.module.view.fstreeview.ActionsModule());
 /* NOT IMPLEMENTED PANELS
         manager.addModule(new TutorialModule());
         manager.addModule(new ReferenceModule());

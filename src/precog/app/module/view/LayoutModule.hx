@@ -20,10 +20,11 @@ using precog.html.JQuerys;
 using thx.react.IObservable;
 using thx.react.Promise;
 
+import precog.ViewConfig;
+
 class LayoutModule extends Module
 {
 	var container : JQuery;
-	var panelMargin : Int = 3;
 	var mainLayout    : DockLayout;
 	var contextLayout : DockLayout;
 
@@ -82,8 +83,8 @@ class LayoutModule extends Module
 		mainLayout = new DockLayout(0, 0);
 		contextLayout = new DockLayout(0, 0);
 
-		mainLayout.defaultMargin = panelMargin;
-		contextLayout.defaultMargin = panelMargin;
+		mainLayout.defaultMargin = ViewConfig.panelMargin;
+		contextLayout.defaultMargin = ViewConfig.panelMargin;
 
 		contextPanel.rectangle.addListener(function(rect) {
 			contextLayout.rectangle.set(rect.x, rect.y, rect.width, rect.height);

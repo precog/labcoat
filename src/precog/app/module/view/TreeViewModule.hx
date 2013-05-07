@@ -18,6 +18,11 @@ import precog.app.message.PrecogResponse;
 import precog.util.fs.*;
 using StringTools;
 
+import precog.layout.*;
+using thx.react.IObservable;
+
+import precog.ViewConfig;
+
 class TreeViewModule extends Module
 {
     static inline var UI_TREE_NODE = "ui_tree_node";
@@ -31,7 +36,7 @@ class TreeViewModule extends Module
         communicator
             .demand(SystemHtmlPanelGroup)
             .await(communicator.demand(Locale))
-            .then(onMessage);
+            .then(init);
     }
 
     function parentPath(s : String)
@@ -39,24 +44,54 @@ class TreeViewModule extends Module
         var p = s.split("/");
         if("metadata.json" == p.pop())
             p.pop();
-trace(s);
-trace(p);
         return p.join("/");
     }
 
-    function onMessage(message: SystemHtmlPanelGroup, locale : Locale)
+    function createContainers(group : HtmlPanelGroupItem) {
+trace(group.panel.rectangle);
+        var layout = new DockLayout(group.panel.rectangle.width, group.panel.rectangle.height);
+        layout.defaultMargin = ViewConfig.panelMargin;
+        group.panel.rectangle.addListener(function(r) {
+            layout.rectangle.updateSize(r); //updateSize
+            layout.update();
+        });
+
+        var toolbar = new HtmlPanel(),
+            main = new HtmlPanel();
+
+        group.panel.element.append(toolbar.element);
+        group.panel.element.append(main.element);
+
+        layout.addPanel(toolbar).dockTop(ViewConfig.toolbarHeight);
+        layout.addPanel(main);
+        layout.update();
+//        group.panel.rectangle.attach(layout.rectangle);
+
+        return {
+            toolbar : toolbar,
+            main : main
+        };
+    }
+
+    function init(message: SystemHtmlPanelGroup, locale : Locale)
     {
         var item = new HtmlPanelGroupItem(locale.singular("file system"));
         message.group.addItem(item);
         item.activate();
-        var renderer = new FSHtmlTreeRenderer(16);
-        tree = new HtmlTree(item.panel, renderer);
+        var renderer = new FSHtmlTreeRenderer(16),
+            panels = createContainers(item);
+        tree = new HtmlTree(panels.main, renderer);
         tree.events.select.on(function(node : TreeNode<Node>) {
             trace("select ");
         });
         tree.events.trigger.on(function(node : TreeNode<Node>) {
             trace("trigger ");
         });
+
+        var toolbar = new JQuery('<div class="btn-group"></div>').appendTo(panels.toolbar.element);
+
+        communicator.provide(new FSTreeViewToolbarHtml(toolbar));
+
         communicator.consume(function(fss : Array<NamedFileSystem>) {
                 fss.map(addTree.bind(communicator, _));
             });
@@ -76,14 +111,12 @@ trace(p);
         }
 
         communicator.on(function(res : ResponseFileCreate) {
-trace(parentPath(res.filePath));
             thx.react.promise.Timer.delay(0).then(function()
                 loadDir(parentPath(res.filePath), res.api, 1)
             );
 //            ensureFileAt(res.filePath, res.api);
         });
         communicator.on(function(res : ResponseFileUpload) {
-trace(parentPath(res.filePath));
             thx.react.promise.Timer.delay(0).then(function()
                 loadDir(parentPath(res.filePath), res.api, 1)
             );

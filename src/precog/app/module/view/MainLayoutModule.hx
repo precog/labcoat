@@ -13,6 +13,7 @@ import jQuery.JQuery;
 using thx.react.IObservable;
 
 using precog.html.JQuerys;
+import precog.ViewConfig;
 
 class MainLayoutModule extends Module {
     var communicator: Communicator;
@@ -41,9 +42,9 @@ class MainLayoutModule extends Module {
         layout = new DockLayout(0, 0);
         layout.defaultMargin = panelMargin;
 
-        layout.addPanel(toolbar).dockTop(22);
+        layout.addPanel(toolbar).dockTop(ViewConfig.toolbarHeight);
         layout.addPanel(editor).fill();
-        layout.addPanel(statusbar).dockBottom(20);
+        layout.addPanel(statusbar).dockBottom(ViewConfig.statusbarHeight);
 
         message.panel.rectangle.addListener(updateLayout);
         updateLayout(message.panel.rectangle);

@@ -5,19 +5,22 @@ import jQuery.JQuery;
 class HtmlButton 
 {
 	public var element(default, null) : JQuery;
-	@:isVar public var text(get_text, set_text) : String;
+	@:isVar public var text(get, set) : String;
+	@:isVar public var title(get, set) : String;
 	
-	@:isVar public var leftIcon(get_leftIcon, set_leftIcon) : String;
-	@:isVar public var size(get_size, set_size) : ButtonSize;
-	@:isVar public var rightIcon(get_rightIcon, set_rightIcon) : String;
-	@:isVar public var active(get_active, set_active) : Bool;
-	@:isVar public var type(get_type, set_type) : ButtonType;
-	@:isVar public var enabled(get_enabled, set_enabled) : Bool;
+	@:isVar public var leftIcon(get, set) : String;
+	@:isVar public var size(get, set) : ButtonSize;
+	@:isVar public var rightIcon(get, set) : String;
+	@:isVar public var active(get, set) : Bool;
+	@:isVar public var type(get, set) : ButtonType;
+	@:isVar public var enabled(get, set) : Bool;
 
-	public function new(?text : String, ?icon : String, ?btnsize : ButtonSize)
+	public function new(?text : String, ?icon : String, ?btnsize : ButtonSize, ?textAsTitle = false)
 	{
 		element = new JQuery('<button type="button" class="btn"></button>');
-		if(null != text)
+		if(textAsTitle && null != text)
+			this.title = title;
+		else if(null != text)
 			this.text = text;
 		if(null != icon)
 			this.leftIcon = icon;
@@ -35,6 +38,15 @@ class HtmlButton
 		this.text = text;
 		update();
 		return text;
+	}
+
+	function get_title()
+		return title;
+	function set_title(title : String)
+	{
+		this.title = title;
+		update();
+		return title;
 	}
 
 	function get_leftIcon()
@@ -139,6 +151,7 @@ class HtmlButton
 		if(null != rightIcon)
 			buf.push('<i class="right-icon icon-$rightIcon"></i>');
 
+		element.attr("title", title);
 		element.html(buf.join(""));
 	}
 }
