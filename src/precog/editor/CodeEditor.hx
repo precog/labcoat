@@ -11,10 +11,11 @@ class CodeEditor implements Editor {
 
     public var element(default, null): JQuery;
 
-    public function new(communicator: Communicator, name: String, locale: precog.util.Locale) {
+    public function new(communicator: Communicator, path: String, name: String, locale: precog.util.Locale) {
         element = new JQuery('<div class="code-editor"></div>');
         region = new Region(communicator, name, MarkdownRegionMode, locale);
         element.append(region.element);
+        this.path = path;
         this.name = name;
     }
 

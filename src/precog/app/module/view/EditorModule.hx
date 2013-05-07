@@ -26,7 +26,13 @@ class EditorModule extends Module {
     var locale : Locale;
     var main : HtmlPanelGroup;
     var panels : Map<Editor, HtmlPanelGroupItem>;
+
     var accountId : String;
+    var tmpPath : String;
+    var metadataPath : String;
+
+    var fileCounter : Int = 0;
+    var notebookCounter : Int = 0;
 
     public function new()
     {
@@ -98,40 +104,78 @@ class EditorModule extends Module {
         communicator.consume(function(configs : Array<PrecogNamedConfig>) {
             // TODO: Maybe check this is the "default" account
             accountId = configs[0].config.accountId;
-            loadNotebooks();
+            tmpPath = '${accountId}/temp';
+            metadataPath = '${tmpPath}/metadata.json';
+            loadMetadata();
         });
     }
 
-    function loadNotebooks() {
-        var path = '${accountId}/temp/notebooks';
+    function loadMetadata() {
         communicator.request(
-            new RequestMetadataChildren(path),
-            ResponseMetadataChildren
-        ).then(function(response: ResponseMetadataChildren) {
-            for(file in response.children) {
-                if(file.type != 'directory') continue;
-                openNotebook('${path}/${file.name}');
+            new RequestFileGet(metadataPath),
+            ResponseFileGet
+        ).then(function(response: ResponseFileGet) {
+            var metadata = haxe.Json.parse(response.content.contents)[0];
+            if(metadata == null) {
+                // TODO: Open a new notebook
+                createNotebook();
+                return;
+            }
+
+            fileCounter = metadata.fileCounter;
+            notebookCounter = metadata.notebookCounter;
+
+            var editors: Array<{type: String, path: String}> = metadata.editors;
+            for(editor in editors) {
+                switch(editor.type) {
+                case 'CodeEditor': openCodeEditor(editor.path);
+                case 'Notebook': openNotebook(editor.path);
+                }
             }
         });
     }
 
-    var fileCounter: Int = 0;
-    function createCodeEditor() {
-        var codeEditor = new CodeEditor(communicator, locale.format("file #{0}", [++fileCounter]), locale);
+    function saveMetadata() {
+        communicator.request(
+            new RequestFileUpload(metadataPath, 'application/json', serializeMetadata()),
+            ResponseFileUpload
+        );
+    }
 
+    function serializeMetadata() {
+        return haxe.Json.stringify({
+            editors: editors.map(function(e: Editor) return {
+                type: e.cata(
+                    function(codeEditor: CodeEditor) return 'CodeEditor',
+                    function(notebook: Notebook) return 'Notebook'
+                ),
+                path: e.path
+            }),
+            fileCounter: fileCounter,
+            notebookCounter: notebookCounter
+        });
+    }
+
+    function openCodeEditor(path: String) {
+        var codeEditor = new CodeEditor(communicator, path, locale.format("file #{0}", [fileCounter]), locale);
         addEditor(codeEditor);
     }
 
-    var notebookCounter : Int = 0;
+    function createCodeEditor() {
+        ++fileCounter;
+        openCodeEditor('${tmpPath}/code/file${fileCounter}');
+        saveMetadata();
+    }
+
     function openNotebook(path: String) {
         var notebook = new Notebook(communicator, path, locale.format("notebook #{0}", [notebookCounter]), locale);
-
         addEditor(notebook);
     }
 
     function createNotebook() {
         ++notebookCounter;
-        openNotebook('${accountId}/temp/notebooks/notebook${notebookCounter}');
+        openNotebook('${tmpPath}/notebooks/notebook${notebookCounter}');
+        saveMetadata();
     }
 
     function addEditor(editor: Editor) {
@@ -178,6 +222,7 @@ class EditorModule extends Module {
             function(notebook: Notebook) { notebook.events.clear(); }
         );
         main.removeItem(item);
+        saveMetadata();
     }
 
     function deleteEditor() {
