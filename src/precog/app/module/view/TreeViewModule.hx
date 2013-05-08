@@ -103,24 +103,30 @@ trace(group.panel.rectangle);
                 node = fs.root.pick(path);
             if(null == node) {
                 fs.root.createFileAt(path, true);
+/*
                 fs.root.walk(path, function(node : Node) {
                     if(node.isFile) return;
                     loadDir(node.toString(), api, 2);
                 });
+*/
             }
         }
 
         communicator.on(function(res : ResponseFileCreate) {
+/*
             thx.react.promise.Timer.delay(0).then(function()
                 loadDir(parentPath(res.filePath), res.api, 1)
             );
-//            ensureFileAt(res.filePath, res.api);
+*/
+            ensureFileAt(res.filePath, res.api);
         });
         communicator.on(function(res : ResponseFileUpload) {
+/*
             thx.react.promise.Timer.delay(0).then(function()
                 loadDir(parentPath(res.filePath), res.api, 1)
             );
-//            ensureFileAt(res.filePath, res.api);
+*/
+            ensureFileAt(res.filePath, res.api);
         });
         communicator.on(function(res : ResponseDirectoryMove) {
             var fs = fss.get(res.api);
