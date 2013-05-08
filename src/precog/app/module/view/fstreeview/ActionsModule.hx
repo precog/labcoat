@@ -50,7 +50,7 @@ class ActionsModule extends Module
             switch(node.type) {
                 case Notebook, Directory if(node.path != "/"):
                     delete.enabled = true;
-                    delete.element.get(0).onclick = confirm("are you sure that you want to delete the ${node.type} and all of its contents?", function() {
+                    delete.element.get(0).onclick = confirm('<p>Are you sure that you want to delete the ${node.type} and all if its contents?</p><p>${node.type}: <code>${node.path}</code></p>', function() {
                         delete.enabled = false;
                         communicator.request(new RequestDirectoryDelete(node.path, node.api), ResponseDirectoryDelete)
                             .then(function(res : ResponseDirectoryDelete) {
@@ -59,7 +59,7 @@ class ActionsModule extends Module
                     });
                 case File:
                     delete.enabled = true;
-                    delete.element.get(0).onclick = confirm("are you sure that you want to delete the selected file?", function() {
+                    delete.element.get(0).onclick = confirm('<p>Are you sure that you want to delete the selected file?</p><p>${node.type}: <code>${node.path}</code></p>', function() {
                         delete.enabled = false;
                         communicator.request(new RequestFileDelete(node.path, node.api), ResponseFileDelete)
                             .then(function(res : ResponseFileDelete) {

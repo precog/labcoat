@@ -11,7 +11,7 @@ class Dialog
 		var cancel = new HtmlButton("cancel"),
 			ok = new HtmlButton("OK");
 		ok.type = Primary;
-		var dialog = createEmptyDialog(),
+		var dialog = createEmptyDialog({ keyboard : true }),
 			el = dialog.el();
 		el.find(".modal-header").hide();
 		el.find(".modal-body").html(message);
@@ -35,7 +35,7 @@ class Dialog
 		return Bootstrap.modal(new JQuery(DIALOG_HTML), options);
 	}
 
-	static var DIALOG_HTML = '<div class="modal hide fade in labcoat-dialog" role="dialog" aria-labelledby="dialog" aria-hidden="false" style="display: block;">
+	static var DIALOG_HTML = '<div class="modal hide fade in labcoat-dialog modal-small" role="dialog" aria-labelledby="dialog" aria-hidden="false" style="display: block;">
   <div class="modal-header"></div>
   <div class="modal-body"></div>
   <div class="modal-footer"></div>
