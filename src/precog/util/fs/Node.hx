@@ -10,6 +10,7 @@ class Node
 	public var isDirectory(default, null) : Bool;
 	public var isRoot(default, null) : Bool;
 	public var isSystem(get, null) : Bool;
+	public var root(get, null) : Node;
 	public function new(name : String, parent : Directory, ?metadata : Map<String, Dynamic>)
 	{
 		meta = new Meta(this);
@@ -50,6 +51,11 @@ class Node
 			parent.removeNode(this);
 			trigger(new NodeRemoveEvent(this, p));
 		}
+	}
+
+	function get_root()
+	{
+		return isRoot ? this : (null == parent ? null : parent.root);
 	}
 
 	macro function trigger<T>(ethis : haxe.macro.Expr, values : Array<haxe.macro.Expr>)

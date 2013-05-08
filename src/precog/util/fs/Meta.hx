@@ -18,6 +18,14 @@ class Meta
 		return this;
 	}
 
+	public function getAll()
+	{
+		var copy = new Map();
+		for(key in map.keys())
+			copy.set(key, map.get(key));
+		return copy;
+	}
+
 	public function remove(key : String)
 	{
 		trigger(new MetaChangeEvent(node, key, map.get(key), null));

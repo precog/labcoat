@@ -1,6 +1,7 @@
 package precog.app.module.view;
 
 import precog.app.message.*;
+import precog.app.message.NodeInfo;
 import precog.util.Locale;
 import precog.communicator.Communicator;
 import precog.communicator.Module;
@@ -26,6 +27,7 @@ import precog.ViewConfig;
 class TreeViewModule extends Module
 {
     static inline var UI_TREE_NODE = "ui_tree_node";
+    static inline var API_CONTEXT = "api_context";
 
     var tree : HtmlTree<precog.util.fs.Node>;
     var communicator : Communicator;
@@ -48,7 +50,6 @@ class TreeViewModule extends Module
     }
 
     function createContainers(group : HtmlPanelGroupItem) {
-trace(group.panel.rectangle);
         var layout = new DockLayout(group.panel.rectangle.width, group.panel.rectangle.height);
         layout.defaultMargin = ViewConfig.panelMargin;
         group.panel.rectangle.addListener(function(r) {
@@ -73,6 +74,20 @@ trace(group.panel.rectangle);
         };
     }
 
+    function extractNodeInfo(node : Node)
+    {
+        var path = node.toString(),
+            meta = node.meta.getAll(),
+            type = getNodeType(node),
+            api  = node.root.meta.get(API_CONTEXT);
+        return {
+            path : path,
+            type : type,
+            api  : api,
+            meta : meta
+        };
+    }
+
     function init(message: SystemHtmlPanelGroup, locale : Locale)
     {
         var item = new HtmlPanelGroupItem(locale.singular("file system"));
@@ -81,20 +96,34 @@ trace(group.panel.rectangle);
         var renderer = new FSHtmlTreeRenderer(16),
             panels = createContainers(item);
         tree = new HtmlTree(panels.main, renderer);
-        tree.events.select.on(function(node : TreeNode<Node>) {
-            trace("select ");
-        });
-        tree.events.trigger.on(function(node : TreeNode<Node>) {
-            trace("trigger ");
-        });
 
-        var toolbar = new JQuery('<div class="btn-group"></div>').appendTo(panels.toolbar.element);
+        tree.events.select.on(function(tn : TreeNode<Node>) {
+            if(null == tn) {
+                communicator.trigger(new NodeDeselected());
+            } else {
+//            trace(node);
+                var info = extractNodeInfo(tn.data);
+                switch(info.type) {
+                    case File, Notebook:
+                        var dirinfo = extractNodeInfo(tn.data.parent);
+                        communicator.trigger(new NodeSelected(dirinfo.path, dirinfo.type, dirinfo.api, dirinfo.meta));
+                    case _:
+                }
+                communicator.trigger(new NodeSelected(info.path, info.type, info.api, info.meta));
+            }
+        });
+        tree.events.trigger.on(function(tn : TreeNode<Node>) {
+//            trace(node);
+            var info = extractNodeInfo(tn.data);
+            communicator.trigger(new NodeTriggered(info.path, info.type, info.api, info.meta));
+        });
+        var toolbar = new JQuery('<div class="btn-group context-bar"></div>').appendTo(panels.toolbar.element);
 
         communicator.provide(new FSTreeViewToolbarHtml(toolbar));
 
         communicator.consume(function(fss : Array<NamedFileSystem>) {
-                fss.map(addTree.bind(communicator, _));
-            });
+            fss.map(addTree.bind(communicator, _));
+        });
 
 
         function ensureFileAt(path : String, api : String)
@@ -112,6 +141,24 @@ trace(group.panel.rectangle);
             }
         }
 
+        function removeNodeAt(path : String, api : String)
+        {
+            var fs   = fss.get(api),
+                node = fs.root.pick(path);
+            if(node.isDirectory)
+                cast(node, Directory).removeRecursive();
+            else
+                node.remove();
+        }
+
+        communicator.on(function(res : ResponseFileDelete) {
+            removeNodeAt(res.filePath, res.api);
+        });
+
+        communicator.on(function(res : ResponseDirectoryDelete) {
+            removeNodeAt(res.filePath, res.api);
+        });
+
         communicator.on(function(res : ResponseFileCreate) {
 /*
             thx.react.promise.Timer.delay(0).then(function()
@@ -120,6 +167,7 @@ trace(group.panel.rectangle);
 */
             ensureFileAt(res.filePath, res.api);
         });
+
         communicator.on(function(res : ResponseFileUpload) {
 /*
             thx.react.promise.Timer.delay(0).then(function()
@@ -139,18 +187,29 @@ trace(group.panel.rectangle);
         });
 
         communicator.queueMany([
-                // new MenuItem(MenuFile(SubgroupFileLocal), "Open File...", function(){}, 0),
-                // new MenuItem(MenuFile(SubgroupFileLocal), "Close", function(){}, 1)
-            ]);
+            // new MenuItem(MenuFile(SubgroupFileLocal), "Open File...", function(){}, 0),
+            // new MenuItem(MenuFile(SubgroupFileLocal), "Close", function(){}, 1)
+        ]);
     }
 
     function addTree(communicator : Communicator, nfs : NamedFileSystem)
     {
         var name = nfs.name,
             fs = nfs.fs;
+        fs.root.meta.set(API_CONTEXT, name);
         fss.set(name, fs);
         wireFileSystem(fs);
         loadDir("/", name, 4);
+    }
+
+    function getNodeType(node : Node) : NodeType
+    {
+        return if(node.meta.get("type") == "notebook")
+            Notebook;
+        else if(node.isFile)
+            File;
+        else
+            Directory;
     }
 
     function loadDir(path : String, name : String, levels : Int)

@@ -84,9 +84,9 @@ class HtmlButton
 		if(this.enabled == state) return state;
 		this.enabled = state;
 		if(state)
-			this.element.attr("disabled", "disabled");
-		else
 			this.element.removeAttr("disabled");
+		else
+			this.element.attr("disabled", "disabled");
 		return state;
 	}
 

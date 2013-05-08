@@ -38,13 +38,12 @@ class JQuerys
 		o.click(function(e) {
 			if(null == timer)
 			{
+				Reflect.callMethod(o, click, [e]);
 				count = 0;
 				timer = haxe.Timer.delay(function() {
-					timer.stop();
 					timer = null;
-					if(count == 1) {
-						Reflect.callMethod(o, click, [e]);
-					} else {
+					if(count > 1) {
+						trace("DOUBLE");
 						Reflect.callMethod(o, dblclick, [e]);
 					}
 				}, DBLCLICK_DELAY);
