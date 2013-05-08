@@ -23,7 +23,6 @@ class EditorToolbarModule extends Module {
             .demand(MainToolbarHtmlPanel)
             .await(communicator.demand(Locale))
             .then(init);
-        communicator.on(updateNotebooks);
     }
 
     function init(toolbarPanel: MainToolbarHtmlPanel, locale : Locale) {
@@ -39,16 +38,6 @@ class EditorToolbarModule extends Module {
             DropdownButton(locale.singular('save'), '', saveEditor),
         ];
         new HtmlDropdown('', 'cog', '', Mini, items, DropdownAlignRight).element.appendTo(element);
-    }
-
-    function updateNotebooks(event: EditorUpdate) {
-        // TODO: This could be made nicer.
-        var closeEditorItem = new JQuery('.${closeEditorClass}');
-        if(event.all.length <= 1) {
-            closeEditorItem.addClass('disabled');
-        } else {
-            closeEditorItem.removeClass('disabled');
-        }
     }
 
     function createCodeEditor(event: Event) {
