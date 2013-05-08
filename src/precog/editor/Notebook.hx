@@ -9,9 +9,7 @@ import jQuery.JQuery;
 import thx.react.Signal;
 
 class Notebook implements Editor {
-    @:isVar public var name(get, set) : String;
     public var events(default, null) : {
-        public var changeName(default, null) : Signal2<String, Notebook>;
         public function clear() : Void;
     };
     public var element(default, null): JQuery;
@@ -22,11 +20,10 @@ class Notebook implements Editor {
     var regions: Array<Region>;
     var regionCounter: Int;
 
-    public function new(communicator: Communicator, path: String, name: String, locale: Locale) {
+    public function new(communicator: Communicator, path: String, locale: Locale) {
         element = new JQuery('<div class="notebook"></div>');
         regions = [];
         events = {
-            changeName : new Signal2(),
             clear : function() {
                 for(field in Reflect.fields(this))
                 {
@@ -39,7 +36,6 @@ class Notebook implements Editor {
         this.communicator = communicator;
         this.locale = locale;
         this.path = path;
-        this.name = name;
 
         metadataPath = '${path}/metadata.json';
         regionCounter = 0;
@@ -58,7 +54,6 @@ class Notebook implements Editor {
                 return;
             }
 
-            name = metadata.name;
             regionCounter = metadata.regionCounter;
 
             var metadataRegions: Array<{path: String, mode: Int}> = metadata.regions;
@@ -82,7 +77,6 @@ class Notebook implements Editor {
 
     function serializeMetadata() {
         return haxe.Json.stringify({
-            name: name,
             type: 'notebook',
             regions: regions.map(function(region: Region) {
                 return {
@@ -182,18 +176,6 @@ class Notebook implements Editor {
         return ++regionCounter;
     }
 
-    function get_name()
-        return name;
-
-    function set_name(value : String)
-    {
-        if(value == name) return value;
-        var old = name;
-        name = value;
-        events.changeName.trigger(old, this);
-        return value;
-    }
-
     public function toString()
-        return 'Notebook - $name (${regions.length} region[s])';
+        return 'Notebook - $path (${regions.length} region[s])';
 }

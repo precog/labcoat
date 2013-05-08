@@ -27,7 +27,7 @@ class Region {
     var communicator: Communicator;
 
     function createEditor() {
-        return switch(this.mode) {
+        return switch(mode) {
             case QuirrelRegionMode: new QuirrelEditor(communicator, this);
             case MarkdownRegionMode: new MarkdownEditor(communicator, this);
             case JSONRegionMode: new JSONEditor(communicator, this);

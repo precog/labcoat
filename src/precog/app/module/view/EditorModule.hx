@@ -157,7 +157,7 @@ class EditorModule extends Module {
     }
 
     function openCodeEditor(path: String) {
-        var codeEditor = new CodeEditor(communicator, path, locale.format("file #{0}", [fileCounter]), locale);
+        var codeEditor = new CodeEditor(communicator, path, locale);
         addEditor(codeEditor);
     }
 
@@ -168,7 +168,7 @@ class EditorModule extends Module {
     }
 
     function openNotebook(path: String) {
-        var notebook = new Notebook(communicator, path, locale.format("notebook #{0}", [notebookCounter]), locale);
+        var notebook = new Notebook(communicator, path, locale);
         addEditor(notebook);
     }
 
@@ -179,9 +179,10 @@ class EditorModule extends Module {
     }
 
     function addEditor(editor: Editor) {
+        var filename = editor.path.split('/').pop();
         var item = editor.cata(
-            function(codeEditor: CodeEditor) return new HtmlPanelGroupItem(codeEditor.name, Icons.file),
-            function(notebook: Notebook) return new HtmlPanelGroupItem(notebook.name, Icons.book)
+            function(codeEditor: CodeEditor) return new HtmlPanelGroupItem(filename, Icons.file),
+            function(notebook: Notebook) return new HtmlPanelGroupItem(filename, Icons.book)
         );
 
         main.addItem(item);
@@ -189,15 +190,6 @@ class EditorModule extends Module {
         item.panel.element.addClass("edit-area");
         item.panel.element.append(editor.element);
         editors.push(editor);
-
-        editor.cata(
-            function(codeEditor: CodeEditor) {},
-            function(notebook: Notebook) {
-                notebook.events.changeName.on(function(old : String, notebook : Notebook) {
-                    item.toggle.text = notebook.name;
-                });
-            }
-        );
 
         communicator.trigger(new EditorUpdate(editor, editors));
     }
