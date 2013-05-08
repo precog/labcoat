@@ -8,6 +8,7 @@ import precog.communicator.Communicator;
 import precog.communicator.Module;
 import precog.util.Locale;
 using thx.react.Promise;
+import precog.html.Bootstrap;
 import precog.html.HtmlButton;
 import precog.html.Icons;
 
@@ -27,7 +28,7 @@ class ActionsModule extends Module
         delete.element.appendTo(item.element);
         delete.enabled = false;
 /*
-        var create = new HtmlButton("create", Icons.plusSign, Mini, true);
+        var create = new HtmlButton("create", Icons.folderClose, Mini, true);
         create.element.appendTo(item.element);
         create.enabled = false;
 */
@@ -35,11 +36,11 @@ class ActionsModule extends Module
         open.element.appendTo(item.element);
         open.enabled = false;
 /*
-        var upload = new HtmlButton("upload", Icons.upload, Mini, true);
+        var upload = new HtmlButton("upload", Icons.uploadAlt, Mini, true);
         upload.element.appendTo(item.element);
         upload.enabled = false;
 
-        var download = new HtmlButton("download", Icons.download, Mini, true);
+        var download = new HtmlButton("download", Icons.downloadAlt, Mini, true);
         download.element.appendTo(item.element);
         download.enabled = false;
 */
@@ -49,22 +50,22 @@ class ActionsModule extends Module
             switch(node.type) {
                 case Notebook, Directory if(node.path != "/"):
                     delete.enabled = true;
-                    delete.element.get(0).onclick = function() {
+                    delete.element.get(0).onclick = confirm("are you sure that you want to delete the ${node.type} and all of its contents?", function() {
                         delete.enabled = false;
                         communicator.request(new RequestDirectoryDelete(node.path, node.api), ResponseDirectoryDelete)
                             .then(function(res : ResponseDirectoryDelete) {
                                 communicator.queue(new StatusMessage('deleted ${node.type} at ${node.path}', Info));
                             });
-                    };
+                    });
                 case File:
                     delete.enabled = true;
-                    delete.element.get(0).onclick = function() {
+                    delete.element.get(0).onclick = confirm("are you sure that you want to delete the selected file?", function() {
                         delete.enabled = false;
                         communicator.request(new RequestFileDelete(node.path, node.api), ResponseFileDelete)
                             .then(function(res : ResponseFileDelete) {
                                  communicator.queue(new StatusMessage('deleted ${node.type} at ${node.path}', Info));
                             });
-                    };
+                    });
                 case _:
                     delete.enabled = false;
             }
@@ -95,5 +96,12 @@ class ActionsModule extends Module
         communicator.on(function(node : NodeDeselected) {
             delete.enabled = true;
         });
+    }
+
+    static function confirm(message : String, success : Void -> Void)
+    {
+        return function() {
+            Dialog.confirm(message, success);
+        };
     }
 }
