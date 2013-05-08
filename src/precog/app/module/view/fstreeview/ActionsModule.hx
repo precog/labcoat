@@ -45,35 +45,56 @@ class ActionsModule extends Module
 */
 
         communicator.on(function(node : NodeSelected) {
-            if(delete.enabled = isDeletable(node.path, node.type)) {
-                delete.element.get(0).onclick = function() {
+            // DELETE
+            switch(node.type) {
+                case Notebook, Directory if(node.path != "/"):
+                    delete.enabled = true;
+                    delete.element.get(0).onclick = function() {
+                        delete.enabled = false;
+                        communicator.request(new RequestDirectoryDelete(node.path, node.api), ResponseDirectoryDelete)
+                            .then(function(res : ResponseDirectoryDelete) {
+                                communicator.queue(new StatusMessage('deleted ${node.type} at ${node.path}', Info));
+                            });
+                    };
+                case File:
+                    delete.enabled = true;
+                    delete.element.get(0).onclick = function() {
+                        delete.enabled = false;
+                        communicator.request(new RequestFileDelete(node.path, node.api), ResponseFileDelete)
+                            .then(function(res : ResponseFileDelete) {
+                                 communicator.queue(new StatusMessage('deleted ${node.type} at ${node.path}', Info));
+                            });
+                    };
+                case _:
                     delete.enabled = false;
-                    switch(node.type) {
-                        case Notebook, Directory:
-                            communicator.request(new RequestDirectoryDelete(node.path, node.api), ResponseDirectoryDelete)
-                                .then(function(res : ResponseDirectoryDelete) {
-                                    communicator.queue(new StatusMessage('deleted ${node.type} at ${node.path}', Info));                                });
-                        case File:
-                            communicator.request(new RequestFileDelete(node.path, node.api), ResponseFileDelete)
-                                .then(function(res : ResponseFileDelete) {
-                                     communicator.queue(new StatusMessage('deleted ${node.type} at ${node.path}', Info));
-                                });
-                    }
-                };
+            }
+
+            // OPEN
+            switch(node.type) {
+                case Notebook, File:
+                    open.enabled = true;
+                    open.element.get(0).onclick = function() {
+                        communicator.trigger(new NodeTriggered(node.path, node.type, node.api, node.meta));
+                    };
+                case _:
+                    open.enabled = false;
             }
         });
 
         communicator.on(function(node : NodeTriggered) {
             trace(node.toString());
+            switch (node.type) {
+                case Notebook:
+                    communicator.trigger(new EditorOpenNotebook(node.path, node.api));
+                case File:
+                    communicator.trigger(new EditorOpenFile(node.path, node.api));
+                case _:
+                    // should never happen
+            }
         });
 
         communicator.on(function(node : NodeDeselected) {
             delete.enabled = true;
         });
     }
-
-    static function isDeletable(path : String, type : NodeType)
-        return switch (type) {
-            case _: path != "/";
-        };
 }
