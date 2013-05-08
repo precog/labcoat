@@ -37,7 +37,6 @@ class EditorToolbarModule extends Module {
             DropdownDivider,
             DropdownButton(locale.singular('insert region'), '', createRegion),
             DropdownButton(locale.singular('save'), '', saveEditor),
-            DropdownButton(locale.singular('delete'), '', deleteEditor)
         ];
         new HtmlDropdown('', 'cog', '', Mini, items, DropdownAlignRight).element.appendTo(element);
     }
@@ -75,10 +74,5 @@ class EditorToolbarModule extends Module {
     function saveEditor(event: Event) {
         event.preventDefault();
         communicator.trigger(new EditorSave());
-    }
-
-    function deleteEditor(event: Event) {
-        event.preventDefault();
-        communicator.trigger(new EditorDelete());
     }
 }

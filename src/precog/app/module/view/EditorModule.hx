@@ -55,8 +55,6 @@ class EditorModule extends Module {
             closeEditor());
         communicator.on(function(e : EditorRegionRequestCreate)
             createRegion(e.regionMode));
-        communicator.on(function(e : EditorDelete)
-            deleteEditor());
         communicator.on(function(e : EditorSave)
             saveEditor());
         communicator.on(function(e : EditorUpdate)
@@ -215,18 +213,6 @@ class EditorModule extends Module {
         );
         main.removeItem(item);
         saveMetadata();
-    }
-
-    function deleteEditor() {
-        if(null == current)
-            return;
-
-        communicator.request(
-            new RequestDirectoryDelete(current.path),
-            ResponseDirectoryDelete
-        ).then(function(e: ResponseDirectoryDelete) {
-            closeEditor();
-        });
     }
 
     function saveEditor() {
