@@ -82,7 +82,6 @@ class ActionsModule extends Module
         });
 
         communicator.on(function(node : NodeTriggered) {
-            trace(node.toString());
             switch (node.type) {
                 case Notebook:
                     communicator.trigger(new EditorOpenNotebook(node.path, node.api));

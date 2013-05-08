@@ -42,10 +42,8 @@ class JQuerys
 				count = 0;
 				timer = haxe.Timer.delay(function() {
 					timer = null;
-					if(count > 1) {
-						trace("DOUBLE");
+					if(count > 1)
 						Reflect.callMethod(o, dblclick, [e]);
-					}
 				}, DBLCLICK_DELAY);
 			}
 			count++;
