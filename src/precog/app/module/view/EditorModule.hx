@@ -47,6 +47,10 @@ class EditorModule extends Module {
             .demand(MainEditorHtmlPanel)
             .await(communicator.demand(Locale))
             .then(init);
+        communicator.on(function(e : EditorOpenNotebook)
+            openNotebook(e.path));
+        communicator.on(function(e : EditorOpenFile)
+            openCodeEditor(e.path));
         communicator.on(function(_ : EditorNotebookRequestCreate)
             createNotebook());
         communicator.on(function(_ : EditorCodeRequestCreate)
