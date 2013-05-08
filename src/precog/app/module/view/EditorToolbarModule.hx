@@ -13,7 +13,6 @@ import jQuery.Event;
 
 class EditorToolbarModule extends Module {
     public static var element = new JQuery('<div class="toolbar"></div>');
-    static var closeEditorClass = 'close-editor';
 
     var communicator : Communicator;
     var locale : Locale;
@@ -32,7 +31,6 @@ class EditorToolbarModule extends Module {
         var items = [
             DropdownButton(locale.singular('new notebook'), '', createNotebook),
             DropdownButton(locale.singular('new file'), '', createCodeEditor),
-            DropdownButton(locale.singular('close editor'), closeEditorClass, closeEditor),
             DropdownDivider,
             DropdownButton(locale.singular('insert region'), '', createRegion),
             DropdownButton(locale.singular('save'), '', saveEditor),
@@ -48,11 +46,6 @@ class EditorToolbarModule extends Module {
     function createNotebook(event: Event) {
         event.preventDefault();
         communicator.trigger(new EditorNotebookRequestCreate());
-    }
-
-    function closeEditor(event: Event) {
-        event.preventDefault();
-        communicator.trigger(new EditorRequestCloseCurrent());
     }
 
     function createRegion(event: Event) {

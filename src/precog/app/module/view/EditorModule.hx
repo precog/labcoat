@@ -55,8 +55,6 @@ class EditorModule extends Module {
             createNotebook());
         communicator.on(function(_ : EditorCodeRequestCreate)
             createCodeEditor());
-        communicator.on(function(_ : EditorRequestCloseCurrent)
-            closeEditor());
         communicator.on(function(e : EditorRegionRequestCreate)
             createRegion(e.regionMode));
         communicator.on(function(e : EditorSave)
@@ -180,17 +178,25 @@ class EditorModule extends Module {
         saveMetadata();
     }
 
-    function addEditor(editor: Editor) {
+    function tabButton(editor: Editor) {
         var filename = editor.path.split('/').pop();
         var item = editor.cata(
             function(codeEditor: CodeEditor) return new HtmlPanelGroupItem(filename, Icons.file),
             function(notebook: Notebook) return new HtmlPanelGroupItem(filename, Icons.book)
         );
-
-        main.addItem(item);
-        panels.set(editor, item);
+        item.toggle.rightIcon = 'remove';
+        item.toggle.element.find('.right-icon').click(function(_: jQuery.Event) {
+            closeEditor(editor);
+        });
         item.panel.element.addClass("edit-area");
         item.panel.element.append(editor.element);
+        return item;
+    }
+
+    function addEditor(editor: Editor) {
+        var item = tabButton(editor);
+        main.addItem(item);
+        panels.set(editor, item);
         editors.push(editor);
 
         communicator.trigger(new EditorUpdate(editor, editors));
@@ -204,14 +210,12 @@ class EditorModule extends Module {
         current.show();
     }
 
-    function closeEditor() {
-        if(null == current)
-            return;
-        current.clear();
-        editors.remove(current);
-        var item = panels.get(current);
-        panels.remove(current);
-        current.cata(
+    function closeEditor(editor: Editor) {
+        editor.clear();
+        editors.remove(editor);
+        var item = panels.get(editor);
+        panels.remove(editor);
+        editor.cata(
             function(codeEditor: CodeEditor) { /* TODO: Clear CodeEditor events */ },
             function(notebook: Notebook) { notebook.events.clear(); }
         );
