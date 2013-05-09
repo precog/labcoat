@@ -64,7 +64,7 @@ class EditorModule extends Module {
         communicator.on(function(e : EditorUpdate)
             changeEditor(e.current));
         communicator.on(function(e : ResponseDirectoryDelete)
-            closeDeleted(e.filePath));
+            closeDeleted(e.path));
 
         communicator.queueMany([
             // new MenuItem(MenuEdit(SubgroupEditHistory), "Undo", function(){}, 0),
