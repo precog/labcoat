@@ -15,6 +15,7 @@ import jQuery.JQuery;
 using thx.react.Promise;
 
 using thx.react.IObservable;
+import precog.html.Bootstrap;
 import precog.html.HtmlPanelGroup;
 import precog.html.Icons;
 import precog.geom.Rectangle;
@@ -224,7 +225,9 @@ class EditorModule extends Module {
     }
 
     function saveEditor() {
-        current.save('${accountId}');
+        Dialog.prompt(locale.format("filename:", []), function(filename: String){
+            current.save('${accountId}/${filename}');
+        });
     }
 
     function deleteRegion(region: Region) {
