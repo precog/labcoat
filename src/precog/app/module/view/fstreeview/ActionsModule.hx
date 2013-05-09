@@ -35,11 +35,21 @@ class ActionsModule extends Module
         var open = new HtmlButton("open", Icons.folderOpen, Mini, true);
         open.element.appendTo(item.element);
         open.enabled = false;
-/*
+
         var upload = new HtmlButton("upload", Icons.uploadAlt, Mini, true);
         upload.element.appendTo(item.element);
-        upload.enabled = false;
-
+        upload.enabled = true;
+        upload.element.get(0).onclick = function() {
+            Dialog.prompt("type something",
+                function(value) {
+                    trace("you typed: " + value);
+                },
+                function(value, handler) {
+                    handler(null);
+                }
+            );
+        };
+/*
         var download = new HtmlButton("download", Icons.downloadAlt, Mini, true);
         download.element.appendTo(item.element);
         download.enabled = false;

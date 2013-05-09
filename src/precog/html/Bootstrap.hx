@@ -21,13 +21,63 @@ class Dialog
 		el.on("hidden", function() {
 			el.remove();
 		});
+		ok.element.addClass("ok");
 		ok.element.get(0).onclick = function() {
 			dialog.hide();
 			success();
 		};
+		cancel.element.addClass("cancel");
 		cancel.element.get(0).onclick = function() {
 			dialog.hide();
 		};
+
+		thx.react.promise.Timer.delay(200).then(function() { ok.element.focus(); });
+		el.on("keypress", function(e) {
+			if(e.which == 13)
+				ok.element.click();
+		});
+		return {
+			dialog : dialog,
+			ok : ok,
+			cancel : cancel
+		};
+	}
+
+	static function emptyValidator(v : String, handler : Null<String> -> Void)
+	{
+		handler(null);
+	}
+
+	public static function prompt(message : String, success : String -> Void, ?validator : String -> (Null<String> -> Void) -> Void)
+	{
+		validator = null == validator ? emptyValidator : validator;
+		var item	= confirm(message, null),
+			ok		= item.ok,
+			cancel	= item.cancel,
+			dialog	= item.dialog,
+			el		= dialog.el(),
+			body	= el.find(".modal-body"),
+			input	= new JQuery('<input type="text" class="prompt-value">').appendTo(new JQuery('<div class="prompt-input-container"></div>').appendTo(body)),
+			error	= new JQuery('<div class="prompt-alert alert alert-error" style="display:none"></div>').appendTo(body);
+
+		ok.element.get(0).onclick = function() {
+			cancel.enabled = ok.enabled = false;
+			error.hide();
+			var value = input.val();
+			validator(value, function(msg) {
+				if(null == msg) {
+					dialog.hide();
+					success(value);
+				} else {
+					cancel.enabled = ok.enabled = true;
+					error.html(msg);
+					error.show();
+				}
+			});
+		};
+
+		thx.react.promise.Timer.delay(250).then(function() { input.focus(); });
+		return dialog;
 	}
 
 	static function createEmptyDialog(?options : OptBootstrapModal)
@@ -48,11 +98,25 @@ class Dialog
 	public static inline function modal(el : JQuery, ?options : OptBootstrapModal) : Modal
 		return new Modal(el, options);
 
+	public static inline function alert(el : JQuery) : Alert
+		return new Alert(el);
+
     static function __init__() : Void
     {
         JQuerys;
         haxe.macro.Compiler.includeFile("precog/html/bootstrap.js");
     }
+}
+
+abstract Alert(Dynamic)
+{
+	public function new(el : JQuery) {
+		this = untyped el.alert();
+	}
+
+	public inline function close() : Modal
+		return this.modal('close');
+
 }
 
 abstract Modal(Dynamic)
