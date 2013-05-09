@@ -223,6 +223,28 @@ class PrecogModule extends Module
 		);
 
 		communicator.respond(
+			function(request : RequestFileMove) : Null<Promise<ResponseFileMove -> Void>> {
+				var deferred = new Deferred(),
+					api      = getApi(request.api);
+				communicator.trigger(request);
+				api.moveFile({
+						source : request.src,
+						dest   : request.dst
+					}).then(
+					function() {
+						var response = new ResponseFileMove(request.src, request.dst, request);
+						deferred.resolve(response);
+						communicator.trigger(response);
+					},
+					errorResponse(request, deferred)
+				);
+				return deferred.promise;
+			},
+			RequestFileMove,
+			ResponseFileMove
+		);
+
+		communicator.respond(
 			function(request : RequestFileExecute) : Null<Promise<ResponseFileExecute -> Void>> {
 				var deferred = new Deferred(),
 					api      = getApi(request.api);

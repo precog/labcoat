@@ -89,6 +89,19 @@ class ResponseFileUpload extends ResponseFileBase
 
 }
 
+class ResponseFileMove extends PrecogResponse
+{
+	public var src(default, null) : String;
+	public var dst(default, null) : String;
+	public function new(src : String, dst : String, request : PrecogRequest)
+	{
+		super(request);
+		this.src = src;
+		this.dst = dst;
+		this.description = 'response move file from ${this.src} to ${this.dst}';
+	}
+}
+
 typedef FileExecution = {
     data: Array<Dynamic>
 };

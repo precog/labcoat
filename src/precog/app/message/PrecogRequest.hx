@@ -83,6 +83,19 @@ class RequestFileUpload extends RequestFileBase
 	}
 }
 
+class RequestFileMove extends PrecogRequest
+{
+	public var src(default, null) : String;
+	public var dst(default, null) : String;
+	public function new(src : String, dst : String, ?api : String)
+	{
+		super(api);
+		this.src = src;
+		this.dst = dst;
+		this.description = 'move file from ${this.src} to ${this.dst}';
+	}
+}
+
 class RequestFileDelete extends RequestFileBase
 {
 
