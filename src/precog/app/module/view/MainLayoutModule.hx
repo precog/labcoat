@@ -3,6 +3,7 @@ package precog.app.module.view;
 import precog.app.message.MainHtmlPanel;
 import precog.app.message.MainEditorHtmlPanel;
 import precog.app.message.MainToolbarHtmlPanel;
+import precog.app.message.MainStatusbarHtmlPanel;
 import precog.communicator.Communicator;
 import precog.communicator.Module;
 import precog.html.HtmlPanel;
@@ -51,6 +52,7 @@ class MainLayoutModule extends Module {
 
         communicator.provide(new MainToolbarHtmlPanel(toolbar));
         communicator.provide(new MainEditorHtmlPanel(editor));
+        communicator.provide(new MainStatusbarHtmlPanel(statusbar));
     }
 
     function updateLayout(size : IRectangle) {

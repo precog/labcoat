@@ -53,6 +53,7 @@ class Main
 */
         manager.addModule(new EditorModule());
         manager.addModule(new EditorToolbarModule());
+        manager.addModule(new StatusbarModule());
 
         // Model
         manager.addModule(new PrecogAuthModule());
