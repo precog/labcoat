@@ -39,14 +39,14 @@ class QuirrelEditor implements RegionEditor {
 
     public function evaluate() {
         communicator.request(
-            new RequestFileUpload(region.path, "text/x-quirrel-script", editor.getValue()),
+            new RequestFileUpload(region.path(), "text/x-quirrel-script", editor.getValue()),
             ResponseFileUpload
         ).then(function(response: ResponseFileUpload) {
             return communicator.request(
-                new RequestFileExecute(region.path),
+                new RequestFileExecute(region.path()),
                 ResponseFileExecute
             ).then(function(response: ResponseFileExecute) {
-                outputElement.innerHTML = '${region.filename()}=${haxe.Json.stringify(response.result.data)}';
+                outputElement.innerHTML = '${region.filename}=${haxe.Json.stringify(response.result.data)}';
             });
         });
     }

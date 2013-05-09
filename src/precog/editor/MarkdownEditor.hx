@@ -54,7 +54,7 @@ class MarkdownEditor implements RegionEditor {
         rendered.innerHTML = Markdown.toHTML(getContent());
 
         communicator.request(
-            new RequestFileUpload(region.path, "text/x-markdown", getContent()),
+            new RequestFileUpload(region.path(), "text/x-markdown", getContent()),
             ResponseFileUpload
         );
     }

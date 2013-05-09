@@ -33,7 +33,7 @@ class JSONEditor implements RegionEditor {
 
     public function evaluate() {
         communicator.request(
-            new RequestFileUpload(region.path, "application/json", editor.getValue()),
+            new RequestFileUpload(region.path(), "application/json", editor.getValue()),
             ResponseFileUpload
         );
     }

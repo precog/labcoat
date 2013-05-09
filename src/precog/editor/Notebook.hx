@@ -56,14 +56,14 @@ class Notebook implements Editor {
 
             regionCounter = metadata.regionCounter;
 
-            var metadataRegions: Array<{path: String, mode: Int}> = metadata.regions;
+            var metadataRegions: Array<{filename: String, mode: Int}> = metadata.regions;
             if(metadata.regions.length == 0) return;
 
             // Clear any regions which were added before loading metadata
             clearInitialRegions();
 
             for(metadataRegion in metadataRegions) {
-                appendUnsavedRegion(new Region(communicator, metadataRegion.path, Type.createEnumIndex(RegionMode, metadataRegion.mode), locale));
+                appendUnsavedRegion(new Region(communicator, path, metadataRegion.filename, Type.createEnumIndex(RegionMode, metadataRegion.mode), locale));
             }
         });
     }
@@ -80,7 +80,7 @@ class Notebook implements Editor {
             type: 'notebook',
             regions: regions.map(function(region: Region) {
                 return {
-                    path: region.path,
+                    filename: region.filename,
                     mode: Type.enumIndex(region.mode)
                 };
             }),
@@ -94,6 +94,7 @@ class Notebook implements Editor {
             ResponseDirectoryMove
         ).then(function(response: ResponseDirectoryMove) {
             path = dest;
+            metadataPath = '${path}/metadata.json';
         });
     }
 
@@ -115,7 +116,7 @@ class Notebook implements Editor {
         saveMetadata();
 
         communicator.request(
-            new RequestFileDelete(region.path),
+            new RequestFileDelete(region.path()),
             ResponseFileDelete
         );
     }
@@ -124,7 +125,7 @@ class Notebook implements Editor {
         oldRegion.events.clear();
 
         var content = oldRegion.editor.getContent();
-        var region = new Region(communicator, oldRegion.path, mode, locale);
+        var region = new Region(communicator, oldRegion.directory, oldRegion.filename, mode, locale);
         region.editor.setContent(content);
         appendUnsavedRegion(region, oldRegion.element);
 
@@ -156,7 +157,7 @@ class Notebook implements Editor {
     }
 
     public function createRegion(regionMode: RegionMode, ?target: JQuery) {
-        appendRegion(new Region(communicator, '${path}/out${incrementRegionCounter()}', regionMode, locale), target);
+        appendRegion(new Region(communicator, path, 'out${incrementRegionCounter()}', regionMode, locale), target);
     }
 
     public function appendRegion(region: Region, ?target: JQuery) {

@@ -14,7 +14,12 @@ class CodeEditor implements Editor {
 
     public function new(communicator: Communicator, path: String, locale: precog.util.Locale) {
         element = new JQuery('<div class="code-editor"></div>');
-        region = new Region(communicator, path, MarkdownRegionMode, locale);
+
+        var segments = path.split('/');
+        var filename = segments.pop();
+        var directory = segments.join('/');
+
+        region = new Region(communicator, directory, filename, MarkdownRegionMode, locale);
         element.append(region.element);
         this.communicator = communicator;
         this.path = path;

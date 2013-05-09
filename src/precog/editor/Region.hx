@@ -12,7 +12,8 @@ import precog.util.Locale;
 
 class Region {
     public var index: Int;
-    public var path: String;
+    public var directory: String;
+    public var filename: String;
 
     public var mode: RegionMode;
     public var element: JQuery;
@@ -35,11 +36,11 @@ class Region {
         }
     }
 
-    public function filename() {
-        return path.split('/').pop();
+    public function path() {
+        return '${directory}/${filename}';
     }
 
-    public function new(communicator: Communicator, path: String, mode: RegionMode, locale : Locale) {
+    public function new(communicator: Communicator, directory: String, filename: String, mode: RegionMode, locale : Locale) {
         this.events = {
             changeMode : new Signal2(),
             remove : new Signal1(),
@@ -55,7 +56,8 @@ class Region {
 
         this.mode = mode;
         this.communicator = communicator;
-        this.path = path;
+        this.directory = directory;
+        this.filename = filename;
 
         element = new JQuery('<div class="region"></div>');
         buttons = new RegionButtons(this, locale);
@@ -67,7 +69,7 @@ class Region {
         element.append(content);
 
         communicator.request(
-            new RequestFileGet(path),
+            new RequestFileGet(path()),
             ResponseFileGet
         ).then(function(response: ResponseFileGet) {
             // HACK: Precog API loves to send us back [] instead of 404
