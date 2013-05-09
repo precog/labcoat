@@ -18,7 +18,7 @@ class PrecogRequest
 
 class Helper
 {
-	public static function normalizeFilePath(p : String)
+	public static function normalizepath(p : String)
 	{
 		return "/" + p.trim("/");
 	}
@@ -45,12 +45,12 @@ class RequestMetadataChildren extends PrecogRequest
 
 class RequestFileBase extends PrecogRequest
 {
-	public var filePath(default, null) : String;
-	public function new(filePath : String, ?api : String)
+	public var path(default, null) : String;
+	public function new(path : String, ?api : String)
 	{
 		super(api);
-		this.filePath = Helper.normalizeFilePath(filePath);
-		this.description = 'request ' + Type.getClassName(Type.getClass(this)).split(".").pop().substr(7).humanize() + ' for $filePath';
+		this.path = Helper.normalizepath(path);
+		this.description = 'request ' + Type.getClassName(Type.getClass(this)).split(".").pop().substr(7).humanize() + ' for $path';
 	}
 }
 
@@ -59,13 +59,23 @@ class RequestFileGet extends RequestFileBase
 	
 }
 
+class RequestFileExist extends RequestFileBase
+{
+	
+}
+
+class RequestDirectoryExist extends RequestFileBase
+{
+	
+}
+
 class RequestFileCreate extends RequestFileBase 
 {
 	public var type(default, null) : String;
 	public var contents(default, null) : String;
-	public function new(filePath : String, type : String, contents : String, ?api : String)
+	public function new(path : String, type : String, contents : String, ?api : String)
 	{
-		super(filePath, api);
+		super(path, api);
 		this.type = type;
 		this.contents = contents;
 	}
@@ -75,9 +85,9 @@ class RequestFileUpload extends RequestFileBase
 {
 	public var type(default, null) : String;
 	public var contents(default, null) : String;
-	public function new(filePath : String, type : String, contents : String, ?api : String)
+	public function new(path : String, type : String, contents : String, ?api : String)
 	{
-		super(filePath, api);
+		super(path, api);
 		this.type = type;
 		this.contents = contents;
 	}
@@ -105,9 +115,9 @@ class RequestFileExecute extends RequestFileBase
 {
 	public var maxAge(default, null) : Null<Float>;
 	public var maxStale(default, null) : Null<Float>;
-	public function new(filePath : String, ?maxage : Float, ?maxstale : Float, ?api : String)
+	public function new(path : String, ?maxage : Float, ?maxstale : Float, ?api : String)
 	{
-		super(filePath, api);
+		super(path, api);
 		this.maxAge = maxage;
 		this.maxStale = maxstale;
 	}
@@ -129,5 +139,18 @@ class RequestDirectoryMove extends PrecogRequest
 		this.src = Helper.normalizeDirectoryPath(src);
 		this.dst = Helper.normalizeDirectoryPath(dst);
 		this.description = 'move directory from ${this.src} to ${this.dst}';
+	}
+}
+
+class RequestFileMove extends PrecogRequest 
+{
+	public var src(default, null) : String;
+	public var dst(default, null) : String;
+	public function new(src : String, dst : String, ?api : String)
+	{
+		super(api);
+		this.src = Helper.normalizepath(src);
+		this.dst = Helper.normalizepath(dst);
+		this.description = 'move file from ${this.src} to ${this.dst}';
 	}
 }

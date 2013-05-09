@@ -139,10 +139,10 @@ class PrecogModule extends Module
 				var deferred = new Deferred(),
 					api      = getApi(request.api);
 				communicator.trigger(request);
-				var path = normalizeFilePath(request.filePath);
+				var path = normalizeFilePath(request.path);
 				api.getFile(path).then(
 					function(result) {
-						var response = new ResponseFileGet(request.filePath, result, request);
+						var response = new ResponseFileGet(request.path, result, request);
 						deferred.resolve(response);
 						communicator.trigger(response);
 					},
@@ -159,10 +159,10 @@ class PrecogModule extends Module
 				var deferred = new Deferred(),
 					api      = getApi(request.api);
 				communicator.trigger(request);
-				var path = normalizeFilePath(request.filePath);
+				var path = normalizeFilePath(request.path);
 				api.delete0(path).then(
 					function(result) {
-						var response = new ResponseFileDelete(request.filePath, request);
+						var response = new ResponseFileDelete(request.path, request);
 						deferred.resolve(response);
 						communicator.trigger(response);
 					},
@@ -179,14 +179,14 @@ class PrecogModule extends Module
 				var deferred = new Deferred(),
 					api      = getApi(request.api);
 				communicator.trigger(request);
-				var path = normalizeFilePath(request.filePath);
+				var path = normalizeFilePath(request.path);
 				api.createFile({
 						type : request.type,
 						path : path,
 						contents : request.contents
 					}).then(
 					function(result) {
-						var response = new ResponseFileCreate(request.filePath, request);
+						var response = new ResponseFileCreate(request.path, request);
 						deferred.resolve(response);
 						communicator.trigger(response);
 					},
@@ -203,14 +203,14 @@ class PrecogModule extends Module
 				var deferred = new Deferred(),
 					api      = getApi(request.api);
 				communicator.trigger(request);
-				var path = normalizeFilePath(request.filePath);
+				var path = normalizeFilePath(request.path);
 				api.uploadFile({
 						type : request.type,
 						path : path,
 						contents : request.contents
 					}).then(
 					function(result) {
-						var response = new ResponseFileUpload(request.filePath, request);
+						var response = new ResponseFileUpload(request.path, request);
 						deferred.resolve(response);
 						communicator.trigger(response);
 					},
@@ -249,14 +249,14 @@ class PrecogModule extends Module
 				var deferred = new Deferred(),
 					api      = getApi(request.api);
 				communicator.trigger(request);
-				var info : OptExecuteFile = { path : normalizeFilePath(request.filePath) };
+				var info : OptExecuteFile = { path : normalizeFilePath(request.path) };
 				if(null != request.maxAge)
 					info.maxAge = request.maxAge;
 				if(null != request.maxStale)
 					info.maxStale = request.maxStale;
 				api.executeFile(info).then(
 					function(result) {
-						var response = new ResponseFileExecute(request.filePath, result, request);
+						var response = new ResponseFileExecute(request.path, result, request);
 						deferred.resolve(response);
 						communicator.trigger(response);
 					},
@@ -273,10 +273,10 @@ class PrecogModule extends Module
 				var deferred = new Deferred(),
 					api      = getApi(request.api);
 				communicator.trigger(request);
-				var path = normalizeFilePath(request.filePath);
+				var path = normalizeFilePath(request.path);
 				api.deleteAll(path).then(
 					function(result) {
-						var response = new ResponseDirectoryDelete(request.filePath, request);
+						var response = new ResponseDirectoryDelete(request.path, request);
 						deferred.resolve(response);
 						communicator.trigger(response);
 					},
@@ -308,6 +308,71 @@ class PrecogModule extends Module
 			},
 			RequestDirectoryMove,
 			ResponseDirectoryMove
+		);
+
+		communicator.respond(
+			function(request : RequestFileMove) : Null<Promise<ResponseFileMove -> Void>> {
+				var deferred = new Deferred(),
+					api      = getApi(request.api);
+				communicator.trigger(request);
+				api.moveFile({
+						source : normalizeFilePath(request.src),
+						dest   : normalizeFilePath(request.dst)
+					}).then(
+					function() {
+						var response = new ResponseFileMove(request.src, request.dst, request);
+						deferred.resolve(response);
+						communicator.trigger(response);
+					},
+					errorResponse(request, deferred)
+				);
+				return deferred.promise;
+			},
+			RequestFileMove,
+			ResponseFileMove
+		);
+
+		communicator.respond(
+			function(request : RequestFileExist) : Null<Promise<ResponseFileExist -> Void>> {
+				var deferred = new Deferred(),
+					api      = getApi(request.api);
+				communicator.trigger(request);
+				api.existsFile(request.path).then(
+					function(exist : Bool) {
+trace(exist);
+						var response = new ResponseFileExist(request.path, exist, request);
+						deferred.resolve(response);
+						communicator.trigger(response);
+					},
+					errorResponse(request, deferred)
+				);
+				return deferred.promise;
+			},
+			RequestFileExist,
+			ResponseFileExist
+		);
+
+		communicator.respond(
+			function(request : RequestDirectoryExist) : Null<Promise<ResponseDirectoryExist -> Void>> {
+				var deferred = new Deferred(),
+					api      = getApi(request.api);
+				communicator.trigger(request);
+				var parent = request.path.split("/").slice(0, -1).join("/"),
+					name   = request.path.split("/").pop();
+trace(parent);
+				api.listChildren(parent).then(
+					function(result : Array<FileDescription>) {
+						trace(request.path);
+						result.map(function(des) trace(des));
+						var exist = result.filter(function(des : FileDescription) return des.type == "directory" && des.name == name).length > 0;
+						var response = new ResponseDirectoryExist(request.path, exist, request);
+						deferred.resolve(response);
+					}
+				);
+				return deferred.promise;
+			},
+			RequestDirectoryExist,
+			ResponseDirectoryExist
 		);
 	}
 

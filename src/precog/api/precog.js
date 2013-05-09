@@ -2545,12 +2545,12 @@
   
       var targetDir  = Util.parentPath(path);
       var targetName = Util.lastPathElement(path);
-  
+  console.log(targetDir, targetName);
       if (targetName === '') Util.error('To determine if a file exists, the file name must be specified');
   
       return self.listChildren(targetDir).then(function(children0) {
         var names = Util.amap(children0, function(child) { return child.name; });
-  
+  console.log(names, " VS ", targetName, " = ", Util.acontains(names, targetName));
         return Util.acontains(names, targetName);
       });
     });

@@ -152,38 +152,53 @@ class TreeViewModule extends Module
         }
 
         communicator.on(function(res : ResponseFileDelete) {
-            removeNodeAt(res.filePath, res.api);
+            removeNodeAt(res.path, res.api);
         });
 
         communicator.on(function(res : ResponseDirectoryDelete) {
-            removeNodeAt(res.filePath, res.api);
+            removeNodeAt(res.path, res.api);
         });
 
         communicator.on(function(res : ResponseFileCreate) {
 /*
             thx.react.promise.Timer.delay(0).then(function()
-                loadDir(parentPath(res.filePath), res.api, 1)
+                loadDir(parentPath(res.path), res.api, 1)
             );
 */
-            ensureFileAt(res.filePath, res.api);
+            ensureFileAt(res.path, res.api);
         });
 
         communicator.on(function(res : ResponseFileUpload) {
 /*
             thx.react.promise.Timer.delay(0).then(function()
-                loadDir(parentPath(res.filePath), res.api, 1)
+                loadDir(parentPath(res.path), res.api, 1)
             );
 */
-            ensureFileAt(res.filePath, res.api);
+            ensureFileAt(res.path, res.api);
         });
-        communicator.on(function(res : ResponseDirectoryMove) {
+
+        communicator.on(function(res : ResponseFileMove) {
             var fs = fss.get(res.api);
-            cast(fs.root.pick(res.src), Directory).removeRecursive();
-            fs.root.ensureDirectory(res.dst);
+            fs.root.pick(res.src).remove();
+            fs.root.createFileAt(res.dst, true);
+            /*
             fs.root.walk(res.dst, function(node : Node) {
                 if(node.isFile) return;
                 loadDir(node.toString(), res.api, 2);
             });
+        */
+        });
+
+        communicator.on(function(res : ResponseDirectoryMove) {
+            var fs = fss.get(res.api);
+            cast(fs.root.pick(res.src), Directory).removeRecursive();
+            fs.root.ensureDirectory(res.dst);
+            /*
+            fs.root.walk(res.dst, function(node : Node) {
+                if(node.isFile) return;
+                loadDir(node.toString(), res.api, 2);
+            });
+*/
         });
 
         communicator.queueMany([
@@ -266,6 +281,7 @@ class TreeViewModule extends Module
             var node = e.node.meta.get(UI_TREE_NODE);
             e.node.meta.remove(UI_TREE_NODE);
             node.remove();
+            tree.select(null);
             tree.update();
         });
     }

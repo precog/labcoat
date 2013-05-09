@@ -55,21 +55,21 @@ typedef FileDescriptionMeta = {
 
 class ResponseFileBase extends PrecogResponse
 {
-	public var filePath(default, null) : String;
-	public function new(filePath : String, request : PrecogRequest)
+	public var path(default, null) : String;
+	public function new(path : String, request : PrecogRequest)
 	{
 		super(request);
-		this.filePath = filePath;
-		this.description = 'response ' + Type.getClassName(Type.getClass(this)).split(".").pop().substr(8).humanize() + ' for $filePath';
+		this.path = path;
+		this.description = 'response ' + Type.getClassName(Type.getClass(this)).split(".").pop().substr(8).humanize() + ' for $path';
 	}
 }
 
 class ResponseFileGet extends ResponseFileBase
 {
 	public var content(default, null) : FileData;
-	public function new(filePath : String, content : FileData, request : PrecogRequest)
+	public function new(path : String, content : FileData, request : PrecogRequest)
 	{
-		super(filePath, request);
+		super(path, request);
 		this.content = content;
 	}
 }
@@ -82,6 +82,30 @@ class ResponseFileDelete extends ResponseFileBase
 class ResponseFileCreate extends ResponseFileBase 
 {
 
+}
+
+class ResponseFileExist extends ResponseFileBase 
+{
+	public var exist(default, null) : Bool;
+	public function new(path : String, exist : Bool, request : PrecogRequest)
+	{
+		super(path, request);
+		this.path = path;
+		this.exist = exist;
+		this.description = 'response ' + Type.getClassName(Type.getClass(this)).split(".").pop().substr(8).humanize() + ' for $path, exists: $exist';
+	}
+}
+
+class ResponseDirectoryExist extends ResponseFileBase 
+{
+	public var exist(default, null) : Bool;
+	public function new(path : String, exist : Bool, request : PrecogRequest)
+	{
+		super(path, request);
+		this.path = path;
+		this.exist = exist;
+		this.description = 'response ' + Type.getClassName(Type.getClass(this)).split(".").pop().substr(8).humanize() + ' for $path, exists: $exist';
+	}
 }
 
 class ResponseFileUpload extends ResponseFileBase 
@@ -109,9 +133,9 @@ typedef FileExecution = {
 class ResponseFileExecute extends ResponseFileBase 
 {
 	public var result(default, null) : FileExecution;
-	public function new(filePath : String, result : FileExecution, request : PrecogRequest)
+	public function new(path : String, result : FileExecution, request : PrecogRequest)
 	{
-		super(filePath, request);
+		super(path, request);
 		this.result = result;
 	}
 }
@@ -131,6 +155,19 @@ class ResponseDirectoryMove extends PrecogResponse
 		this.src = src;
 		this.dst = dst;
 		this.description = 'response move directory from ${this.src} to ${this.dst}';
+	}
+}
+
+class ResponseFileMove extends PrecogResponse 
+{
+	public var src(default, null) : String;
+	public var dst(default, null) : String;
+	public function new(src : String, dst : String, request : PrecogRequest)
+	{
+		super(request);
+		this.src = src;
+		this.dst = dst;
+		this.description = 'response move file from ${this.src} to ${this.dst}';
 	}
 }
 

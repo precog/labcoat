@@ -48,7 +48,7 @@ class Dialog
 		handler(null);
 	}
 
-	public static function prompt(message : String, success : String -> Void, ?validator : String -> (Null<String> -> Void) -> Void)
+	public static function prompt(message : String, ?defaultValue : String, success : String -> Void, ?validator : String -> (Null<String> -> Void) -> Void)
 	{
 		validator = null == validator ? emptyValidator : validator;
 		var item	= confirm(message, null),
@@ -60,10 +60,13 @@ class Dialog
 			input	= new JQuery('<input type="text" class="prompt-value">').appendTo(new JQuery('<div class="prompt-input-container"></div>').appendTo(body)),
 			error	= new JQuery('<div class="prompt-alert alert alert-error" style="display:none"></div>').appendTo(body);
 
+		if(null != defaultValue)
+			input.val(defaultValue);
 		ok.element.get(0).onclick = function() {
 			cancel.enabled = ok.enabled = false;
 			error.hide();
 			var value = input.val();
+trace(value);
 			validator(value, function(msg) {
 				if(null == msg) {
 					dialog.hide();
