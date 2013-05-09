@@ -1,24 +1,25 @@
 package precog.app.module.view;
 
+import jQuery.JQuery;
 import precog.app.message.*;
+import precog.app.message.MenuItem;
 import precog.app.message.PrecogRequest;
 import precog.app.message.PrecogResponse;
-import precog.app.message.MenuItem;
-import precog.util.Locale;
 import precog.communicator.Communicator;
 import precog.communicator.Module;
 import precog.editor.*;
 import precog.editor.Editor;
 import precog.editor.codemirror.Externs;
 import precog.editor.codemirror.QuirrelMode;
-import jQuery.JQuery;
-using thx.react.Promise;
-
-using thx.react.IObservable;
+import precog.geom.Rectangle;
 import precog.html.Bootstrap;
 import precog.html.HtmlPanelGroup;
 import precog.html.Icons;
-import precog.geom.Rectangle;
+import precog.util.Locale;
+
+using StringTools;
+using thx.react.IObservable;
+using thx.react.Promise;
 
 class EditorModule extends Module {
     var current : Editor;
@@ -62,6 +63,8 @@ class EditorModule extends Module {
             saveEditor());
         communicator.on(function(e : EditorUpdate)
             changeEditor(e.current));
+        communicator.on(function(e : ResponseDirectoryDelete)
+            closeDeleted(e.filePath));
 
         communicator.queueMany([
             // new MenuItem(MenuEdit(SubgroupEditHistory), "Undo", function(){}, 0),
@@ -209,6 +212,14 @@ class EditorModule extends Module {
             return;
         panels.get(editor).activate();
         current.show();
+    }
+
+    function closeDeleted(path: String) {
+        for(editor in editors) {
+            if(!'/${editor.path}'.startsWith(path + '/') && editor.path != path)
+                continue;
+            closeEditor(editor);
+        }
     }
 
     function closeEditor(editor: Editor) {
