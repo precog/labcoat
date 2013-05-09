@@ -1,8 +1,10 @@
 package precog.html;
 
+import haxe.ds.Option;
 import jQuery.JQuery;
 import precog.geom.IRectangle;
 import precog.geom.IRectangleObservable;
+import precog.html.HtmlDropdown;
 import precog.layout.DockLayout;
 import precog.layout.Panel;
 import thx.react.IObserver;
@@ -33,12 +35,12 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 
 	@:isVar public var gutterPosition(get_gutterPosition, set_gutterPosition) : GutterPosition;
 
-	public function new(parent : JQuery, rectangle : IRectangleObservable, ?gutterPosition : GutterPosition, ?tabMode : Bool = false)
+	public function new(parent : JQuery, rectangle : IRectangleObservable, ?gutterPosition : GutterPosition, ?plusItems : Array<DropdownItem>)
 	{
 		events = {
 			activate : new Signal1()
 		};
-		this.tabMode = tabMode;
+		tabMode = plusItems != null;
 		length = 0;
 		items = [];
 		current = null;
@@ -48,10 +50,12 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 		layout = new DockLayout(0, 0);
 		pane   = new Panel();
 		gutter = new HtmlPanel();
-		gutter.element.addClass("gutter");
-		if(tabMode)
-			gutter.element.addClass("tabs");
 		togglesContainer = new JQuery('<div class="btn-group"></div>').appendTo(gutter.element);
+		gutter.element.addClass("gutter");
+		if(tabMode) {
+			gutter.element.addClass("tabs");
+			addPlusButton(plusItems);
+		}
 
 		container.append(gutter.element);
 
@@ -82,6 +86,13 @@ class HtmlPanelGroup implements IObserver<IRectangle>
 	public function update(rect : IRectangle) {
 		layout.rectangle.set(rect.x, rect.y, rect.width, rect.height);
 		layout.update();
+	}
+
+	function addPlusButton(plusItems: Array<DropdownItem>)
+	{
+		var button = new JQuery('<button type="button" class="btn dropdown-toggle icon-plus" data-toggle="dropdown"></button>');
+		var menu = DropdownItems.groupToHtml(plusItems);
+		new JQuery('<div class="btn-group"></div>').append(button).append(menu).appendTo(gutter.element);
 	}
 
 	public function addItem(item : HtmlPanelGroupItem) 

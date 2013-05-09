@@ -1,5 +1,6 @@
 package precog.app.module.view;
 
+import jQuery.Event;
 import jQuery.JQuery;
 import precog.app.message.*;
 import precog.app.message.MenuItem;
@@ -13,6 +14,7 @@ import precog.editor.codemirror.Externs;
 import precog.editor.codemirror.QuirrelMode;
 import precog.geom.Rectangle;
 import precog.html.Bootstrap;
+import precog.html.HtmlDropdown;
 import precog.html.HtmlPanelGroup;
 import precog.html.Icons;
 import precog.util.Locale;
@@ -53,10 +55,6 @@ class EditorModule extends Module {
             openNotebook(e.path));
         communicator.on(function(e : EditorOpenFile)
             openCodeEditor(e.path));
-        communicator.on(function(_ : EditorNotebookRequestCreate)
-            createNotebook());
-        communicator.on(function(_ : EditorCodeRequestCreate)
-            createCodeEditor());
         communicator.on(function(e : EditorRegionRequestCreate)
             createRegion(e.regionMode));
         communicator.on(function(e : EditorSave)
@@ -88,7 +86,20 @@ class EditorModule extends Module {
         var rect = new Rectangle();
         editorPanel.panel.rectangle.addListener(rect.updateSize);
         rect.updateSize(editorPanel.panel.rectangle);
-        main = new HtmlPanelGroup(editorPanel.panel.element, rect, true);
+        main = new HtmlPanelGroup(editorPanel.panel.element, rect, [
+            DropdownButton('new notebook', '', function(e: Event) {
+                createNotebook();
+            }),
+            DropdownButton('new quirrel file', '', function(e: Event) {
+                createCodeEditor(/*QuirrelRegionMode*/);
+            }),
+            DropdownButton('new markdown file', '', function(e: Event) {
+                createCodeEditor(/*MarkdownRegionMode*/);
+            }),
+            DropdownButton('new json file', '', function(e: Event) {
+                createCodeEditor(/*JSONRegionMode*/);
+            })
+        ]);
         main.gutterMargin = 0;
         main.toggleSize = Default;
 //        main.toggleType = Primary;

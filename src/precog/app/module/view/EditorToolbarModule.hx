@@ -29,23 +29,10 @@ class EditorToolbarModule extends Module {
         toolbarPanel.panel.element.append(element);
 
         var items = [
-            DropdownButton(locale.singular('new notebook'), '', createNotebook),
-            DropdownButton(locale.singular('new file'), '', createCodeEditor),
-            DropdownDivider,
             DropdownButton(locale.singular('insert region'), '', createRegion),
             DropdownButton(locale.singular('save'), '', saveEditor),
         ];
         new HtmlDropdown('', 'cog', '', Mini, items, DropdownAlignRight).element.appendTo(element);
-    }
-
-    function createCodeEditor(event: Event) {
-        event.preventDefault();
-        communicator.trigger(new EditorCodeRequestCreate());
-    }
-
-    function createNotebook(event: Event) {
-        event.preventDefault();
-        communicator.trigger(new EditorNotebookRequestCreate());
     }
 
     function createRegion(event: Event) {
