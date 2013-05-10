@@ -28,6 +28,7 @@ class Region {
     };
 
     var communicator: Communicator;
+    var editorToolbar: JQuery;
 
     // TOOD: Triggering ourselves
     function changeTo(mode: RegionMode) {
@@ -58,7 +59,7 @@ class Region {
 
     function createEditor() {
         return switch(mode) {
-            case QuirrelRegionMode: new QuirrelEditor(communicator, this);
+            case QuirrelRegionMode: new QuirrelEditor(communicator, this, editorToolbar);
             case MarkdownRegionMode: new MarkdownEditor(communicator, this);
             case JSONRegionMode: new JSONEditor(communicator, this);
             case VegaRegionMode: new VegaEditor(this);
@@ -93,7 +94,8 @@ class Region {
 
         var titlebar = new JQuery('<div class="titlebar"></div>');
         titlebar.append(changeEditorModeButton().element);
-        titlebar.append('<div class="editor toolbar"></div><div class="context toolbar"></div>');
+        editorToolbar = new JQuery('<div class="editor toolbar"></div>').appendTo(titlebar);
+        titlebar.append('<div class="context toolbar"></div>');
         element.append(titlebar);
 
         editor = createEditor();

@@ -4,8 +4,10 @@ import precog.app.message.PrecogRequest;
 import precog.app.message.PrecogResponse;
 import precog.communicator.Communicator;
 import precog.editor.codemirror.Externs;
+import precog.html.HtmlButton;
 import js.Browser.document;
 import js.html.Element;
+import jQuery.JQuery;
 
 class QuirrelEditor implements RegionEditor {
     public var element: Element;
@@ -14,7 +16,7 @@ class QuirrelEditor implements RegionEditor {
     var communicator: Communicator;
     var editor: CodeMirror;
 
-    public function new(communicator: Communicator, region: Region) {
+    public function new(communicator: Communicator, region: Region, editorToolbar: JQuery) {
         this.region = region;
         this.communicator = communicator;
 
@@ -23,6 +25,10 @@ class QuirrelEditor implements RegionEditor {
         element = document.createElement('div');
 
         editor = CodeMirrorFactory.addTo(element, options);
+
+        var runButton = new HtmlButton('Run', Mini);
+        runButton.element.click(evaluate);
+        editorToolbar.append(runButton.element);
 
         outputElement = document.createElement('div');
         outputElement.className = 'output';
