@@ -14,6 +14,7 @@ class QuirrelEditor implements RegionEditor {
     var region: Region;
     var communicator: Communicator;
     var editor: CodeMirror;
+    var showHideButton: HtmlButton;
 
     public function new(communicator: Communicator, region: Region, editorToolbar: JQuery) {
         this.region = region;
@@ -30,7 +31,16 @@ class QuirrelEditor implements RegionEditor {
         runButton.element.click(evaluate);
         editorToolbar.append(runButton.element);
 
+        var outputToolbar = new JQuery('<div class="output-toolbar toolbar"></div>').appendTo(element);
+        showHideButton = new HtmlButton('', Icons.eyeOpen, Mini, true);
+        showHideButton.element.click(showHideOutput);
+        outputToolbar.append(showHideButton.element);
+
         outputElement = new JQuery('<div class="output"></div>').appendTo(element);
+    }
+
+    function showHideOutput() {
+        showHideButton.leftIcon = element.find('.output').toggle().is(':visible') ? Icons.eyeClose : Icons.eyeOpen;
     }
 
     public function getContent() {
