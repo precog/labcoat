@@ -6,6 +6,7 @@ import precog.communicator.Module;
 import precog.editor.*;
 import precog.html.HtmlButton;
 import precog.html.HtmlDropdown;
+import precog.html.Icons;
 import precog.util.Locale;
 using thx.react.Promise;
 import jQuery.JQuery;
@@ -28,11 +29,8 @@ class EditorToolbarModule extends Module {
         this.locale = locale;
         toolbarPanel.panel.element.append(element);
 
-        var items = [
-            DropdownButton(locale.singular('insert region'), '', createRegion),
-            DropdownButton(locale.singular('save'), '', saveEditor),
-        ];
-        new HtmlDropdown('', 'cog', '', Mini, items, DropdownAlignRight).element.appendTo(element);
+        new HtmlButton(locale.singular('insert region'), Icons.chevronDown, Mini, true).element.appendTo(toolbarPanel.panel.element).click(createRegion);
+        new HtmlButton(locale.singular('save'), Icons.save, Mini, true).element.appendTo(toolbarPanel.panel.element).click(saveEditor);
     }
 
     function createRegion(event: Event) {
