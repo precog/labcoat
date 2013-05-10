@@ -37,7 +37,7 @@ class QuirrelEditor implements RegionEditor {
         outputbar.append('<div class="buttons dropdown region-type"><button class="btn btn-mini btn-link">JSON</div></div>');
 
         var contextToolbar = new JQuery('<div class="context toolbar"></div>').appendTo(outputbar);
-        showHideButton = new HtmlButton('', Icons.eyeOpen, Mini, true);
+        showHideButton = new HtmlButton('', Icons.eyeClose, Mini, true);
         showHideButton.type = Flat;
         showHideButton.element.click(showHideOutput);
         contextToolbar.append(showHideButton.element);
