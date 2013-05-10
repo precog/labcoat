@@ -12,7 +12,7 @@ class CodeEditor implements Editor {
     var communicator: Communicator;
     public var path(default, null): String;
 
-    public function new(communicator: Communicator, path: String, locale: precog.util.Locale) {
+    public function new(communicator: Communicator, path: String, mode: RegionMode, locale: precog.util.Locale) {
         element = new JQuery('<div class="code-editor"></div>');
 
         var segments = path.split('/');
@@ -20,7 +20,7 @@ class CodeEditor implements Editor {
         var directory = segments.join('/');
 
         // TODO: Allow files which are not Markdown
-        region = new Region(communicator, directory, filename, MarkdownRegionMode, locale);
+        region = new Region(communicator, directory, filename, mode, locale);
         element.append(region.element);
         this.communicator = communicator;
         this.path = path;

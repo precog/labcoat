@@ -10,6 +10,7 @@ import precog.communicator.Communicator;
 import precog.communicator.Module;
 import precog.editor.*;
 import precog.editor.Editor;
+import precog.editor.RegionMode;
 import precog.editor.codemirror.Externs;
 import precog.editor.codemirror.QuirrelMode;
 import precog.geom.Rectangle;
@@ -54,7 +55,7 @@ class EditorModule extends Module {
         communicator.on(function(e : EditorOpenNotebook)
             openNotebook(e.path));
         communicator.on(function(e : EditorOpenFile)
-            openCodeEditor(e.path));
+            getContentTypeOpenCodeEditor(e.path));
         communicator.on(function(e : EditorRegionRequestCreate)
             createRegion(e.regionMode));
         communicator.on(function(e : EditorSave)
@@ -91,13 +92,13 @@ class EditorModule extends Module {
                 createNotebook();
             }),
             DropdownButton('new quirrel file', '', function(e: Event) {
-                createCodeEditor(/*QuirrelRegionMode*/);
+                createCodeEditor(QuirrelRegionMode);
             }),
             DropdownButton('new markdown file', '', function(e: Event) {
-                createCodeEditor(/*MarkdownRegionMode*/);
+                createCodeEditor(MarkdownRegionMode);
             }),
             DropdownButton('new json file', '', function(e: Event) {
-                createCodeEditor(/*JSONRegionMode*/);
+                createCodeEditor(JSONRegionMode);
             })
         ]);
         main.gutterMargin = 0;
@@ -143,11 +144,18 @@ class EditorModule extends Module {
             var editors: Array<{type: String, path: String}> = metadata.editors;
             for(editor in editors) {
                 switch(editor.type) {
-                case 'CodeEditor': openCodeEditor(editor.path);
+                case 'CodeEditor': getContentTypeOpenCodeEditor(editor.path);
                 case 'Notebook': openNotebook(editor.path);
                 }
             }
         });
+    }
+
+    function contentTypeToRegionMode(contentType: String) {
+        return switch(contentType) {
+        case 'application/json': JSONRegionMode;
+        case _: throw "Bad content type ${contentType}: no editor mode available";
+        }
     }
 
     function saveMetadata() {
@@ -171,14 +179,23 @@ class EditorModule extends Module {
         });
     }
 
-    function openCodeEditor(path: String) {
-        var codeEditor = new CodeEditor(communicator, path, locale);
+    function getContentTypeOpenCodeEditor(path: String) {
+        communicator.request(
+            new RequestFileGet(path),
+            ResponseFileGet
+        ).then(function(response: ResponseFileGet) {
+            openCodeEditor(path, contentTypeToRegionMode(response.content.type));
+        });
+    }
+
+    function openCodeEditor(path: String, mode: RegionMode) {
+        var codeEditor = new CodeEditor(communicator, path, mode, locale);
         addEditor(codeEditor);
     }
 
-    function createCodeEditor() {
+    function createCodeEditor(mode: RegionMode) {
         ++fileCounter;
-        openCodeEditor('${tmpPath}/code/file${fileCounter}');
+        openCodeEditor('${tmpPath}/code/file${fileCounter}', mode);
         saveMetadata();
     }
 
