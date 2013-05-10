@@ -226,9 +226,16 @@ body {
     .titlebar, .outputbar {
         position: relative;
         height: 24px;
-        border-bottom: @gutterBorder;
         line-height: 22px;
+    }
+    .titlebar {
+        border-bottom: @gutterBorder;
+    }
+    .outputbar {
+        border-top: @gutterBorder;
+    }
 
+    .titlebar, .outputbar {
         .btn-mini {
             line-height: 16px;
         }
