@@ -32,10 +32,12 @@ class QuirrelEditor implements RegionEditor {
         runButton.element.click(evaluate);
         editorToolbar.append(runButton.element);
 
-        var outputToolbar = new JQuery('<div class="output-toolbar toolbar"></div>').appendTo(element);
+        var outputbar = new JQuery('<div class="outputbar"></div>').appendTo(element);
+
+        var contextToolbar = new JQuery('<div class="context toolbar"></div>').appendTo(outputbar);
         showHideButton = new HtmlButton('', Icons.eyeOpen, Mini, true);
         showHideButton.element.click(showHideOutput);
-        outputToolbar.append(showHideButton.element);
+        contextToolbar.append(showHideButton.element);
 
         outputElement = new JQuery('<div class="output"></div>').appendTo(element);
     }
