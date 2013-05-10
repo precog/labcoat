@@ -1,13 +1,12 @@
 package precog.editor;
 
 import precog.editor.codemirror.Externs;
-import js.Browser.document;
-import js.html.Element;
 import precog.editor.vega.Vega;
+import jQuery.JQuery;
 
 class VegaEditor implements RegionEditor {
-    public var element: Element;
-    var outputElement: Element;
+    public var element: JQuery;
+    var outputElement: JQuery;
     var region: Region;
     var editor: CodeMirror;
 
@@ -16,13 +15,11 @@ class VegaEditor implements RegionEditor {
 
         var options: Dynamic = { lineNumber: true, mode: {name: 'javascript', json: true}, region: region};
 
-        element = document.createElement('div');
+        element = new JQuery('<div></div>');
 
-        editor = CodeMirrorFactory.addTo(element, options);
+        editor = CodeMirrorFactory.addTo(element.get(0), options);
 
-        outputElement = document.createElement('div');
-        outputElement.className = 'output';
-        element.appendChild(outputElement);
+        outputElement = new JQuery('<div class="output"></div>').appendTo(element);
     }
 
     public function getContent() {

@@ -1,9 +1,9 @@
 package precog.editor;
 
-import js.html.Element;
+import jQuery.JQuery;
 
 interface RegionEditor {
-    var element: Element;
+    var element: JQuery;
     function getContent(): String;
     function setContent(content: String): Void;
     function evaluate(): Void;

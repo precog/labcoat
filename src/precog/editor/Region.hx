@@ -4,6 +4,7 @@ import precog.app.message.PrecogRequest;
 import precog.app.message.PrecogResponse;
 import precog.communicator.Communicator;
 import precog.editor.codemirror.Externs;
+import precog.html.Icons;
 import precog.html.HtmlButton;
 import precog.html.HtmlDropdown;
 import jQuery.JQuery;
@@ -66,6 +67,10 @@ class Region {
         }
     }
 
+    function showHideContent() {
+        element.find('.content .editor').toggle();
+    }
+
     public function path() {
         return '${directory}/${filename}';
     }
@@ -95,7 +100,13 @@ class Region {
         var titlebar = new JQuery('<div class="titlebar"></div>');
         titlebar.append(changeEditorModeButton().element);
         editorToolbar = new JQuery('<div class="editor toolbar"></div>').appendTo(titlebar);
-        titlebar.append('<div class="context toolbar"></div>');
+
+        var contextToolbar = new JQuery('<div class="context toolbar"></div>').appendTo(titlebar);
+
+        var showHideButton = new HtmlButton(locale.singular('show/hide'), Icons.eyeOpen, Mini);
+        showHideButton.element.click(showHideContent);
+        contextToolbar.append(showHideButton.element);
+
         element.append(titlebar);
 
         editor = createEditor();

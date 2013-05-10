@@ -5,19 +5,16 @@ import precog.app.message.PrecogResponse;
 import precog.communicator.Communicator;
 import precog.editor.codemirror.Externs;
 import precog.editor.markdown.Externs;
-import js.Browser.document;
-import js.html.Element;
-import js.html.Event;
-import js.html.Node;
+import jQuery.JQuery;
 
 using StringTools;
 
 class MarkdownEditor implements RegionEditor {
-    public var element: Element;
+    public var element: JQuery;
     var communicator: Communicator;
     var editor: CodeMirror;
     var region: Region;
-    var rendered: Element;
+    var rendered: JQuery;
 
     public function new(communicator: Communicator, region: Region) {
         this.communicator = communicator;
@@ -25,21 +22,19 @@ class MarkdownEditor implements RegionEditor {
 
         var options: Dynamic = {mode: 'markdown', region: region};
 
-        rendered = document.createElement('div');
-        rendered.style.display = 'none';
+        rendered = new JQuery('<div></div>').hide();
         // Giving block elements a tabIndex give them a "focus" event.
-        rendered.tabIndex = -1;
-        rendered.addEventListener('focus', renderedFocus, false);
+        rendered.attr('tabindex', '-1');
+        rendered.focus(renderedFocus);
 
-        element = document.createElement('div');
-        element.appendChild(rendered);
+        element = new JQuery('<div></div>').append(rendered);
 
-        editor = CodeMirrorFactory.addTo(element, options);
+        editor = CodeMirrorFactory.addTo(element.get(0), options);
         editor.on('blur', editorBlur);
     }
 
-    function renderedFocus(event: Event) {
-        rendered.style.display = 'none';
+    function renderedFocus() {
+        rendered.hide();
         editor.getWrapperElement().style.display = 'block';
         focus();
     }
@@ -50,8 +45,7 @@ class MarkdownEditor implements RegionEditor {
         if(getContent().trim().length == 0) return;
 
         editor.getWrapperElement().style.display = 'none';
-        rendered.style.display = 'block';
-        rendered.innerHTML = Markdown.toHTML(getContent());
+        rendered.show().html(Markdown.toHTML(getContent()));
 
         communicator.request(
             new RequestFileUpload(region.path(), "text/x-markdown", getContent()),

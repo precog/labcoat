@@ -4,11 +4,10 @@ import precog.app.message.PrecogRequest;
 import precog.app.message.PrecogResponse;
 import precog.communicator.Communicator;
 import precog.editor.codemirror.Externs;
-import js.Browser.document;
-import js.html.Element;
+import jQuery.JQuery;
 
 class JSONEditor implements RegionEditor {
-    public var element: Element;
+    public var element: JQuery;
     var communicator: Communicator;
     var region: Region;
     var editor: CodeMirror;
@@ -19,9 +18,9 @@ class JSONEditor implements RegionEditor {
 
         var options: Dynamic = {mode: {name: 'javascript', json: true}, region: region};
 
-        element = document.createElement('div');
+        element = new JQuery('<div></div>');
 
-        editor = CodeMirrorFactory.addTo(element, options);
+        editor = CodeMirrorFactory.addTo(element.get(0), options);
     }
 
     public function getContent() {

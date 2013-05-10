@@ -5,13 +5,11 @@ import precog.app.message.PrecogResponse;
 import precog.communicator.Communicator;
 import precog.editor.codemirror.Externs;
 import precog.html.HtmlButton;
-import js.Browser.document;
-import js.html.Element;
 import jQuery.JQuery;
 
 class QuirrelEditor implements RegionEditor {
-    public var element: Element;
-    var outputElement: Element;
+    public var element: JQuery;
+    var outputElement: JQuery;
     var region: Region;
     var communicator: Communicator;
     var editor: CodeMirror;
@@ -22,17 +20,16 @@ class QuirrelEditor implements RegionEditor {
 
         var options: Dynamic = {lineNumbers: true, mode: 'quirrel', region: region};
 
-        element = document.createElement('div');
+        element = new JQuery('<div></div>');
 
-        editor = CodeMirrorFactory.addTo(element, options);
+        var editorElement = new JQuery('<div class="editor"></div>').appendTo(element);
+        editor = CodeMirrorFactory.addTo(editorElement.get(0), options);
 
         var runButton = new HtmlButton('Run', Mini);
         runButton.element.click(evaluate);
         editorToolbar.append(runButton.element);
 
-        outputElement = document.createElement('div');
-        outputElement.className = 'output';
-        element.appendChild(outputElement);
+        outputElement = new JQuery('<div class="output"></div>').appendTo(element);
     }
 
     public function getContent() {
@@ -52,7 +49,7 @@ class QuirrelEditor implements RegionEditor {
                 new RequestFileExecute(region.path()),
                 ResponseFileExecute
             ).then(function(response: ResponseFileExecute) {
-                outputElement.innerHTML = '${region.filename}=${haxe.Json.stringify(response.result.data)}';
+                outputElement.html('${region.filename}=${haxe.Json.stringify(response.result.data)}');
             });
         });
     }
