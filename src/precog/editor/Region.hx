@@ -30,6 +30,7 @@ class Region {
 
     var communicator: Communicator;
     var editorToolbar: JQuery;
+    var showHideButton: HtmlButton;
 
     // TOOD: Triggering ourselves
     function changeTo(mode: RegionMode) {
@@ -68,7 +69,7 @@ class Region {
     }
 
     function showHideContent() {
-        element.find('.content .editor').toggle();
+        showHideButton.leftIcon = element.find('.content .editor').toggle().is(':visible') ? Icons.eyeClose : Icons.eyeOpen;
     }
 
     public function path() {
@@ -103,7 +104,7 @@ class Region {
 
         var contextToolbar = new JQuery('<div class="context toolbar"></div>').appendTo(titlebar);
 
-        var showHideButton = new HtmlButton(locale.singular('show/hide'), Icons.eyeOpen, Mini);
+        showHideButton = new HtmlButton(locale.singular('show/hide'), Icons.eyeOpen, Mini, true);
         showHideButton.element.click(showHideContent);
         contextToolbar.append(showHideButton.element);
 
