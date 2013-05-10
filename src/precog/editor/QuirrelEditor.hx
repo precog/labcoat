@@ -64,7 +64,7 @@ class QuirrelEditor implements RegionEditor {
                 new RequestFileExecute(region.path()),
                 ResponseFileExecute
             ).then(function(response: ResponseFileExecute) {
-                outputElement.html('${region.filename}=${haxe.Json.stringify(response.result.data)}');
+                outputElement.html('<span class="out">${region.filename}=</span>${haxe.Json.stringify(response.result.data)}');
             });
         });
     }
