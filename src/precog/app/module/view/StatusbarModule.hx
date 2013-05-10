@@ -42,7 +42,7 @@ class StatusbarModule extends Module {
     		if(null != timer) timer.stop();
     		timer = haxe.Timer.delay(function(){
 	    		if(requests != 0)
-	    			el.html('<small><i class="icon-spinner icon-spin"></i> <span class="label label-important"> active requests: $requests</span> out of <span class="label label-light">$total</span></small>');
+	    			el.html('<small><i class="icon-spinner icon-spin"></i> <span class="label label-important"> $requests active requests</span> out of <span class="label label-light">$total</span></small>');
 	    		else
 	    			el.html('<small><i class="icon-cloud"></i> <span class="label label-light"> total requests made $total</span></small>');
     		}, 200);
