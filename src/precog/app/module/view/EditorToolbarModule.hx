@@ -13,7 +13,7 @@ import jQuery.JQuery;
 import jQuery.Event;
 
 class EditorToolbarModule extends Module {
-    public static var element = new JQuery('<div class="toolbar"></div>');
+    public static var element = new JQuery('<div class="btn-group toolbar"></div>');
 
     var communicator : Communicator;
     var locale : Locale;
@@ -29,8 +29,8 @@ class EditorToolbarModule extends Module {
         this.locale = locale;
         toolbarPanel.panel.element.append(element);
 
-        new HtmlButton(locale.singular('insert region'), Icons.chevronDown, Mini, true).element.appendTo(toolbarPanel.panel.element).click(createRegion);
-        new HtmlButton(locale.singular('save'), Icons.save, Mini, true).element.appendTo(toolbarPanel.panel.element).click(saveEditor);
+        new HtmlButton(locale.singular('insert region'), Icons.chevronDown, Mini, true).element.appendTo(element).click(createRegion);
+        new HtmlButton(locale.singular('save'), Icons.save, Mini, true).element.appendTo(element).click(saveEditor);
     }
 
     function createRegion(event: Event) {
