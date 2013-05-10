@@ -13,7 +13,7 @@ import jQuery.JQuery;
 import jQuery.Event;
 
 class EditorToolbarModule extends Module {
-    public static var element = new JQuery('<div class="btn-group toolbar"></div>');
+    public static var element = new JQuery('<div class="btn-group toolbar pull-right"></div>');
 
     var communicator : Communicator;
     var locale : Locale;
