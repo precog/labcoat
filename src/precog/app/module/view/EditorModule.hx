@@ -154,7 +154,8 @@ class EditorModule extends Module {
     function contentTypeToRegionMode(contentType: String) {
         return switch(contentType) {
         case 'application/json': JSONRegionMode;
-        case _: throw "Bad content type ${contentType}: no editor mode available";
+        case 'text/x-quirrel-script': QuirrelRegionMode;
+        case _: throw 'Bad content type ${contentType}: no editor mode available';
         }
     }
 
