@@ -101,6 +101,7 @@ class Region {
         var contextToolbar = new JQuery('<div class="context toolbar"></div>').appendTo(titlebar);
 
         showHideButton = new HtmlButton(locale.singular('show/hide'), Icons.eyeOpen, Mini, true);
+        showHideButton.type = Flat;
         showHideButton.element.click(showHideContent);
         contextToolbar.append(showHideButton.element);
 

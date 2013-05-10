@@ -115,7 +115,8 @@ class HtmlButton
 			case Warning:	element.removeClass("btn-warning");
 			case Danger:	element.removeClass("btn-danger");
 			case Inverse:	element.removeClass("btn-inverse");
-			case Link:	element.removeClass("btn-link");
+			case Link:		element.removeClass("btn-link");
+			case Flat:		element.removeClass("btn-flat");
 		}
 		type = value;
 		switch(type)
@@ -127,7 +128,8 @@ class HtmlButton
 			case Warning:	element.addClass("btn-warning");
 			case Danger:	element.addClass("btn-danger");
 			case Inverse:	element.addClass("btn-inverse");
-			case Link:	element.addClass("btn-link");
+			case Link:		element.addClass("btn-link");
+			case Flat:		element.addClass("btn-flat");
 		}
 		return value;
 	}
@@ -185,4 +187,5 @@ enum ButtonType
 	Danger;
 	Inverse;
 	Link;
+	Flat;
 }

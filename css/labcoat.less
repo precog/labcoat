@@ -225,7 +225,7 @@ body {
     @gutterBorder : 1px solid #ddd;
     .titlebar {
         position: relative;
-        height: 22px;
+        height: 24px;
         border-bottom: @gutterBorder;
         line-height: 22px;
 
@@ -239,6 +239,7 @@ body {
             background-color: @gutterColor;
             border-right: @gutterBorder;
             text-align: right;
+            line-height: 24px;
 
             ul {
                 text-align: left;
@@ -256,6 +257,18 @@ body {
             right: 0;
             padding-right: 2px;
         }
+    }
+
+    .btn-flat {
+        background-color: #fff;
+        background-image: none;
+        border-color: #d9d9d9;
+        border-bottom-color: #cacaca;
+        color: #666;
+    }
+
+    .btn-flat:hover {
+        color: #000;
     }
 
     .region {

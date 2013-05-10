@@ -28,6 +28,7 @@ class QuirrelEditor implements RegionEditor {
         editor = CodeMirrorFactory.addTo(editorElement.get(0), options);
 
         var runButton = new HtmlButton('run', Icons.play, Mini);
+        runButton.type = Flat;
         runButton.element.click(evaluate);
         editorToolbar.append(runButton.element);
 
