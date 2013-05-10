@@ -4,6 +4,8 @@ import precog.app.message.PrecogRequest;
 import precog.app.message.PrecogResponse;
 import precog.communicator.Communicator;
 import precog.editor.codemirror.Externs;
+import precog.html.HtmlButton;
+import precog.html.HtmlDropdown;
 import jQuery.JQuery;
 import jQuery.Event;
 import js.Browser.document;
@@ -14,6 +16,7 @@ class Region {
     public var index: Int;
     public var directory: String;
     public var filename: String;
+    public var locale: Locale;
 
     public var mode: RegionMode;
     public var element: JQuery;
@@ -24,8 +27,34 @@ class Region {
         public function clear() : Void;
     };
 
-    var buttons: RegionButtons;
     var communicator: Communicator;
+
+    // TOOD: Triggering ourselves
+    function changeTo(mode: RegionMode) {
+        return function(event: Event) {
+            events.changeMode.trigger(this, mode);
+            return false;
+        };
+    }
+
+    function changeEditorModeButton() {
+        var items = [];
+
+        if(mode != QuirrelRegionMode) {
+            items.push(DropdownButton(locale.format('switch to {0}', ['Quirrel']), '', changeTo(QuirrelRegionMode)));
+        }
+        if(mode != MarkdownRegionMode) {
+            items.push(DropdownButton(locale.format('switch to {0}', ['Markdown']), '', changeTo(MarkdownRegionMode)));
+        }
+        if(mode != JSONRegionMode) {
+            items.push(DropdownButton(locale.format('switch to {0}', ['JSON']), '', changeTo(JSONRegionMode)));
+        }
+        if(mode != VegaRegionMode) {
+            items.push(DropdownButton(locale.format('switch to {0}', ['Vega']), '', changeTo(VegaRegionMode)));
+        }
+
+        return new HtmlDropdown(mode+'', '', '', Mini, items, DropdownAlignLeft);
+    }
 
     function createEditor() {
         return switch(mode) {
@@ -58,10 +87,14 @@ class Region {
         this.communicator = communicator;
         this.directory = directory;
         this.filename = filename;
+        this.locale = locale;
 
         element = new JQuery('<div class="region"></div>');
-        buttons = new RegionButtons(this, locale);
-        element.append(buttons.element);
+
+        var titlebar = new JQuery('<div class="titlebar"></div>');
+        titlebar.append(changeEditorModeButton().element);
+        titlebar.append('<div class="editor toolbar"></div><div class="context toolbar"></div>');
+        element.append(titlebar);
 
         editor = createEditor();
         var content = new JQuery('<div class="content"></div>');
