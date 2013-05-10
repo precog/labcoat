@@ -9,9 +9,9 @@ import precog.html.HtmlButton;
 import precog.html.HtmlDropdown;
 import jQuery.JQuery;
 import jQuery.Event;
-import js.Browser.document;
 import thx.react.Signal;
 import precog.util.Locale;
+using precog.editor.RegionMode;
 
 class Region {
     public var index: Int;
@@ -43,20 +43,16 @@ class Region {
     function changeEditorModeButton() {
         var items = [];
 
-        if(mode != QuirrelRegionMode) {
-            items.push(DropdownButton(locale.format('switch to {0}', ['Quirrel']), '', changeTo(QuirrelRegionMode)));
-        }
-        if(mode != MarkdownRegionMode) {
-            items.push(DropdownButton(locale.format('switch to {0}', ['Markdown']), '', changeTo(MarkdownRegionMode)));
-        }
-        if(mode != JSONRegionMode) {
-            items.push(DropdownButton(locale.format('switch to {0}', ['JSON']), '', changeTo(JSONRegionMode)));
-        }
-        if(mode != VegaRegionMode) {
-            items.push(DropdownButton(locale.format('switch to {0}', ['Vega']), '', changeTo(VegaRegionMode)));
-        }
+        Type.allEnums(RegionMode).map(function(other) {
+            if(!Type.enumEq(mode, other))
+                items.push(DropdownButton(locale.format('switch to {0}', [other.toEnglish()]), '', changeTo(other)));
+        });
 
-        return new HtmlDropdown(mode+'', '', '', Mini, items, DropdownAlignLeft);
+        var dropdown = new HtmlDropdown(locale.singular(mode.toEnglish()), '', '', Mini, items, DropdownAlignLeft);
+        dropdown.element
+            .addClass("region-type")
+            .find("button:first-child").addClass("btn-link");
+        return dropdown;
     }
 
     function createEditor() {

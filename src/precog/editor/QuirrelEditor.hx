@@ -5,6 +5,7 @@ import precog.app.message.PrecogResponse;
 import precog.communicator.Communicator;
 import precog.editor.codemirror.Externs;
 import precog.html.HtmlButton;
+import precog.html.Icons;
 import jQuery.JQuery;
 
 class QuirrelEditor implements RegionEditor {
@@ -25,7 +26,7 @@ class QuirrelEditor implements RegionEditor {
         var editorElement = new JQuery('<div class="editor"></div>').appendTo(element);
         editor = CodeMirrorFactory.addTo(editorElement.get(0), options);
 
-        var runButton = new HtmlButton('Run', Mini);
+        var runButton = new HtmlButton('run', Icons.play, Mini);
         runButton.element.click(evaluate);
         editorToolbar.append(runButton.element);
 
