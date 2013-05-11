@@ -223,10 +223,11 @@ body {
     @gutterWidth : 80px;
     @gutterColor : #f7f7f7;
     @gutterBorder : 1px solid #ddd;
+    @regionBarHeight : 20px;
     .titlebar, .outputbar {
         position: relative;
-        height: 24px;
-        line-height: 22px;
+        height: @regionBarHeight;
+        line-height: @regionBarHeight - 2px;
     }
     .titlebar {
         border-bottom: @gutterBorder;
@@ -237,6 +238,7 @@ body {
     }
 
     .titlebar, .outputbar {
+
         .btn-mini {
             line-height: 16px;
         }
@@ -244,10 +246,10 @@ body {
         .region-type {
             position: absolute;
             width: @gutterWidth;
-            background-color: @gutterColor;
+            
             border-right: @gutterBorder;
             text-align: right;
-            line-height: 24px;
+            line-height: @regionBarHeight;
 
             ul {
                 text-align: left;
@@ -271,23 +273,25 @@ body {
         font-family: monospace;
         font-size: 11.5px;
 
+        background-color: #f0f9f6; 
+
         .out {
             position: absolute;
             width: @gutterWidth - 4px;
             background-color: @gutterColor;
             border-right: @gutterBorder;
             text-align: right;
-            line-height: 24px;
+            line-height: @regionBarHeight;
             padding-right: 4px; 
         }
 
         .data {
             position: absolute;
             left: @gutterWidth;
-            padding-left: 8px;
-            min-height: 24px;
+            padding-left: 4px;
+            min-height: @regionBarHeight;
         }
-        min-height: 24px;
+        min-height: @regionBarHeight;
     }
 
     .btn-flat {
@@ -296,10 +300,19 @@ body {
         border-color: #d9d9d9;
         border-bottom-color: #cacaca;
         color: #666;
+        padding: 0 4px;
+
+        i {
+            color: #aaa;
+        }
     }
 
     .btn-flat:hover {
         color: #000;
+
+        i {
+            color: #666;
+        }
     }
 
     .region {
