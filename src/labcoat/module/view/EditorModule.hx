@@ -209,6 +209,17 @@ class EditorModule extends Module {
     }
 
     function tabButton(editor: Editor) {
+        var insert = new HtmlButton(locale.singular('insert region'), Icons.chevronDown, Mini, true);
+        insert.element.click(function(event: Event) {
+            event.preventDefault();
+            createRegion(QuirrelRegionMode);
+        });
+        var save = new HtmlButton(locale.singular('save'), Icons.save, Mini, true);
+        save.element.click(function(event: Event) {
+            event.preventDefault();
+            saveEditor();
+        });
+
         var filename = editor.path.split('/').pop();
         var item = editor.cata(
             function(codeEditor: CodeEditor) return new HtmlPanelGroupItem(filename, Icons.file),
@@ -219,14 +230,17 @@ class EditorModule extends Module {
             closeEditor(editor);
         });
 
-        new HtmlButton(locale.singular('insert region'), Icons.chevronDown, Mini, true).element.appendTo(item.panel.element).click(function(event: Event) {
-            event.preventDefault();
-            createRegion(QuirrelRegionMode);
-        });
-        new HtmlButton(locale.singular('save'), Icons.save, Mini, true).element.appendTo(item.panel.element).click(function(event: Event) {
-            event.preventDefault();
-            saveEditor();
-        });
+        // TODO: Stop using catamorphisms in EditorModule for
+        // polymorphism. Add these details to each editor.
+        editor.cata(
+            function(codeEditor: CodeEditor) {
+                save.element.appendTo(item.panel.element);
+            },
+            function(notebook: Notebook) {
+                insert.element.appendTo(item.panel.element);
+                save.element.appendTo(item.panel.element);
+            }
+        );
 
         item.panel.element.addClass("edit-area");
         item.panel.element.append(editor.element);
