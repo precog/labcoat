@@ -2,7 +2,7 @@ package precog.communicator;
 
 import utest.Assert;
 import thx.react.Promise;
-import precog.app.message.ApplicationHtmlContainerMessage;
+import labcoat.message.ApplicationHtmlContainerMessage;
 
 class TestCommunicator
 {

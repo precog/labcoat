@@ -1,7 +1,7 @@
 -cp src
 -cp test
 -js bin/debug/html5/js/labcoat.js
--main precog.app.Main
+-main labcoat.Main
 -debug
 #DEFS
 -D html5

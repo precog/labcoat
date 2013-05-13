@@ -1,7 +1,7 @@
 package precog.editor;
 
-import precog.app.message.PrecogRequest;
-import precog.app.message.PrecogResponse;
+import labcoat.message.PrecogRequest;
+import labcoat.message.PrecogResponse;
 import precog.communicator.Communicator;
 import precog.editor.Editor;
 import jQuery.JQuery;
