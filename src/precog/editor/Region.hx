@@ -103,6 +103,7 @@ class Region {
         showHideButton = new HtmlButton(locale.singular('show/hide'), Icons.eyeClose, Mini, true);
         showHideButton.type = Flat;
         showHideButton.element.click(showHideContent);
+        showHideButton.element.addClass('show-hide');
         contextToolbar.append(showHideButton.element);
 
         element.append(titlebar);

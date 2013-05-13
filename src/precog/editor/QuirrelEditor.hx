@@ -40,6 +40,7 @@ class QuirrelEditor implements RegionEditor {
         showHideButton = new HtmlButton('', Icons.eyeClose, Mini, true);
         showHideButton.type = Flat;
         showHideButton.element.click(showHideOutput);
+        showHideButton.element.addClass('show-hide');
         contextToolbar.append(showHideButton.element);
 
         outputElement = new JQuery('<div class="output"></div>').appendTo(element);
