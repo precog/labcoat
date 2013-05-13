@@ -96,12 +96,10 @@ class TreeViewModule extends Module
         var renderer = new FSHtmlTreeRenderer(16),
             panels = createContainers(item);
         tree = new HtmlTree(panels.main, renderer);
-
         tree.events.select.on(function(tn : TreeNode<Node>) {
             if(null == tn) {
                 communicator.trigger(new NodeDeselected());
             } else {
-//            trace(node);
                 var info = extractNodeInfo(tn.data);
                 switch(info.type) {
                     case File, Notebook:

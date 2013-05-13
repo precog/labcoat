@@ -29,7 +29,7 @@ class QuirrelEditor implements RegionEditor {
 
         var runButton = new HtmlButton('run', Icons.play, Mini);
         runButton.type = Flat;
-        runButton.element.click(evaluate);
+        runButton.element.click(onclick);
         editorToolbar.append(runButton.element);
 
         var outputbar = new JQuery('<div class="outputbar"></div>').appendTo(element);
@@ -46,7 +46,7 @@ class QuirrelEditor implements RegionEditor {
         outputElement = new JQuery('<div class="output"></div>').appendTo(element);
     }
 
-    function showHideOutput() {
+    function showHideOutput(_) {
         showHideButton.leftIcon = element.find('.output').toggle().is(':visible') ? Icons.eyeClose : Icons.eyeOpen;
     }
 
@@ -56,6 +56,10 @@ class QuirrelEditor implements RegionEditor {
 
     public function setContent(content: String) {
         editor.setValue(content);
+    }
+
+    function onclick(_ : jQuery.Event) {
+        evaluate();
     }
 
     public function evaluate() {

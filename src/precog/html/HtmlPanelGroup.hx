@@ -226,7 +226,7 @@ class HtmlPanelGroupItem
 //		this.toggle.rightIcon = Icons.heart;
 		this.panel = new HtmlPanelSwap();
 		this.panel.hide();
-		this.toggle.element.bind("click", click);
+		this.toggle.element.bind("click", null, click);
 	}
 
 	function click(_) 

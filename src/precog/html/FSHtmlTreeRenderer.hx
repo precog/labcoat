@@ -46,7 +46,7 @@ class FSHtmlTreeRenderer implements IHtmlTreeRenderer<Node>
 	}
 	public function updateRow(el : JQuery, node : TreeNode<Node>) : JQuery
 	{
-		el.prop("data-node", node);
+		el.prop("data-node", cast node); // The case is needed due to a limitation in jQuery Extern lib
 
 		if(node == tree.selected)
 			el.addClass("badge badge-light");

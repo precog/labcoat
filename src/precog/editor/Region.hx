@@ -64,7 +64,7 @@ class Region {
         }
     }
 
-    function showHideContent() {
+    function showHideContent(_) {
         showHideButton.leftIcon = element.find('.content .editor').toggle().is(':visible') ? Icons.eyeClose : Icons.eyeOpen;
     }
 

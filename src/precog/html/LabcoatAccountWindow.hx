@@ -73,7 +73,7 @@ class LabcoatAccountWindow
 			if(!createModel.isValid())
 				return;
 			formError.hide();
-			el.find("#account-create").attr("disabled", true);
+			el.find("#account-create").attr("disabled", cast true);
 			processCreate({
 					email : email.get(),
 					password : password.get(),
@@ -83,7 +83,7 @@ class LabcoatAccountWindow
 						title : createModel.model("title").get()
 					}
 				}, function(result) {
-				el.find("#account-create").attr("disabled", false);
+				el.find("#account-create").attr("disabled", cast false);
 				switch (result) {
 					case Ok:
 						js.Cookie.set(COOKIE_EMAIL, email.get(), COOKIE_EXPIRATION);
@@ -99,12 +99,12 @@ class LabcoatAccountWindow
 			if(!loginModel.isValid())
 				return;
 			formError.hide();
-			el.find("#account-login").attr("disabled", true);
+			el.find("#account-login").attr("disabled", cast true);
 			processLogin({
 					email : email.get(),
 					password : password.get()
 				}, function(result) {
-				el.find("#account-login").attr("disabled", false);
+				el.find("#account-login").attr("disabled", cast false);
 				switch (result) {
 					case Ok:
 						js.Cookie.set(COOKIE_EMAIL, email.get(), COOKIE_EXPIRATION);
@@ -125,7 +125,7 @@ class LabcoatAccountWindow
 			processReset({
 					email : email.get()
 				}, function(result) {
-				el.find("#account-login").attr("disabled", false);
+				el.find("#account-login").attr("disabled", cast false);
 				switch (result) {
 					case Ok:
 						el.find("#reset-loader").html("The request was successful! Please check your email for further instructions.");
@@ -137,14 +137,18 @@ class LabcoatAccountWindow
 			});
 		});
 
-		el.find("input.choose-ui").change(updateForm);
+		el.find("input.choose-ui").change(onchange);
 
 		// replace with dynamic behavior
-		el.find("input.choose-ui").first().attr("checked", true);
+		el.find("input.choose-ui").first().attr("checked", cast true);
 
 		updateForm();
 
 		thx.react.promise.Timer.delay(500).then(function() el.find("#email").focus());
+	}
+
+	function onchange(_ : jQuery.Event) {
+		updateForm();
 	}
 
 	function updateForm() {

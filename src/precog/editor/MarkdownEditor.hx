@@ -33,7 +33,7 @@ class MarkdownEditor implements RegionEditor {
         editor.on('blur', editorBlur);
     }
 
-    function renderedFocus() {
+    function renderedFocus(_) {
         rendered.hide();
         editor.getWrapperElement().style.display = 'block';
         focus();
