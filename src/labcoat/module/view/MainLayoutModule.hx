@@ -2,7 +2,6 @@ package labcoat.module.view;
 
 import labcoat.message.MainHtmlPanel;
 import labcoat.message.MainEditorHtmlPanel;
-import labcoat.message.MainToolbarHtmlPanel;
 import labcoat.message.MainStatusbarHtmlPanel;
 import precog.communicator.Communicator;
 import precog.communicator.Module;
@@ -24,7 +23,6 @@ class MainLayoutModule extends Module {
     var layout: DockLayout;
     var panelMargin: Int = 3;
 
-    var toolbar: HtmlPanel;
     var editor: HtmlPanel;
     var statusbar: HtmlPanel;
 
@@ -36,21 +34,18 @@ class MainLayoutModule extends Module {
     function onMessage(message: MainHtmlPanel) {
         container = message.panel.element;
 
-        toolbar   = new HtmlPanel("toolbar", container);
         editor    = new HtmlPanel("editor", container);
         statusbar = new HtmlPanel("statusbar", container);
 
         layout = new DockLayout(0, 0);
         layout.defaultMargin = panelMargin;
 
-        layout.addPanel(toolbar).dockTop(ViewConfig.toolbarHeight);
         layout.addPanel(editor).fill();
         layout.addPanel(statusbar).dockBottom(ViewConfig.statusbarHeight);
 
         message.panel.rectangle.addListener(updateLayout);
         updateLayout(message.panel.rectangle);
 
-        communicator.provide(new MainToolbarHtmlPanel(toolbar));
         communicator.provide(new MainEditorHtmlPanel(editor));
         communicator.provide(new MainStatusbarHtmlPanel(statusbar));
     }

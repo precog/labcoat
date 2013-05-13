@@ -15,6 +15,7 @@ import precog.editor.codemirror.Externs;
 import precog.editor.codemirror.QuirrelMode;
 import precog.geom.Rectangle;
 import precog.html.Bootstrap;
+import precog.html.HtmlButton;
 import precog.html.HtmlDropdown;
 import precog.html.HtmlPanelGroup;
 import precog.html.Icons;
@@ -56,10 +57,6 @@ class EditorModule extends Module {
             openNotebook(e.path));
         communicator.on(function(e : EditorOpenFile)
             getContentTypeOpenCodeEditor(e.path));
-        communicator.on(function(e : EditorRegionRequestCreate)
-            createRegion(e.regionMode));
-        communicator.on(function(e : EditorSave)
-            saveEditor());
         communicator.on(function(e : EditorUpdate)
             changeEditor(e.current));
         communicator.on(function(e : ResponseDirectoryDelete)
@@ -221,6 +218,16 @@ class EditorModule extends Module {
         item.toggle.element.find('.right-icon').click(function(_: jQuery.Event) {
             closeEditor(editor);
         });
+
+        new HtmlButton(locale.singular('insert region'), Icons.chevronDown, Mini, true).element.appendTo(item.panel.element).click(function(event: Event) {
+            event.preventDefault();
+            createRegion(QuirrelRegionMode);
+        });
+        new HtmlButton(locale.singular('save'), Icons.save, Mini, true).element.appendTo(item.panel.element).click(function(event: Event) {
+            event.preventDefault();
+            saveEditor();
+        });
+
         item.panel.element.addClass("edit-area");
         item.panel.element.append(editor.element);
         return item;
