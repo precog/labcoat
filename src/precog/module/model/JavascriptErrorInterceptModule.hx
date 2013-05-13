@@ -1,4 +1,4 @@
-package labcoat.module.model;
+package precog.module.model;
 
 import precog.communicator.*;
 import thx.react.Promise;

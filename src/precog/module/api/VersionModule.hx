@@ -1,4 +1,4 @@
-package labcoat.module.api;
+package precog.module.api;
 
 import precog.communicator.*;
 

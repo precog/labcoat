@@ -1,10 +1,17 @@
 package labcoat;
 
 import precog.communicator.ModuleManager;
+
+import precog.module.api.*;
+import precog.module.config.*;
+import precog.module.model.*;
+
+import labcoat.module.api.*;
 import labcoat.module.config.*;
 import labcoat.module.model.*;
 import labcoat.module.view.*;
-import labcoat.module.api.*;
+
+
 import precog.editor.*;
 import js.Browser.window;
 

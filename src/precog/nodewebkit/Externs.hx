@@ -1,4 +1,4 @@
-package labcoat.module.view.nodewebkit;
+package precog.nodewebkit;
 
 @:native("process") extern class Process {
     static var platform: String;

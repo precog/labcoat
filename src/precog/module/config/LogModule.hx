@@ -1,4 +1,4 @@
-package labcoat.module.config;
+package precog.module.config;
 
 import precog.communicator.Communicator;
 import precog.communicator.Module;
