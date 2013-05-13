@@ -20,7 +20,7 @@ using precog.html.JQuerys;
 using thx.react.IObservable;
 using thx.react.Promise;
 
-import precog.ViewConfig;
+import labcoat.config.ViewConfig;
 
 class LayoutModule extends Module
 {

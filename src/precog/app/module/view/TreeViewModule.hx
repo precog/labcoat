@@ -16,20 +16,20 @@ using precog.html.JQuerys;
 
 import precog.app.message.PrecogRequest;
 import precog.app.message.PrecogResponse;
-import precog.util.fs.*;
+import precog.fs.*;
 using StringTools;
 
 import precog.layout.*;
 using thx.react.IObservable;
 
-import precog.ViewConfig;
+import labcoat.config.ViewConfig;
 
 class TreeViewModule extends Module
 {
     static inline var UI_TREE_NODE = "ui_tree_node";
     static inline var API_CONTEXT = "api_context";
 
-    var tree : HtmlTree<precog.util.fs.Node>;
+    var tree : HtmlTree<precog.fs.Node>;
     var communicator : Communicator;
     var fss : Map<String, FileSystem>;
     override public function connect(communicator: Communicator) {

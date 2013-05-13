@@ -1,6 +1,6 @@
 package precog.html;
 
-import precog.util.fs.Node;
+import precog.fs.Node;
 import precog.html.HtmlTree;
 import precog.geom.IRectangle;
 import jQuery.JQuery;

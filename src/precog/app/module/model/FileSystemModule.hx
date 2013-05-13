@@ -2,7 +2,7 @@ package precog.app.module.model;
 
 import precog.app.message.*;
 import precog.communicator.*;
-import precog.util.fs.*;
+import precog.fs.*;
 import thx.react.Promise;
 
 class FileSystemModule extends Module

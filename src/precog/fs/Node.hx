@@ -1,4 +1,4 @@
-package precog.util.fs;
+package precog.fs;
 
 class Node
 {

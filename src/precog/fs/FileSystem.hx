@@ -1,4 +1,4 @@
-package precog.util.fs;
+package precog.fs;
 
 import thx.react.Dispatcher;
 
@@ -6,7 +6,7 @@ import thx.react.Dispatcher;
 import haxe.macro.Expr;
 #end
 
-@:access(precog.util.fs.Root)
+@:access(precog.fs.Root)
 class FileSystem 
 {
 	public var root(default, null) : Root;

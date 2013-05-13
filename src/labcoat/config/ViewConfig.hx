@@ -1,4 +1,4 @@
-package precog;
+package labcoat.config;
 
 class ViewConfig 
 {

@@ -7,6 +7,7 @@ import precog.editor.codemirror.Externs;
 import precog.html.HtmlButton;
 import precog.html.Icons;
 import jQuery.JQuery;
+import thx.core.Procedure;
 
 class QuirrelEditor implements RegionEditor {
     public var element: JQuery;
@@ -70,9 +71,9 @@ class QuirrelEditor implements RegionEditor {
             return communicator.request(
                 new RequestFileExecute(region.path()),
                 ResponseFileExecute
-            ).then(cast function(res: ResponseFileExecute) { // TODO not sure why casting is required
+            ).then(ProcedureDef.fromArity1(function(res: ResponseFileExecute) {
                 outputElement.html('<div class="out">${region.filename}=</div><div class="data">${haxe.Json.stringify(res.result.data)}</div>');
-            });
+            }));
         });
     }
 

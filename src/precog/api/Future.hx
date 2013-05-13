@@ -4,7 +4,6 @@ extern class Future<TAccept, TFailure>
 {
 	public function then(onaccept : TAccept, ?onreject : TFailure) : Future<TAccept, TFailure>;
 
-
 	public function done(onaccept : TAccept, ?onreject : TFailure) : Void;
 	inline public static function catchError<TFailure, TNAccept, TNFailure>(onreject : TFailure) : Future<TNAccept, TNFailure>
 		return untyped precog.api.Future["catch"](onreject);

@@ -14,7 +14,7 @@ import jQuery.JQuery;
 using thx.react.IObservable;
 
 using precog.html.JQuerys;
-import precog.ViewConfig;
+import labcoat.config.ViewConfig;
 
 class MainLayoutModule extends Module {
     var communicator: Communicator;

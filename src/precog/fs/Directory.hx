@@ -1,6 +1,6 @@
-package precog.util.fs;
+package precog.fs;
 
-@:access(precog.util.fs.Nodes)
+@:access(precog.fs.Nodes)
 class Directory extends Node
 {
 	public var directories(default, null) : Directories;

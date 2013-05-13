@@ -1,7 +1,7 @@
-package precog.util.fs;
+package precog.fs;
 
 import utest.Assert;
-import precog.util.fs.FileSystem;
+import precog.fs.FileSystem;
 
 class TestFileSystem 
 {
