@@ -70,8 +70,8 @@ class QuirrelEditor implements RegionEditor {
             return communicator.request(
                 new RequestFileExecute(region.path()),
                 ResponseFileExecute
-            ).then(function(response: ResponseFileExecute) {
-                outputElement.html('<div class="out">${region.filename}=</div><div class="data">${haxe.Json.stringify(response.result.data)}</div>');
+            ).then(cast function(res: ResponseFileExecute) { // TODO not sure why casting is required
+                outputElement.html('<div class="out">${region.filename}=</div><div class="data">${haxe.Json.stringify(res.result.data)}</div>');
             });
         });
     }
