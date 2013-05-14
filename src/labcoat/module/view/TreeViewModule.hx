@@ -107,7 +107,7 @@ class TreeViewModule extends Module
                         communicator.trigger(new NodeSelected(dirinfo.path, dirinfo.type, dirinfo.api, dirinfo.meta));
                     case _:
                 }
-                communicator.trigger(new NodeSelected(info.path, info.type, info.api, info.meta));
+                communicator.trigger(new DirectorySelected(info.path, info.type, info.api, info.meta));
             }
         });
         tree.events.trigger.on(function(tn : TreeNode<Node>) {

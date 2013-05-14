@@ -36,6 +36,7 @@ class EditorModule extends Module {
     var accountId : String;
     var tmpPath : String;
     var metadataPath : String;
+    var currentPath : String;
 
     var fileCounter : Int = 0;
     var notebookCounter : Int = 0;
@@ -66,6 +67,14 @@ class EditorModule extends Module {
             // new MenuItem(MenuEdit(SubgroupEditHistory), "Undo", function(){}, 0),
             // new MenuItem(MenuEdit(SubgroupEditHistory), "Redo", function(){}, 1)
         ]);
+
+        communicator.on(function(_ : NodeDeselected) {
+            setCurrentPath(null);
+        });
+
+        communicator.on(function(e : DirectorySelected) {
+            setCurrentPath(e.path);
+        });
     }
 
     public function init(editorPanel: MainEditorHtmlPanel, locale : Locale) {
@@ -117,10 +126,19 @@ class EditorModule extends Module {
         communicator.consume(function(configs : Array<PrecogNamedConfig>) {
             // TODO: Maybe check this is the "default" account
             accountId = configs[0].config.accountId;
+            setCurrentPath(null);
             tmpPath = '${accountId}/temp';
             metadataPath = '${tmpPath}/metadata.json';
             loadMetadata();
         });
+    }
+
+    function setCurrentPath(path : String)
+    {
+        if(null == path)
+            currentPath = "/" + accountId;
+        else
+            currentPath = path;
     }
 
     function loadMetadata() {
@@ -286,8 +304,9 @@ class EditorModule extends Module {
     }
 
     function saveEditor() {
-        Dialog.prompt(locale.format("filename:", []), function(filename: String){
-            current.save('${accountId}/${filename}');
+        var parent = currentPath;
+        Dialog.prompt(locale.format("Current directory: <code>{0}</code><br>Save file as:", [parent]), function(filename: String){
+            current.save('${parent}/${filename}');
         });
     }
 
