@@ -6,7 +6,6 @@ import precog.util.Locale;
 import precog.communicator.Communicator;
 import precog.communicator.Module;
 import precog.html.HtmlPanelGroup;
-import precog.html.HtmlPanel;
 import precog.html.HtmlTree;
 import precog.html.FSHtmlTreeRenderer;
 import jQuery.JQuery;
@@ -49,30 +48,6 @@ class TreeViewModule extends Module
         return p.join("/");
     }
 
-    function createContainers(group : HtmlPanelGroupItem) {
-        var layout = new DockLayout(group.panel.rectangle.width, group.panel.rectangle.height);
-        layout.defaultMargin = ViewConfig.panelMargin;
-        group.panel.rectangle.addListener(function(r) {
-            layout.rectangle.updateSize(r); //updateSize
-            layout.update();
-        });
-
-        var toolbar = new HtmlPanel(),
-            main = new HtmlPanel();
-
-        group.panel.element.append(toolbar.element);
-        group.panel.element.append(main.element);
-
-        layout.addPanel(toolbar).dockTop(ViewConfig.toolbarHeight);
-        layout.addPanel(main);
-        layout.update();
-
-        return {
-            toolbar : toolbar,
-            main : main
-        };
-    }
-
     function extractNodeInfo(node : Node)
     {
         var path = node.toString(),
@@ -93,7 +68,7 @@ class TreeViewModule extends Module
         message.group.addItem(item);
         item.activate();
         var renderer = new FSHtmlTreeRenderer(16),
-            panels = createContainers(item);
+            panels = new ToolbarContainers(item);
         tree = new HtmlTree(panels.main, renderer);
         tree.events.select.on(function(tn : TreeNode<Node>) {
             if(null == tn) {
