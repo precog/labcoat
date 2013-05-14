@@ -192,6 +192,8 @@ class TreeEvents<T> implements precog.macro.ValueClass
 	var select : Signal1<TreeNode<T>>;
 	var deselect : Signal1<TreeNode<T>>;
 	var trigger : Signal1<TreeNode<T>>;
+	var expand : Signal1<TreeNode<T>>;
+	var collapse : Signal1<TreeNode<T>>;
 }
 
 class HtmlTree<T>
@@ -216,6 +218,8 @@ class HtmlTree<T>
 		tree = new Tree();
 		
 		events = new TreeEvents(
+			new Signal1<TreeNode<T>>(),
+			new Signal1<TreeNode<T>>(),
 			new Signal1<TreeNode<T>>(),
 			new Signal1<TreeNode<T>>(),
 			new Signal1<TreeNode<T>>()
@@ -269,6 +273,16 @@ class HtmlTree<T>
 	public function trigger(node : TreeNode<T>)
 	{
 		events.trigger.trigger(node);
+	}
+
+	public function collapse(node : TreeNode<T>)
+	{
+		events.collapse.trigger(node);
+	}
+
+	public function expand(node : TreeNode<T>)
+	{
+		events.expand.trigger(node);
 	}
 
 	public function update()

@@ -78,6 +78,12 @@ class FSHtmlTreeRenderer implements IHtmlTreeRenderer<Node>
 		var toggle = el.find(".tree-toggle");
 		if(node.collapsed || node.hasChildren) {
 			toggle.get(0).onclick = function() {
+				if(node.collapsed)
+				{
+					tree.expand(node);
+				} else {
+					tree.collapse(node);
+				}
 				node.toggle();
 				tree.update();
 			};

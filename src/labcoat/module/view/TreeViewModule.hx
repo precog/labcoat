@@ -115,6 +115,10 @@ class TreeViewModule extends Module
             var info = extractNodeInfo(tn.data);
             communicator.trigger(new NodeTriggered(info.path, info.type, info.api, info.meta));
         });
+        tree.events.expand.on(function(tn : TreeNode<Node>) {
+            var info = extractNodeInfo(tn.data);
+            loadDir(info.path, info.api, 2);
+        });
         var toolbar = new JQuery('<div class="btn-group context-bar"></div>').appendTo(panels.toolbar.element);
 
         communicator.provide(new FSTreeViewToolbarHtml(toolbar));
@@ -212,7 +216,7 @@ class TreeViewModule extends Module
         fs.root.meta.set(API_CONTEXT, name);
         fss.set(name, fs);
         wireFileSystem(fs);
-        loadDir("/", name, 0);
+        loadDir("/", name, 2);
     }
 
     function getNodeType(node : Node) : NodeType
@@ -225,13 +229,13 @@ class TreeViewModule extends Module
             Directory;
     }
 
-    function loadDir(path : String, name : String, levels : Int)
+    function loadDir(path : String, api : String, levels : Int)
     {
         if(levels == 0)
             return;
-        var fs = fss.get(name);
+        var fs = fss.get(api);
         communicator.request(
-                new RequestMetadataChildren(path, name),
+                new RequestMetadataChildren(path, api),
                 ResponseMetadataChildren
             ).then(function(response : ResponseMetadataChildren) {
                 // filter out already existing nodes
@@ -256,7 +260,7 @@ class TreeViewModule extends Module
                             // TODO, removing the timer will break the second load.communicator
                             // Very possible but in thx.react request/respond
                             thx.react.promise.Timer.delay(0).then(
-                                loadDir.bind(path + "/", name, levels-1)
+                                loadDir.bind(path + "/", api, levels-1)
                             );
                     }
                 });
