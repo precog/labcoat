@@ -8,6 +8,7 @@ import labcoat.message.*;
 import labcoat.message.PrecogRequest;
 import labcoat.message.PrecogResponse;
 using thx.core.Strings;
+using StringTools;
 
 class PrecogModule extends Module
 {
@@ -84,47 +85,48 @@ trace("RESPONSE ERROR");
 					function(result : Array<FileDescription>) {
 						// load metadata file if available
 						Promise.list(
-							result.map(function(o) {
-								return switch(o.type)
-								{
-									case "file":
-										Promise.value({
-											type : o.type,
-											name : o.name,
-											metadata : new Map<String, Dynamic>()
-										});
-									case "directory":
-										var metafile = normalizeFilePath(request.path + o.name + "/metadata.json");
-										var deferred = new Deferred();
-										api.getFile(metafile).then(function(result : ResFile) {
-												var metadata = new Map<String, Dynamic>();
-												var contents = haxe.Json.parse(result.contents)[0];
-												if(contents != null)
-												{
-													for(field in Reflect.fields(contents)) {
-														metadata.set(field, Reflect.field(contents, field));
+							result
+								.map(function(o) {
+									return switch(o.type)
+									{
+										case "file":
+											Promise.value({
+												type : o.type,
+												name : o.name,
+												metadata : new Map<String, Dynamic>()
+											});
+										case "directory":
+											var metafile = normalizeFilePath(request.path + o.name + "/metadata.json");
+											var deferred = new Deferred();
+											api.getFile(metafile).then(function(result : ResFile) {
+													var metadata = new Map<String, Dynamic>();
+													var contents = haxe.Json.parse(result.contents)[0];
+													if(contents != null)
+													{
+														for(field in Reflect.fields(contents)) {
+															metadata.set(field, Reflect.field(contents, field));
+														}
 													}
-												}
-												deferred.resolve({
-													type : o.type,
-													name : o.name,
-													metadata : metadata
-												});
-											},
-											errorResponse(request, deferred)
-										);	
-										deferred.promise;
-									case invalid:
-										throw 'invalid type "$invalid"';
-								};
-							}))
-							.then(function(arr : Array<{ type : String, name : String, metadata : Map<String, Dynamic> }>) {
-									var response = new ResponseMetadataChildren(request.path, arr, request);
-									deferred.resolve(response);
-									communicator.trigger(response);
-								},
-								errorResponse(request, deferred)
-							);
+													deferred.resolve({
+														type : o.type,
+														name : o.name,
+														metadata : metadata
+													});
+												},
+												errorResponse(request, deferred)
+											);	
+											deferred.promise;
+										case invalid:
+											throw 'invalid type "$invalid"';
+									};
+								}))
+								.then(function(arr : Array<{ type : String, name : String, metadata : Map<String, Dynamic> }>) {
+										var response = new ResponseMetadataChildren(request.path, arr, request);
+										deferred.resolve(response);
+										communicator.trigger(response);
+									},
+									errorResponse(request, deferred)
+								);
 
 					},
 					errorResponse(request, deferred)

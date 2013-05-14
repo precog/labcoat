@@ -66,7 +66,6 @@ class TreeViewModule extends Module
         layout.addPanel(toolbar).dockTop(ViewConfig.toolbarHeight);
         layout.addPanel(main);
         layout.update();
-//        group.panel.rectangle.attach(layout.rectangle);
 
         return {
             toolbar : toolbar,
@@ -111,7 +110,6 @@ class TreeViewModule extends Module
             }
         });
         tree.events.trigger.on(function(tn : TreeNode<Node>) {
-//            trace(node);
             var info = extractNodeInfo(tn.data);
             communicator.trigger(new NodeTriggered(info.path, info.type, info.api, info.meta));
         });
@@ -134,12 +132,6 @@ class TreeViewModule extends Module
                 node = fs.root.pick(path);
             if(null == node) {
                 fs.root.createFileAt(path, true);
-/*
-                fs.root.walk(path, function(node : Node) {
-                    if(node.isFile) return;
-                    loadDir(node.toString(), api, 2);
-                });
-*/
             }
         }
 
@@ -147,6 +139,7 @@ class TreeViewModule extends Module
         {
             var fs   = fss.get(api),
                 node = fs.root.pick(path);
+            if(null == node) return;
             if(node.isDirectory)
                 cast(node, Directory).removeRecursive();
             else
@@ -162,20 +155,10 @@ class TreeViewModule extends Module
         });
 
         communicator.on(function(res : ResponseFileCreate) {
-/*
-            thx.react.promise.Timer.delay(0).then(function()
-                loadDir(parentPath(res.path), res.api, 1)
-            );
-*/
             ensureFileAt(res.path, res.api);
         });
 
         communicator.on(function(res : ResponseFileUpload) {
-/*
-            thx.react.promise.Timer.delay(0).then(function()
-                loadDir(parentPath(res.path), res.api, 1)
-            );
-*/
             ensureFileAt(res.path, res.api);
         });
 
@@ -183,24 +166,12 @@ class TreeViewModule extends Module
             var fs = fss.get(res.api);
             fs.root.pick(res.src).remove();
             fs.root.createFileAt(res.dst, true);
-            /*
-            fs.root.walk(res.dst, function(node : Node) {
-                if(node.isFile) return;
-                loadDir(node.toString(), res.api, 2);
-            });
-        */
         });
 
         communicator.on(function(res : ResponseDirectoryMove) {
             var fs = fss.get(res.api);
             cast(fs.root.pick(res.src), Directory).removeRecursive();
             fs.root.ensureDirectory(res.dst);
-            /*
-            fs.root.walk(res.dst, function(node : Node) {
-                if(node.isFile) return;
-                loadDir(node.toString(), res.api, 2);
-            });
-*/
         });
 
         communicator.queueMany([
@@ -267,18 +238,26 @@ class TreeViewModule extends Module
             });
     }
 
+    function isHiddenFile(path : String) {
+        function filter(segment : String) 
+        {
+            return segment.startsWith(".") || segment == "temp"; // TODO remove the second condition once dot-prefix is supported
+        }
+        return path.split("/").filter(filter).length > 0;
+    }
+
     function wireFileSystem(fs : FileSystem)
     {
         var root = tree.addRoot(fs.root);
         fs.root.meta.set(UI_TREE_NODE, root);
         fs.on(function(e : NodeAddEvent) {
             var node = e.node,
-                parent = node.parent.meta.get(UI_TREE_NODE),
-                tree_node = parent.appendChild(node);
+                parent = node.parent.meta.get(UI_TREE_NODE);
+            if(isHiddenFile(node.toString())) return;
+            var tree_node = parent.appendChild(node);
             if(node.isDirectory && node.level > 1)
             {
                 tree_node.collapse();
-
             }
             node.meta.set(UI_TREE_NODE, tree_node);
             tree.update();
@@ -286,6 +265,7 @@ class TreeViewModule extends Module
 
         fs.on(function(e : NodeRemoveEvent) {
             var node = e.node.meta.get(UI_TREE_NODE);
+            if(node == null) return; // file/dir that is not mapped to a node in the tree
             e.node.meta.remove(UI_TREE_NODE);
             node.remove();
             tree.select(null);
