@@ -8,6 +8,8 @@ import precog.util.Locale;
 import jQuery.JQuery;
 import thx.react.Signal;
 
+using Lambda;
+
 class Notebook implements Editor {
     public var events(default, null) : {
         public function clear() : Void;
@@ -63,7 +65,9 @@ class Notebook implements Editor {
             clearInitialRegions();
 
             for(metadataRegion in metadataRegions) {
-                appendUnsavedRegion(new Region(communicator, path, metadataRegion.filename, Type.createEnumIndex(RegionMode, metadataRegion.mode), locale));
+                var region = new Region(communicator, path, metadataRegion.filename, Type.createEnumIndex(RegionMode, metadataRegion.mode), locale);
+                appendUnsavedRegion(region);
+                regions.push(region);
             }
         });
     }
@@ -128,6 +132,7 @@ class Notebook implements Editor {
         var region = new Region(communicator, oldRegion.directory, oldRegion.filename, mode, locale);
         region.editor.setContent(content);
         appendUnsavedRegion(region, oldRegion.element);
+        regions[regions.indexOf(oldRegion)] = region;
 
         deleteRegion(oldRegion);
     }
@@ -153,7 +158,6 @@ class Notebook implements Editor {
             element.append(region.element);
         }
         region.editor.focus();
-        regions.push(region);
     }
 
     public function createRegion(regionMode: RegionMode, ?target: JQuery) {
@@ -162,6 +166,7 @@ class Notebook implements Editor {
 
     public function appendRegion(region: Region, ?target: JQuery) {
         appendUnsavedRegion(region, target);
+        regions.push(region);
         saveMetadata();
     }
 
