@@ -294,6 +294,54 @@ body {
         min-height: @regionBarHeight;
     }
 
+    .content {
+         background-color: @gutterColor;
+    }
+
+    .markdown-render {
+        margin-left: 80px;
+        border-left: @gutterBorder;
+        line-height: @baseFontSize;
+        padding-left: 10px;
+        background-color: #fff;
+
+        h1 {
+            font-size: @baseFontSize * 2;
+        }
+
+        h2 {
+            font-size: @baseFontSize * 1.8;
+        }
+
+        h3 {
+            font-size: @baseFontSize * 1.6;
+        }
+
+        h4 {
+            font-size: @baseFontSize * 1.4;
+        }
+
+        h5 {
+            font-size: @baseFontSize * 1.2;
+        }
+
+        h6 {
+            font-size: @baseFontSize * 1.2;
+        }
+
+        h1, h2, h3 {
+            line-height: @baseFontSize * 2;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            margin: 5px 0;
+        }
+
+        h1:first-child, h2:first-child, h3:first-child, h4:first-child, h5:first-child, h6:first-child {
+            margin-top: 0;
+        }
+    }
+
     .btn-flat {
         background-color: #fff;
         background-image: none;

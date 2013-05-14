@@ -11,6 +11,7 @@ class Node
 	public var isRoot(default, null) : Bool;
 	public var isSystem(get, null) : Bool;
 	public var root(get, null) : Node;
+	public var level(get, null) : Int;
 	public function new(name : String, parent : Directory, ?metadata : Map<String, Dynamic>)
 	{
 		meta = new Meta(this);
@@ -56,6 +57,11 @@ class Node
 	function get_root()
 	{
 		return isRoot ? this : (null == parent ? null : parent.root);
+	}
+
+	function get_level()
+	{
+		return null == parent ? 0 : 1 + parent.level;
 	}
 
 	macro function trigger<T>(ethis : haxe.macro.Expr, values : Array<haxe.macro.Expr>)

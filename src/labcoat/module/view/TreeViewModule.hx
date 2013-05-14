@@ -212,7 +212,7 @@ class TreeViewModule extends Module
         fs.root.meta.set(API_CONTEXT, name);
         fss.set(name, fs);
         wireFileSystem(fs);
-        loadDir("/", name, 4);
+        loadDir("/", name, 0);
     }
 
     function getNodeType(node : Node) : NodeType
@@ -271,6 +271,11 @@ class TreeViewModule extends Module
             var node = e.node,
                 parent = node.parent.meta.get(UI_TREE_NODE),
                 tree_node = parent.appendChild(node);
+            if(node.isDirectory && node.level > 1)
+            {
+                tree_node.collapse();
+
+            }
             node.meta.set(UI_TREE_NODE, tree_node);
             tree.update();
         });
