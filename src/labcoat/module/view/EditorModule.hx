@@ -2,6 +2,7 @@ package labcoat.module.view;
 
 import jQuery.Event;
 import jQuery.JQuery;
+import labcoat.config.ViewConfig;
 import labcoat.message.*;
 import labcoat.message.MenuItem;
 import labcoat.message.PrecogRequest;
@@ -17,8 +18,10 @@ import precog.geom.Rectangle;
 import precog.html.Bootstrap;
 import precog.html.HtmlButton;
 import precog.html.HtmlDropdown;
+import precog.html.HtmlPanel;
 import precog.html.HtmlPanelGroup;
 import precog.html.Icons;
+import precog.layout.DockLayout;
 import precog.util.Locale;
 
 using StringTools;
@@ -226,6 +229,31 @@ class EditorModule extends Module {
         saveMetadata();
     }
 
+    // TODO: Code is exactly same as TreeViewModule, extract.
+    function createContainers(group: HtmlPanelGroupItem) {
+        var layout = new DockLayout(group.panel.rectangle.width, group.panel.rectangle.height);
+        layout.defaultMargin = ViewConfig.panelMargin;
+        group.panel.rectangle.addListener(function(r) {
+            layout.rectangle.updateSize(r); //updateSize
+            layout.update();
+        });
+
+        var toolbar = new HtmlPanel(),
+            main = new HtmlPanel();
+
+        group.panel.element.append(toolbar.element);
+        group.panel.element.append(main.element);
+
+        layout.addPanel(toolbar).dockTop(ViewConfig.toolbarHeight);
+        layout.addPanel(main);
+        layout.update();
+
+        return {
+            toolbar : toolbar,
+            main : main
+        };
+    }
+
     function tabButton(editor: Editor) {
         var insert = new HtmlButton(locale.singular('insert region'), Icons.chevronDown, Mini, true);
         insert.element.click(function(event: Event) {
@@ -248,20 +276,24 @@ class EditorModule extends Module {
             closeEditor(editor);
         });
 
+        var containers = createContainers(item);
+
+        containers.main.element.append(editor.element);
+        containers.main.element.addClass("edit-area");
+
+        var btnGroup = new JQuery('<div class="btn-group"></div>').appendTo(containers.toolbar.element);
         // TODO: Stop using catamorphisms in EditorModule for
         // polymorphism. Add these details to each editor.
         editor.cata(
             function(codeEditor: CodeEditor) {
-                save.element.appendTo(item.panel.element);
+                save.element.appendTo(btnGroup);
             },
             function(notebook: Notebook) {
-                insert.element.appendTo(item.panel.element);
-                save.element.appendTo(item.panel.element);
+                insert.element.appendTo(btnGroup);
+                save.element.appendTo(btnGroup);
             }
         );
 
-        item.panel.element.addClass("edit-area");
-        item.panel.element.append(editor.element);
         return item;
     }
 
