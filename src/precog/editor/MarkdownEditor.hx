@@ -6,6 +6,7 @@ import precog.communicator.Communicator;
 import precog.editor.codemirror.Externs;
 import precog.editor.markdown.Externs;
 import jQuery.JQuery;
+import jQuery.Event;
 
 using StringTools;
 
@@ -25,19 +26,13 @@ class MarkdownEditor implements RegionEditor {
         rendered = new JQuery('<div class="markdown-rendered"></div>').hide();
         // Giving block elements a tabIndex give them a "focus" event.
         rendered.attr('tabindex', '-1');
-        rendered.focus(renderedFocus);
+        rendered.focus(function(e: Event) focus());
 
         element = new JQuery('<div></div>').append(rendered);
 
         editor = CodeMirrorFactory.addTo(element.get(0), options);
         editor.on('blur', editorBlur);
         editor.getWrapperElement().className += ' markdown-editor';
-    }
-
-    function renderedFocus(_) {
-        rendered.hide();
-        editor.getWrapperElement().style.display = 'block';
-        focus();
     }
 
     function editorBlur(editor: CodeMirror) {
@@ -67,6 +62,8 @@ class MarkdownEditor implements RegionEditor {
     }
 
     public function focus() {
+        rendered.hide();
+        editor.getWrapperElement().style.display = 'block';
         editor.refresh();
         editor.focus();
     }
