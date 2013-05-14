@@ -231,6 +231,7 @@ body {
     }
     .titlebar {
         border-bottom: @gutterBorder;
+        background-color: @gutterColor;
     }
     .outputbar {
         border-bottom: @gutterBorder;
@@ -258,8 +259,8 @@ body {
 
         .editor {
             position: absolute;
-            left: @gutterWidth;
-            padding-left: 8px;
+            left: @gutterWidth + 1px;
+            padding-left: 7px;
         }
 
         .context {
@@ -270,26 +271,28 @@ body {
     }
 
     .output {
+        position: relative;
         font-family: monospace;
         font-size: 11.5px;
 
-        background-color: #f0f9f6; 
+        background-color: #f9fffa; 
 
         .out {
             position: absolute;
-            width: @gutterWidth - 4px;
             background-color: @gutterColor;
+            width: @gutterWidth - 4px;
             border-right: @gutterBorder;
             text-align: right;
             line-height: @regionBarHeight;
             padding-right: 4px; 
+            height: 100%;
+            font-weight: bold;
         }
 
         .data {
-            position: absolute;
-            left: @gutterWidth;
-            padding-left: 4px;
+            padding-left: @gutterWidth + 4px;
             min-height: @regionBarHeight;
+            max-height: @regionBarHeight * 6;
         }
         min-height: @regionBarHeight;
     }
@@ -298,11 +301,18 @@ body {
          background-color: @gutterColor;
     }
 
-    .markdown-render {
-        margin-left: 80px;
+    .markdown-editor {
+        margin-left: @gutterWidth - 52px;
+        border-left: @gutterBorder;
+        padding-left: 10px;
+        background-color: #fff;
+    }
+
+    .markdown-rendered {
+        margin-left: @gutterWidth - 52px;
         border-left: @gutterBorder;
         line-height: @baseFontSize;
-        padding-left: 10px;
+        padding: 5px 10px;
         background-color: #fff;
 
         h1 {
@@ -343,7 +353,7 @@ body {
     }
 
     .btn-flat {
-        background-color: #fff;
+        background-color: rgba(255,255,255,0.75);
         background-image: none;
         border-color: #d9d9d9;
         border-bottom-color: #cacaca;
@@ -375,9 +385,8 @@ body {
         font-size: 11.5px;
     }
 
-    .content .editor {
+    .editor {
         padding-left: @gutterWidth - 28px;
-        background-color: @gutterColor;
 
         height: 100%;
 
@@ -407,6 +416,7 @@ body {
 
     .edit-area {
         overflow: auto;
+        background-color: #fff;
         .region {
             border-bottom: 1px solid #ddd;
             margin: 0;

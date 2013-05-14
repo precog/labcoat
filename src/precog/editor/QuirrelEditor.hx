@@ -21,7 +21,7 @@ class QuirrelEditor implements RegionEditor {
         this.region = region;
         this.communicator = communicator;
 
-        var options: Dynamic = {lineNumbers: true, mode: 'quirrel', region: region};
+        var options: Dynamic = {lineNumbers: true, mode: 'quirrel', region: region, lineWrapping : true };
 
         element = new JQuery('<div></div>');
 
@@ -72,7 +72,7 @@ class QuirrelEditor implements RegionEditor {
                 new RequestFileExecute(region.path()),
                 ResponseFileExecute
             ).then(ProcedureDef.fromArity1(function(res: ResponseFileExecute) {
-                outputElement.html('<div class="out">${region.filename}=</div><div class="data">${haxe.Json.stringify(res.result.data)}</div>');
+                outputElement.html('<div class="out">${region.filename} :=</div><div class="data">${haxe.Json.stringify(res.result.data)}</div>');
             }));
         });
     }
