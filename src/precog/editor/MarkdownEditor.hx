@@ -22,7 +22,7 @@ class MarkdownEditor implements RegionEditor {
 
         var options: Dynamic = {mode: 'markdown', region: region};
 
-        rendered = new JQuery('<div></div>').hide();
+        rendered = new JQuery('<div class="markdown-rendered"></div>').hide();
         // Giving block elements a tabIndex give them a "focus" event.
         rendered.attr('tabindex', '-1');
         rendered.focus(renderedFocus);
@@ -31,6 +31,7 @@ class MarkdownEditor implements RegionEditor {
 
         editor = CodeMirrorFactory.addTo(element.get(0), options);
         editor.on('blur', editorBlur);
+        editor.getWrapperElement().className += ' markdown-editor';
     }
 
     function renderedFocus(_) {
