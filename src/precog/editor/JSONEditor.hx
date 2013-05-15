@@ -20,10 +20,10 @@ class JSONEditor implements RegionEditor {
 
         element = new JQuery('<div></div>');
 
-        var area = new TextAreaEditor();
-        area.element.appendTo(element);
-        editor = area;
-//        editor = CodeMirrorFactory.addTo(element.get(0), options);
+//        var area = new TextAreaEditor();
+//        area.element.appendTo(element);
+//        editor = area;
+        editor = CodeMirrorFactory.addTo(element.get(0), options);
     }
 
     public function getContent() {
