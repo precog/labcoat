@@ -119,14 +119,15 @@ trace("RESPONSE ERROR");
 										case invalid:
 											throw 'invalid type "$invalid"';
 									};
-								}))
-								.then(function(arr : Array<{ type : String, name : String, metadata : Map<String, Dynamic> }>) {
-										var response = new ResponseMetadataChildren(request.path, arr, request);
-										deferred.resolve(response);
-										communicator.trigger(response);
-									},
-									errorResponse(request, deferred)
-								);
+								})
+							)
+							.then(function(arr : Array<{ type : String, name : String, metadata : Map<String, Dynamic> }>) {
+									var response = new ResponseMetadataChildren(request.path, arr, request);
+									deferred.resolve(response);
+									communicator.trigger(response);
+								},
+								errorResponse(request, deferred)
+							);
 
 					},
 					errorResponse(request, deferred)

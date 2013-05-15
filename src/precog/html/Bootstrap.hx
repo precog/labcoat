@@ -66,7 +66,7 @@ class Dialog
 			cancel.enabled = ok.enabled = false;
 			error.hide();
 			var value = input.val();
-trace(value);
+
 			validator(value, function(msg) {
 				if(null == msg) {
 					dialog.hide();

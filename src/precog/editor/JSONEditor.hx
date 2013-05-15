@@ -10,17 +10,20 @@ class JSONEditor implements RegionEditor {
     public var element: JQuery;
     var communicator: Communicator;
     var region: Region;
-    var editor: CodeMirror;
+    var editor: TextEditor;
 
     public function new(communicator: Communicator, region: Region) {
         this.communicator = communicator;
         this.region = region;
 
-        var options: Dynamic = {mode: {name: 'javascript', json: true}, region: region};
+        var options: Dynamic = {mode: {name: 'javascript', json: true}, region: region, lineWrapping : true};
 
         element = new JQuery('<div></div>');
 
-        editor = CodeMirrorFactory.addTo(element.get(0), options);
+        var area = new TextAreaEditor();
+        area.element.appendTo(element);
+        editor = area;
+//        editor = CodeMirrorFactory.addTo(element.get(0), options);
     }
 
     public function getContent() {

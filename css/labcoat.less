@@ -413,6 +413,27 @@ body {
         }
     }
 
+    textarea.textarea-editor {
+        font-size: 11.5px;
+        line-height: 15px;
+        font-family: monospace;
+        margin: 0;
+        padding: 5px;
+        width: 100%;
+        resize: none;
+        .box-sizing(border-box);
+        border: none;
+        .border-radius(0px);
+        .box-shadow(none);
+        display: block;
+        height: 30px;
+
+        margin-left: @gutterWidth;
+        border-left: @gutterBorder;
+        padding-left: 10px;
+        background-color: #fff;
+    }
+
     .code-editor {
         .show-hide {
             display: none;
