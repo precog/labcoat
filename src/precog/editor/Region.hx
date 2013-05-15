@@ -32,6 +32,7 @@ class Region {
     var editorToolbar: JQuery;
     var toggleTrimButton: HtmlButton;
     var showHideButton: HtmlButton;
+    var deleteButton: HtmlButton;
 
     // TOOD: Triggering ourselves
     function changeTo(mode: RegionMode) {
@@ -71,6 +72,11 @@ class Region {
 
     function showHideContent(_) {
         showHideButton.leftIcon = element.find('.content .editor').toggle().is(':visible') ? Icons.eyeClose : Icons.eyeOpen;
+    }
+
+    // TOOD: Triggering ourselves
+    function deleteContent(_) {
+        events.remove.trigger(this);
     }
 
     public function path() {
@@ -116,6 +122,12 @@ class Region {
         showHideButton.element.click(showHideContent);
         showHideButton.element.addClass('show-hide');
         contextToolbar.append(showHideButton.element);
+
+        deleteButton = new HtmlButton(locale.singular('delete'), Icons.remove, Mini, true);
+        deleteButton.type = Flat;
+        deleteButton.element.click(deleteContent);
+        deleteButton.element.addClass('toggle-trim');
+        contextToolbar.append(deleteButton.element);
 
         element.append(titlebar);
 
