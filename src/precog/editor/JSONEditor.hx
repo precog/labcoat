@@ -18,12 +18,13 @@ class JSONEditor implements RegionEditor {
 
         var options: Dynamic = {mode: {name: 'javascript', json: true}, region: region, lineWrapping : true};
 
-        element = new JQuery('<div></div>');
+        element = new JQuery('<div><div class="out">${region.filename} :=</div></div>');
 
 //        var area = new TextAreaEditor();
 //        area.element.appendTo(element);
 //        editor = area;
         editor = CodeMirrorFactory.addTo(element.get(0), options);
+        editor.getWrapperElement().className += ' editor';
     }
 
     public function getContent() {
@@ -45,4 +46,3 @@ class JSONEditor implements RegionEditor {
         editor.focus();
     }
 }
-
