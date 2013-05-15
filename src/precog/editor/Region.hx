@@ -30,6 +30,7 @@ class Region {
 
     var communicator: Communicator;
     var editorToolbar: JQuery;
+    var toggleTrimButton: HtmlButton;
     var showHideButton: HtmlButton;
 
     // TOOD: Triggering ourselves
@@ -62,6 +63,10 @@ class Region {
             case JSONRegionMode: new JSONEditor(communicator, this);
             case VegaRegionMode: new VegaEditor(this);
         }
+    }
+
+    function toggleTrimContent(_) {
+        toggleTrimButton.leftIcon = element.find('.content .editor').toggleClass('trimmed').is('.trimmed') ? Icons.resizeFull : Icons.resizeSmall;
     }
 
     function showHideContent(_) {
@@ -99,6 +104,12 @@ class Region {
         editorToolbar = new JQuery('<div class="editor toolbar"></div>').appendTo(titlebar);
 
         var contextToolbar = new JQuery('<div class="context toolbar"></div>').appendTo(titlebar);
+
+        toggleTrimButton = new HtmlButton(locale.singular('toggle trim'), Icons.resizeFull, Mini, true);
+        toggleTrimButton.type = Flat;
+        toggleTrimButton.element.click(toggleTrimContent);
+        toggleTrimButton.element.addClass('toggle-trim');
+        contextToolbar.append(toggleTrimButton.element);
 
         showHideButton = new HtmlButton(locale.singular('show/hide'), Icons.eyeClose, Mini, true);
         showHideButton.type = Flat;

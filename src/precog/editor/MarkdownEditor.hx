@@ -28,7 +28,7 @@ class MarkdownEditor implements RegionEditor {
         rendered.attr('tabindex', '-1');
         rendered.focus(function(e: Event) focus());
 
-        element = new JQuery('<div class="editor"></div>').append(rendered);
+        element = new JQuery('<div class="editor trimmed"></div>').append(rendered);
 
         editor = CodeMirrorFactory.addTo(element.get(0), options);
         editor.on('blur', editorBlur);

@@ -25,7 +25,7 @@ class QuirrelEditor implements RegionEditor {
 
         element = new JQuery('<div></div>');
 
-        var editorElement = new JQuery('<div class="editor"></div>').appendTo(element);
+        var editorElement = new JQuery('<div class="editor trimmed"></div>').appendTo(element);
         editor = CodeMirrorFactory.addTo(editorElement.get(0), options);
 
         var runButton = new HtmlButton('run', Icons.play, Mini);
