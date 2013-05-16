@@ -18,7 +18,7 @@ class JSONEditor implements RegionEditor {
 
         var options: Dynamic = {mode: {name: 'javascript', json: true}, region: region, lineWrapping : true};
 
-        element = new JQuery('<div><div class="out">${region.filename} :=</div></div>');
+        element = new JQuery('<div class="json-editor"><div class="out">${region.filename} :=</div></div>');
 
 //        var area = new TextAreaEditor();
 //        area.element.appendTo(element);

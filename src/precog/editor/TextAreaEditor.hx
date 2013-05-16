@@ -26,6 +26,10 @@ class TextAreaEditor
 	{
 		element.focus();
 	}
+	public function getWrapperElement() : js.html.Element;
+	{
+		return element.get(0);
+	}
 
 	static function autoresize(element : JQuery)
 	{

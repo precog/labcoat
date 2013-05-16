@@ -6,4 +6,5 @@ typedef TextEditor =
 	public function setValue(text : String) : Void;
 	public function refresh() : Void;
 	public function focus() : Void;
+	public function getWrapperElement() : js.html.Element;
 }

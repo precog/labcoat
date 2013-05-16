@@ -277,18 +277,6 @@ body {
 
         background-color: #f9fffa; 
 
-        .out {
-            position: absolute;
-            background-color: @gutterColor;
-            width: @gutterWidth - 4px;
-            border-right: @gutterBorder;
-            text-align: right;
-            line-height: @regionBarHeight;
-            padding-right: 4px; 
-            height: 100%;
-            font-weight: bold;
-        }
-
         .data {
             overflow-y: auto;
             padding-left: @gutterWidth + 4px;
@@ -296,6 +284,26 @@ body {
             max-height: @regionBarHeight * 6;
         }
         min-height: @regionBarHeight;
+    }
+
+    .content {
+        position: relative;
+    }
+
+    .out {
+        font-family: monospace;
+        font-size: 11.5px;
+
+        position: absolute;
+        background-color: @gutterColor;
+        width: @gutterWidth - 4px;
+        border-right: @gutterBorder;
+//        border-bottom: @gutterBorder;
+        text-align: right;
+        line-height: @regionBarHeight;
+        padding-right: 4px; 
+        height: 100%;
+        font-weight: bold;
     }
 
     .content {
@@ -309,7 +317,7 @@ body {
     .markdown-editor {
         margin-left: @gutterWidth - 52px;
         border-left: @gutterBorder;
-        padding-left: 10px;
+        padding-left: 0px;
         background-color: #fff;
     }
 
@@ -317,7 +325,7 @@ body {
         margin-left: @gutterWidth - 52px;
         border-left: @gutterBorder;
         line-height: @baseFontSize;
-        padding: 5px 10px;
+        padding: 5px;
         background-color: #fff;
 
         h1 {
@@ -432,6 +440,26 @@ body {
         border-left: @gutterBorder;
         padding-left: 10px;
         background-color: #fff;
+    }
+/*
+    @gutterWidth : 80px;
+    @gutterColor : #f7f7f7;
+    @gutterBorder : 1px solid #ddd;
+    @regionBarHeight : 20px;
+*/
+    .json-editor {
+        /*
+        .out {
+            position: absolute;
+            width: @gutterWidth;
+            border-right: @gutterBorder;
+            background-color: @gutterColor;
+        }
+*/
+        .editor {
+            margin-left: @gutterWidth + 1px;
+            padding-left: 0;
+        }
     }
 
     .code-editor {
