@@ -14,6 +14,22 @@ body {
 
 .labcoat 
 {
+    .icon-90, .icon-180, .icon-270 {
+        display: inline-block;
+    }
+
+    .icon-90 {
+        .transform(rotate(90deg));
+    }
+
+    .icon-180 {
+        .transform(rotate(180deg));
+    }
+
+    .icon-270 {
+        .transform(rotate(270deg));
+    }
+
     .user-select(none);
 	position: absolute;
 	width: 100%;
@@ -191,6 +207,48 @@ body {
         }
     }
 
+    .main .editor {
+        .gutter.tabs.top {
+            button.btn {
+                bottom: 0;
+                border-bottom: 1px solid #ccc;
+            }
+
+            button.btn.active {
+                border-bottom: 1px solid #f3f3f3;
+                background-color: #f3f3f3;
+                .box-shadow(none);
+            }
+        }
+
+        .main-toolbar {
+            background-color: #f3f3f3;
+            padding: 3px;
+            .border-radius(0);
+            border-left: 1px solid #ccc;
+            border-right: 1px solid #ccc;
+
+            button.btn {
+                color: #666;
+                background-color: rgba(255,255,255,0.8);
+                background-image: none;
+                .box-shadow(none);
+                border: 1px solid #ddd;
+                line-height: 22px;
+                height: 22px;
+                min-width: 30px;
+                .i {
+                    
+                }
+            }
+
+            button.btn:hover {
+                color: #000;
+                background-color: rgba(255,255,255,0.5);
+            }
+        }
+    }
+
     .tree, .tree div {
         .box-sizing(border-box);
     }
@@ -223,18 +281,16 @@ body {
     @gutterWidth : 80px;
     @gutterColor : #f7f7f7;
     @gutterBorder : 1px solid #ddd;
-    @regionBarHeight : 20px;
+    @regionBarHeight : 21px;
     .titlebar, .outputbar {
         position: relative;
         height: @regionBarHeight;
         line-height: @regionBarHeight - 2px;
     }
     .titlebar {
-        border-bottom: @gutterBorder;
         background-color: @gutterColor;
     }
     .outputbar {
-        border-bottom: @gutterBorder;
         border-top: @gutterBorder;
     }
 
@@ -387,10 +443,10 @@ body {
     }
 
     .region {
-        border-top: 1px solid #999;
+        border-top: 1px solid #ccc;
     }
     .region:first-child {
-        border-top: none;
+//        border-top: none;
     }
 
     .CodeMirror {
@@ -472,7 +528,7 @@ body {
         overflow: auto;
         background-color: #fff;
         .region {
-            border-bottom: 1px solid #ddd;
+//            border-bottom: 1px solid #ddd;
             margin: 0;
             margin-bottom: 0px;
 
@@ -481,6 +537,10 @@ body {
             .cm-header {
                 font-size: 1.5em;
             }
+        }
+
+        .region:last-child {
+            border-bottom: 1px solid #ddd;
         }
     }
 

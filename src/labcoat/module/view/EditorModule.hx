@@ -21,6 +21,7 @@ import precog.html.HtmlPanel;
 import precog.html.HtmlPanelGroup;
 import precog.html.Icons;
 import precog.util.Locale;
+import labcoat.config.ViewConfig;
 
 using StringTools;
 using thx.react.IObservable;
@@ -90,7 +91,6 @@ class EditorModule extends Module {
         Reflect.setField(CodeMirror.keyMap.macDefault, "Cmd-Enter", createRegionFromEditor);
         Reflect.setField(CodeMirror.keyMap.pcDefault, "Ctrl-Enter", createRegionFromEditor);
 
-                // TODO: move out from here: TABS!!!
         var rect = new Rectangle();
         editorPanel.panel.rectangle.addListener(rect.updateSize);
         rect.updateSize(editorPanel.panel.rectangle);
@@ -228,7 +228,7 @@ class EditorModule extends Module {
     }
 
     function tabButton(editor: Editor) {
-        var insert = new HtmlButton(locale.singular('insert region'), Icons.chevronDown, Mini, true);
+        var insert = new HtmlButton(locale.singular('insert region'), Icons.shareAlt + " icon-180", Mini, true);
         insert.element.click(function(event: Event) {
             event.preventDefault();
             createRegion(QuirrelRegionMode);
@@ -249,8 +249,9 @@ class EditorModule extends Module {
             closeEditor(editor);
         });
 
-        var containers = new ToolbarContainers(item);
+        var containers = new ToolbarContainers(item, ViewConfig.mainToolbarHeight, ViewConfig.mainToolbarMargin);
 
+        containers.toolbar.element.addClass("main-toolbar");
         containers.main.element.append(editor.element);
         containers.main.element.addClass("edit-area");
 

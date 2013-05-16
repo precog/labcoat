@@ -11,12 +11,24 @@ class ToolbarContainers {
     public var toolbar(default, null): HtmlPanel;
     public var main(default, null): HtmlPanel;
 
-    public function new(group : HtmlPanelGroupItem) {
+    public function new(group : HtmlPanelGroupItem, ?toolbarHeight : Int, ?margin : Int) {
         toolbar = new HtmlPanel();
         main = new HtmlPanel();
 
+trace(toolbarHeight);
+trace(margin);
+
+        toolbarHeight = null != toolbarHeight ? toolbarHeight : ViewConfig.toolbarHeight;
+        margin = null != margin ? margin : ViewConfig.panelMargin;
+
+trace(toolbarHeight);
+trace(margin);
+
+trace(ViewConfig.toolbarHeight);
+trace(ViewConfig.panelMargin);
+
         var layout = new DockLayout(group.panel.rectangle.width, group.panel.rectangle.height);
-        layout.defaultMargin = ViewConfig.panelMargin;
+        layout.defaultMargin = margin;
         group.panel.rectangle.addListener(function(r) {
             layout.rectangle.updateSize(r); //updateSize
             layout.update();
@@ -25,8 +37,36 @@ class ToolbarContainers {
         group.panel.element.append(toolbar.element);
         group.panel.element.append(main.element);
 
-        layout.addPanel(toolbar).dockTop(ViewConfig.toolbarHeight);
+        layout.addPanel(toolbar).dockTop(toolbarHeight);
         layout.addPanel(main);
         layout.update();
     }
 }
+
+
+/*
+    public function new(group : HtmlPanelGroupItem, ?toolbarHeight : Float, ?margin : Float) {
+        toolbar = new HtmlPanel();
+        main = new HtmlPanel();
+
+        toolbarHeight = null != toolbarHeight ? toolbarHeight : ViewConfig.toolbarHeight;
+        margin = null != margin ? margin : ViewConfig.panelMargin;
+
+        var layout = new DockLayout(group.panel.rectangle.width, group.panel.rectangle.height);
+        layout.defaultMargin = margin;
+        group.panel.rectangle.addListener(function(r) {
+            layout.rectangle.updateSize(r); //updateSize
+            layout.update();
+        });
+
+        group.panel.element.append(toolbar.element);
+        group.panel.element.append(main.element);
+
+        layout.addPanel(toolbar).dockTop(toolbarHeight);
+        layout.addPanel(main);
+        layout.update();
+    }
+}
+
+
+*/
