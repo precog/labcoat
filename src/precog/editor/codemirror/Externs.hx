@@ -124,10 +124,16 @@ typedef StringStream = {
 }
 
 class CodeMirrorFactory {
+    static function refreshOnChange(editor: CodeMirror) {
+        editor.on('viewportChange', function(editor: CodeMirror) {
+            editor.refresh();
+        });
+        return editor;
+    }
     public static function addTo(elem: Node, ?options: Config): CodeMirror untyped {
-        return CodeMirror(elem, options);
+        return refreshOnChange(CodeMirror(elem, options));
     }
     public static function create(callback: Node -> Void, ?options: Config): CodeMirror untyped {
-        return CodeMirror(callback, options);
+        return refreshOnChange(CodeMirror(callback, options));
     }
 }
