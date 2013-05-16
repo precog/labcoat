@@ -113,9 +113,23 @@ class ResponseFileUpload extends ResponseFileBase
 
 }
 
+typedef FileExecutionErrorPosition = {
+	column: Int,
+	line: Int,
+	text: String
+}
+
+typedef FileExecutionError = {
+	message: String,
+	position: FileExecutionErrorPosition,
+	timestame: String
+}
+
 typedef FileExecution = {
-    data: Array<Dynamic>
-};
+	data: Array<Dynamic>,
+	errors: Array<FileExecutionError>,
+	warnings: Array<FileExecutionError>
+}
 
 class ResponseFileExecute extends ResponseFileBase 
 {

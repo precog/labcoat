@@ -76,9 +76,9 @@ extern class Precog
 	// ****************
 
     public function executeFile(info : OptExecuteFile, ?success : ProcQuery, ?failure : ProcFailure) : Future<ProcQuery, ProcFailure>;
-    public function execute(info : ResQuery, ?success : ProcQuery, ?failure : ProcFailure) : Future<ProcQuery, ProcFailure>;
-    public function _asyncQuery(info : ResQuery, ?success : ProcAsyncQuery, ?failure : ProcFailure) : Future<ProcAsyncQuery, ProcFailure>;
-    public function _asyncQueryResults(jobId : String, ?success : ProcQueryDetailed, ?failure : ProcFailure) : Future<ProcQueryDetailed, ProcFailure>;
+    public function execute(info : OptQuery, ?success : ProcQuery, ?failure : ProcFailure) : Future<ProcQuery, ProcFailure>;
+    public function _asyncQuery(info : OptQuery, ?success : ProcAsyncQuery, ?failure : ProcFailure) : Future<ProcAsyncQuery, ProcFailure>;
+    public function _asyncQueryResults(jobId : String, ?success : ProcQuery, ?failure : ProcFailure) : Future<ProcQuery, ProcFailure>;
 
 	static function __init__() : Void
 	{
@@ -175,14 +175,12 @@ typedef ResAsyncQuery = {
 				jobId : String
 			}
 typedef ProcAsyncQuery = ProcT<ResAsyncQuery>;
-typedef ResQuery = {data: Array<Dynamic>};
-typedef ProcQuery = ProcT<ResQuery>;
-typedef ResQueryDetailed = {
+typedef ResQuery = {
 				errors : Array<Dynamic>, // TODO type me
 				warnings : Array<Dynamic>, // TODO type me
-				data : ResQuery
+				data : Array<Dynamic>
 			}
-typedef ProcQueryDetailed = ProcT<ResQueryDetailed>;
+typedef ProcQuery = ProcT<ResQuery>;
 typedef ResFile = {
 				contents : String,
 				type : String
@@ -269,6 +267,10 @@ typedef OptExecuteFile = {
 	path	: String,
 	?maxAge : Float,
 	?maxStale : Float
+}
+
+typedef OptQuery = {
+    query : String
 }
 
 typedef OptMove = {

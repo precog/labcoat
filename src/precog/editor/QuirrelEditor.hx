@@ -2,6 +2,7 @@ package precog.editor;
 
 import labcoat.message.PrecogRequest;
 import labcoat.message.PrecogResponse;
+import labcoat.message.StatusMessage;
 import precog.communicator.Communicator;
 import precog.editor.codemirror.Externs;
 import precog.html.HtmlButton;
@@ -73,6 +74,12 @@ class QuirrelEditor implements RegionEditor {
                 ResponseFileExecute
             ).then(ProcedureDef.fromArity1(function(res: ResponseFileExecute) {
                 outputElement.html('<div class="out">${region.filename} :=</div><div class="data">${haxe.Json.stringify(res.result.data)}</div>');
+                for(warning in res.result.warnings) {
+                    communicator.queue(new StatusMessage(warning.message, Warning));
+                }
+                for(error in res.result.errors) {
+                    communicator.queue(new StatusMessage(error.message, Error));
+                }
             }));
         });
     }
