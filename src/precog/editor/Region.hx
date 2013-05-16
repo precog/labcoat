@@ -11,6 +11,7 @@ import jQuery.JQuery;
 import jQuery.Event;
 import thx.react.Signal;
 import precog.util.Locale;
+import precog.html.Bootstrap;
 using precog.editor.RegionMode;
 
 class Region {
@@ -75,7 +76,7 @@ class Region {
     }
 
     // TOOD: Triggering ourselves
-    function deleteContent(_) {
+    function deleteContent() {
         events.remove.trigger(this);
     }
 
@@ -125,7 +126,9 @@ class Region {
 
         deleteButton = new HtmlButton(locale.singular('delete'), Icons.remove, Mini, true);
         deleteButton.type = Flat;
-        deleteButton.element.click(deleteContent);
+        deleteButton.element.click(function(_) {
+            Dialog.confirm("Are you sure you want to delete this region?", deleteContent);
+        });
         deleteButton.element.addClass('toggle-trim');
         contextToolbar.append(deleteButton.element);
 
