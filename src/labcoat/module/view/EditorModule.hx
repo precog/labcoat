@@ -85,6 +85,8 @@ class EditorModule extends Module {
         QuirrelMode.init();
 
         // Global keyhandlers
+        Reflect.setField(CodeMirror.keyMap.basic, "Shift-Up", "goLineUp");
+        Reflect.setField(CodeMirror.keyMap.basic, "Shift-Down", "goLineDown");
         Reflect.setField(CodeMirror.keyMap.basic, "Up", moveUpAcrossRegions);
         Reflect.setField(CodeMirror.keyMap.basic, "Down", moveDownAcrossRegions);
         Reflect.setField(CodeMirror.keyMap.basic, "Shift-Enter", evaluateRegion);
