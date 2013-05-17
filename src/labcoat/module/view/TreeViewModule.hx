@@ -17,6 +17,7 @@ import labcoat.message.PrecogRequest;
 import labcoat.message.PrecogResponse;
 import precog.fs.*;
 using StringTools;
+using thx.core.Strings;
 
 import precog.layout.*;
 using thx.react.IObservable;
@@ -62,6 +63,11 @@ class TreeViewModule extends Module
         };
     }
 
+    function isNotebook(node : Node)
+    {
+        return node.meta.get("type") == "notebook";
+    }
+
     function init(message: SystemHtmlPanelGroup, locale : Locale)
     {
         var item = new HtmlPanelGroupItem(locale.singular("file system"));
@@ -70,6 +76,17 @@ class TreeViewModule extends Module
         var renderer = new FSHtmlTreeRenderer(16),
             panels = new ToolbarContainers(item);
         tree = new HtmlTree(panels.main, renderer);
+        tree.compare = function(a, b) {
+            if(a.isDirectory == b.isDirectory && isNotebook(a) == isNotebook(b))
+                return a.name.compare(b.name);
+            else if(a.isDirectory)
+                return -1;
+            else if(isNotebook(a) && !b.isDirectory)
+                return -1;
+            else
+                return 1;
+
+        };
         tree.events.select.on(function(tn : TreeNode<Node>) {
             if(null == tn) {
                 communicator.trigger(new NodeDeselected());
@@ -138,8 +155,10 @@ class TreeViewModule extends Module
         });
 
         communicator.on(function(res : ResponseFileMove) {
-            var fs = fss.get(res.api);
-            fs.root.pick(res.src).remove();
+            var fs = fss.get(res.api),
+                node = fs.root.pick(res.src);
+            if(null != node)
+                node.remove();
             fs.root.createFileAt(res.dst, true);
         });
 
@@ -229,8 +248,8 @@ class TreeViewModule extends Module
             var node = e.node,
                 parent = node.parent.meta.get(UI_TREE_NODE);
             if(isHiddenFile(node.toString())) return;
-            var tree_node = parent.appendChild(node);
-            if(node.isDirectory && node.level > 1)
+            var tree_node = parent.appendChildOrdered(node);
+            if(node.isDirectory && node.level > 0)
             {
                 tree_node.collapse();
             }

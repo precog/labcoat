@@ -94,8 +94,7 @@ class TreeNode<T>
 		if(null != after)
 			after.before = node;
 		else if(null != parent)
-			parent.lastChild = this;
-
+			parent.lastChild = node;
 		after = node;
 		tree.dirty = true;
 		return node;
@@ -111,10 +110,37 @@ class TreeNode<T>
 		if(null != before)
 			before.after = node;
 		else if(null != parent)
-			parent.firstChild = this;
+			parent.firstChild = node;
 		before = node;
 		tree.dirty = true;
 		return node;
+	}
+
+	public function appendChildOrdered(data : T)
+	{
+
+		for(node in iterator())
+		{
+			var c = tree.compare(data, node.data);
+			if(c < 0) {
+				return node.insertBefore(data);
+			} else if(c == 0) {
+				return node.insertAfter(data);
+			}
+		}
+		return appendChild(data);
+	}
+
+	public function iterator() : Iterator<TreeNode<T>>
+	{
+		var list = [],
+			node = firstChild;
+		while(null != node)
+		{
+			list.push(node);
+			node = node.after;
+		}
+		return list.iterator();
 	}
 
 	public function remove()
@@ -138,11 +164,13 @@ class TreeNode<T>
 class Tree<T>
 {
 	public var root(default, null) : TreeNode<T>;
+	public var compare : T -> T -> Int;
 
 	public function new() 
 	{
 		dirty = false;
 		list = [];
+		this.compare = function(a, b) return 1;
 	}
 
 	public function addRoot(data : T)
@@ -210,6 +238,7 @@ class HtmlTree<T>
 	public var panel : HtmlPanel;
 	public var events(default, null) : TreeEvents<T>;
 	public var selected(default, null) : Null<TreeNode<T>>;
+	public var compare(get, set) : T -> T -> Int;
 
 	public function new(panel : HtmlPanel, renderer : IHtmlTreeRenderer<T>)
 	{
@@ -337,6 +366,16 @@ class HtmlTree<T>
 	function calculateRowHeight()
 	{
 		rowHeight = renderer.getRowHeight(panel.rectangle);
+	}
+
+	function get_compare()
+	{
+		return tree.compare;
+	}
+
+	function set_compare(f)
+	{
+		return tree.compare = f;
 	}
 }
 

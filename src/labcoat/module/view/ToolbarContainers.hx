@@ -15,17 +15,8 @@ class ToolbarContainers {
         toolbar = new HtmlPanel();
         main = new HtmlPanel();
 
-trace(toolbarHeight);
-trace(margin);
-
         toolbarHeight = null != toolbarHeight ? toolbarHeight : ViewConfig.toolbarHeight;
         margin = null != margin ? margin : ViewConfig.panelMargin;
-
-trace(toolbarHeight);
-trace(margin);
-
-trace(ViewConfig.toolbarHeight);
-trace(ViewConfig.panelMargin);
 
         var layout = new DockLayout(group.panel.rectangle.width, group.panel.rectangle.height);
         layout.defaultMargin = margin;

@@ -67,7 +67,6 @@ class PrecogModule extends Module
 
 		function errorResponse(request : PrecogRequest, deferred : Deferred<Dynamic>) {
 			return function(err) {
-trace("RESPONSE ERROR");
 				var response = new ResponseError(err, request);
 				deferred.reject(response);
 				communicator.trigger(response);
@@ -364,8 +363,6 @@ trace("RESPONSE ERROR");
 					name   = request.path.split("/").pop();
 				api.listChildren(parent).then(
 					function(result : Array<FileDescription>) {
-						trace(request.path);
-						result.map(function(des) trace(des));
 						var exist = result.filter(function(des : FileDescription) return des.type == "directory" && des.name == name).length > 0;
 						var response = new ResponseDirectoryExist(request.path, exist, request);
 						deferred.resolve(response);
