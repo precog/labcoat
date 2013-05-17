@@ -23,7 +23,7 @@ env.repository = 'git@github.com:precog/labcoat.git' if not 'repository' in env 
 env.binpath = 'bin/release/html5' if not 'binpath' in env else env.binpath
 env.sitepath = '%(repopath)s/%(binpath)s' % env if not 'sitepath' in env else env.sitepath
 env.linkpath = '%(basepath)s/current' % env if not 'linkpath' in env else env.linkpath
-env.branch = 'origin/master' if not 'branch' in env else env.branch
+env.branch = 'origin/develop' if not 'branch' in env else env.branch
 
 @task
 @hosts('localhost')
@@ -32,6 +32,7 @@ def production():
         Run the tasks that follow it on production
     """
     env.hosts = ["qclus-demo01.reportgrid.com"]
+    env.branch = 'origin/master'
 
 @task
 def deploy():
