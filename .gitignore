@@ -26,4 +26,8 @@ Labcoat.app
 
 *.vim
 
+*.un~
+
+*.pyc
+
 build.hxml
