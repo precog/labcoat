@@ -230,7 +230,7 @@ class EditorModule extends Module {
     }
 
     function tabButton(editor: Editor) {
-        var insert = new HtmlButton(locale.singular('insert region'), Icons.levelDown + " icon-90", Mini, true);
+        var insert = new HtmlButton(locale.singular('insert region'), Icons.reply + " icon-flip-vertical", Mini, true);
         insert.element.click(function(event: Event) {
             event.preventDefault();
             createRegion(QuirrelRegionMode);

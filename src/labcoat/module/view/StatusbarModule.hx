@@ -38,7 +38,6 @@ class StatusbarModule extends Module {
     {
         var main    = new JQuery('<div class="pull-left"></div>').appendTo(bar.panel.element),
             context = new JQuery('<div class="pull-right"></div>').appendTo(bar.panel.element);
-//    	var el = bar.panel.element;
 
     	var timer = null;
     	function updateRequests()

@@ -94,9 +94,9 @@ class Notebook implements Editor {
 
     public function save(dest: String) {
         communicator.request(
-            new RequestDirectoryMove(path, dest),
-            ResponseDirectoryMove
-        ).then(function(response: ResponseDirectoryMove) {
+            new RequestNotebookMove(path, dest),
+            ResponseNotebookMove
+        ).then(function(response: ResponseNotebookMove) {
             path = dest;
             metadataPath = '${path}/metadata.json';
         });

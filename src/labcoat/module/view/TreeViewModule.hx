@@ -159,13 +159,30 @@ class TreeViewModule extends Module
                 node = fs.root.pick(res.src);
             if(null != node)
                 node.remove();
-            fs.root.createFileAt(res.dst, true);
+            fs.root.createFileAt(res.dst, true, null == node ? null : node.meta.getAll());
         });
 
         communicator.on(function(res : ResponseDirectoryMove) {
-            var fs = fss.get(res.api);
-            cast(fs.root.pick(res.src), Directory).removeRecursive();
-            fs.root.ensureDirectory(res.dst);
+            var fs = fss.get(res.api),
+                node = fs.root.pick(res.src);
+            if(null != node)
+                cast(node, Directory).removeRecursive();
+            fs.root.ensureDirectory(res.dst, null == node ? null : node.meta.getAll());
+        });
+
+        communicator.on(function(res : ResponseNotebookMove) {
+            var fs = fss.get(res.api),
+                node = fs.root.pick(res.src);
+            if(null != node)
+                cast(node, Directory).removeRecursive();
+            var meta = null == node ? null : node.meta.getAll();
+            if(null == meta)
+            {
+                meta = new Map<String, Dynamic>();
+            }
+            if(!meta.exists("type"))
+                meta.set("type", "notebook");
+            fs.root.createFileAt(res.dst, true, meta);
         });
 
         communicator.queueMany([

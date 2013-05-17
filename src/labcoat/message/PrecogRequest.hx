@@ -108,7 +108,6 @@ class RequestFileExecute extends RequestFileBase
 		this.maxAge = maxage;
 		this.maxStale = maxstale;
 	}
-
 }
 
 class RequestDirectoryDelete extends RequestFileBase
@@ -126,6 +125,19 @@ class RequestDirectoryMove extends PrecogRequest
 		this.src = Helper.normalizeDirectoryPath(src);
 		this.dst = Helper.normalizeDirectoryPath(dst);
 		this.description = 'move directory from ${this.src} to ${this.dst}';
+	}
+}
+
+class RequestNotebookMove extends PrecogRequest 
+{
+	public var src(default, null) : String;
+	public var dst(default, null) : String;
+	public function new(src : String, dst : String, ?api : String)
+	{
+		super(api);
+		this.src = Helper.normalizeDirectoryPath(src);
+		this.dst = Helper.normalizeDirectoryPath(dst);
+		this.description = 'move notebook from ${this.src} to ${this.dst}';
 	}
 }
 

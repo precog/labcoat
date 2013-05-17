@@ -113,12 +113,14 @@ class ActionsModule extends Module
                                     .then(function(res : ResponseFileMove) {
                                         communicator.queue(new StatusMessage(locale.format('renamed "{0}" to "{1}" in "{2}"', [getFileName(res.src), getFileName(res.dst), parent]), Info));
                                     });
-                            case Notebook, Directory:
+                            case Directory:
                                 communicator.request(new RequestDirectoryMove(node.path, newpath, node.api), ResponseDirectoryMove)
                                     .then(function(res : ResponseDirectoryMove) {
-                                        trace(res);
-                                        trace(res.src);
-                                        trace(res.dst);
+                                        communicator.queue(new StatusMessage(locale.format('renamed "{0}" to "{1}" in "{2}"', [getFileName(res.src), getFileName(res.dst), parent]), Info));
+                                    });
+                            case Notebook:
+                                communicator.request(new RequestNotebookMove(node.path, newpath, node.api), ResponseNotebookMove)
+                                    .then(function(res : ResponseNotebookMove) {
                                         communicator.queue(new StatusMessage(locale.format('renamed "{0}" to "{1}" in "{2}"', [getFileName(res.src), getFileName(res.dst), parent]), Info));
                                     });
                         }

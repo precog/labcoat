@@ -159,6 +159,19 @@ class ResponseDirectoryMove extends PrecogResponse
 	}
 }
 
+class ResponseNotebookMove extends PrecogResponse 
+{
+	public var src(default, null) : String;
+	public var dst(default, null) : String;
+	public function new(src : String, dst : String, request : PrecogRequest)
+	{
+		super(request);
+		this.src = src;
+		this.dst = dst;
+		this.description = 'response move notebook from ${this.src} to ${this.dst}';
+	}
+}
+
 class ResponseFileMove extends PrecogResponse 
 {
 	public var src(default, null) : String;
