@@ -124,12 +124,11 @@ class Notebook implements Editor {
         regions.remove(region);
         region.events.clear();
         region.element.remove();
-
-        saveMetadata();
     }
 
     public function deleteRegion(region: Region) {
         removeRegion(region);
+        saveMetadata();
 
         communicator.request(
             new RequestFileDelete(region.path()),
@@ -164,7 +163,6 @@ class Notebook implements Editor {
     function appendUnsavedRegion(region: Region, ?target: JQuery) {
         region.events.changeMode.on(changeRegionMode);
         region.events.delete.on(deleteRegion);
-        region.events.remove.on(removeRegion);
         if(target != null) {
             target.after(region.element);
         } else {
@@ -173,10 +171,12 @@ class Notebook implements Editor {
         region.editor.focus();
     }
 
-    public function moveToRegion(region: Region, filename: String, regionMode: RegionMode, content: String) {
-        var created = new Region(communicator, path, filename, regionMode, locale);
-        created.editor.setContent(content);
-        appendRegion(created, region.element);
+    public function moveToRegion(from: Region, to: Region) {
+        removeRegion(from);
+
+        var created = new Region(communicator, from.path(), from.filename, from.mode, locale);
+        created.editor.setContent(from.editor.getContent());
+        appendRegion(created, to.element);
     }
 
     public function createRegion(regionMode: RegionMode, ?target: JQuery) {

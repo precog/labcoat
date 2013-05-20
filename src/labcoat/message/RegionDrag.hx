@@ -10,6 +10,10 @@ class RegionDragStart implements ValueClass {
 class RegionDragStop implements ValueClass {
 }
 
+class RegionDrag implements ValueClass {
+    var region: Region;
+}
+
 class RegionDragTo implements ValueClass {
     var region: Region;
     var filename: String;

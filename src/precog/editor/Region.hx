@@ -27,7 +27,6 @@ class Region {
     public var events(default, null) : {
         public var changeMode(default, null) : Signal2<Region, RegionMode>;
         public var delete(default, null) : Signal1<Region>;
-        public var remove(default, null) : Signal1<Region>;
         public function clear() : Void;
     };
 
@@ -90,7 +89,6 @@ class Region {
         this.events = {
             changeMode : new Signal2(),
             delete : new Signal1(),
-            remove : new Signal1(),
             clear : function() {
                 for(field in Reflect.fields(this)) {
                     var signal : Signal<Dynamic> = Reflect.field(this, field);
@@ -159,8 +157,7 @@ class Region {
                 return;
             }
 
-            // Remove this region
-            events.remove.trigger(this);
+            communicator.trigger(new RegionDrag(this));
         });
 
         var titlebar = new JQuery('<div class="titlebar"></div>');

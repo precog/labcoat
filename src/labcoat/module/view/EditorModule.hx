@@ -1,7 +1,9 @@
 package labcoat.module.view;
 
+import haxe.ds.Option;
 import jQuery.Event;
 import jQuery.JQuery;
+import labcoat.config.ViewConfig;
 import labcoat.message.*;
 import labcoat.message.MenuItem;
 import labcoat.message.PrecogRequest;
@@ -22,7 +24,6 @@ import precog.html.HtmlPanel;
 import precog.html.HtmlPanelGroup;
 import precog.html.Icons;
 import precog.util.Locale;
-import labcoat.config.ViewConfig;
 
 using StringTools;
 using thx.react.IObservable;
@@ -44,11 +45,17 @@ class EditorModule extends Module {
     var fileCounter : Int = 0;
     var notebookCounter : Int = 0;
 
+    var dragEvent : Option<RegionDrag>;
+    var dragToEvent : Option<RegionDragTo>;
+
     public function new()
     {
         super();
         panels = new Map();
         editors = [];
+
+        dragEvent = None;
+        dragToEvent = None;
     }
 
     override public function connect(communicator: Communicator) {
@@ -65,8 +72,11 @@ class EditorModule extends Module {
             changeEditor(e.current));
         communicator.on(function(e : ResponseDirectoryDelete)
             closeDeleted(e.path));
+
+        communicator.on(function(e : RegionDrag)
+            storeDrag(e));
         communicator.on(function(e : RegionDragTo)
-            moveToRegion(e.region, e.filename, e.mode, e.content));
+            storeDragTo(e));
 
         communicator.queueMany([
             // new MenuItem(MenuEdit(SubgroupEditHistory), "Undo", function(){}, 0),
@@ -260,18 +270,18 @@ class EditorModule extends Module {
         containers.main.element.append(editor.element);
         containers.main.element.addClass("edit-area");
 
-        var btnGroup = new JQuery('<div class="btn-group"></div>').appendTo(containers.toolbar.element);
         // TODO: Stop using catamorphisms in EditorModule for
         // polymorphism. Add these details to each editor.
         editor.cata(
-            function(codeEditor: CodeEditor) {
-                save.element.appendTo(btnGroup);
-            },
+            function(codeEditor: CodeEditor) {},
             function(notebook: Notebook) {
-                insert.element.appendTo(btnGroup);
-                save.element.appendTo(btnGroup);
+                insert.element.appendTo(containers.toolbar.element);
             }
         );
+
+        var btnGroup = new JQuery('<div class="btn-group"></div>').appendTo(containers.toolbar.element);
+        save.element.appendTo(btnGroup);
+        new JQuery('<button class="btn btn-mini dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>').appendTo(btnGroup);
 
         return item;
     }
@@ -339,11 +349,37 @@ class EditorModule extends Module {
         );
     }
 
-    function moveToRegion(region: Region, filename: String, mode: RegionMode, content: String) {
+    function storeDrag(drag: RegionDrag) {
+        dragEvent = Some(drag);
+        liftA2(moveToRegion, dragEvent, dragToEvent);
+    }
+
+    function storeDragTo(dragTo: RegionDragTo) {
+        dragToEvent = Some(dragTo);
+        liftA2(moveToRegion, dragEvent, dragToEvent);
+    }
+
+    // Applicative liftA2 with concreted to two Options.
+    function liftA2<A, B, C>(f: A -> B -> C, oa: Option<A>, ob: Option<B>) {
+        return switch oa {
+            case Some(a): switch(ob) {
+                case Some(b): Some(f(a, b));
+                case _: None;
+            }
+            case _: None;
+        }
+    }
+
+    function moveToRegion(drag: RegionDrag, dragTo: RegionDragTo) {
+        trace("moving");
+
         current.cata(
             function(codeEditor: CodeEditor) {},
-            function(notebook: Notebook) notebook.moveToRegion(region, filename, mode, content)
+            function(notebook: Notebook) notebook.moveToRegion(drag.region, dragTo.region)
         );
+
+        dragEvent = None;
+        dragToEvent = None;
     }
 
     function appendRegion(region: Region, notebook: Notebook, ?target: JQuery) {
