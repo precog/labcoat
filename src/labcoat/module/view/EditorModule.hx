@@ -6,6 +6,7 @@ import labcoat.message.*;
 import labcoat.message.MenuItem;
 import labcoat.message.PrecogRequest;
 import labcoat.message.PrecogResponse;
+import labcoat.message.RegionDrag;
 import precog.communicator.Communicator;
 import precog.communicator.Module;
 import precog.editor.*;
@@ -64,6 +65,8 @@ class EditorModule extends Module {
             changeEditor(e.current));
         communicator.on(function(e : ResponseDirectoryDelete)
             closeDeleted(e.path));
+        communicator.on(function(e : RegionDragTo)
+            moveToRegion(e.region, e.filename, e.mode, e.content));
 
         communicator.queueMany([
             // new MenuItem(MenuEdit(SubgroupEditHistory), "Undo", function(){}, 0),
@@ -333,6 +336,13 @@ class EditorModule extends Module {
                 // Can't change single editor modes
             },
             function(notebook: Notebook) { notebook.changeRegionMode(oldRegion, mode); }
+        );
+    }
+
+    function moveToRegion(region: Region, filename: String, mode: RegionMode, content: String) {
+        current.cata(
+            function(codeEditor: CodeEditor) {},
+            function(notebook: Notebook) notebook.moveToRegion(region, filename, mode, content)
         );
     }
 

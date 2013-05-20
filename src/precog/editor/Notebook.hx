@@ -2,6 +2,7 @@ package precog.editor;
 
 import labcoat.message.PrecogRequest;
 import labcoat.message.PrecogResponse;
+import labcoat.message.RegionDrag;
 import precog.communicator.Communicator;
 import precog.editor.Editor;
 import precog.util.Locale;
@@ -35,9 +36,15 @@ class Notebook implements Editor {
                 }
             }
         };
+
         this.communicator = communicator;
         this.locale = locale;
         this.path = path;
+
+        communicator.on(function(e : RegionDragStart)
+            element.addClass('dragging'));
+        communicator.on(function(e : RegionDragStop)
+            element.removeClass('dragging'));
 
         metadataPath = '${path}/metadata.json';
         regionCounter = 0;
@@ -113,11 +120,16 @@ class Notebook implements Editor {
         }
     }
 
-    public function deleteRegion(region: Region) {
+    public function removeRegion(region: Region) {
         regions.remove(region);
         region.events.clear();
         region.element.remove();
+
         saveMetadata();
+    }
+
+    public function deleteRegion(region: Region) {
+        removeRegion(region);
 
         communicator.request(
             new RequestFileDelete(region.path()),
@@ -151,13 +163,20 @@ class Notebook implements Editor {
 
     function appendUnsavedRegion(region: Region, ?target: JQuery) {
         region.events.changeMode.on(changeRegionMode);
-        region.events.remove.on(deleteRegion);
+        region.events.delete.on(deleteRegion);
+        region.events.remove.on(removeRegion);
         if(target != null) {
             target.after(region.element);
         } else {
             element.append(region.element);
         }
         region.editor.focus();
+    }
+
+    public function moveToRegion(region: Region, filename: String, regionMode: RegionMode, content: String) {
+        var created = new Region(communicator, path, filename, regionMode, locale);
+        created.editor.setContent(content);
+        appendRegion(created, region.element);
     }
 
     public function createRegion(regionMode: RegionMode, ?target: JQuery) {

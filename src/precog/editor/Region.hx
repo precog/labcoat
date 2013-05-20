@@ -2,6 +2,7 @@ package precog.editor;
 
 import labcoat.message.PrecogRequest;
 import labcoat.message.PrecogResponse;
+import labcoat.message.RegionDrag;
 import precog.communicator.Communicator;
 import precog.editor.codemirror.Externs;
 import precog.html.HtmlButton;
@@ -25,6 +26,7 @@ class Region {
     public var editor: RegionEditor;
     public var events(default, null) : {
         public var changeMode(default, null) : Signal2<Region, RegionMode>;
+        public var delete(default, null) : Signal1<Region>;
         public var remove(default, null) : Signal1<Region>;
         public function clear() : Void;
     };
@@ -77,7 +79,7 @@ class Region {
 
     // TOOD: Triggering ourselves
     function deleteContent() {
-        events.remove.trigger(this);
+        events.delete.trigger(this);
     }
 
     public function path() {
@@ -87,6 +89,7 @@ class Region {
     public function new(communicator: Communicator, directory: String, filename: String, mode: RegionMode, locale : Locale) {
         this.events = {
             changeMode : new Signal2(),
+            delete : new Signal1(),
             remove : new Signal1(),
             clear : function() {
                 for(field in Reflect.fields(this)) {
@@ -104,7 +107,61 @@ class Region {
         this.filename = filename;
         this.locale = locale;
 
-        element = new JQuery('<div class="region"></div>');
+        element = new JQuery('<div></div>');
+
+        var dropArea = new JQuery('<div class="drop-area">${locale.singular("move here")}</div>').appendTo(element);
+        dropArea.bind('dragover', null, function(event: jQuery.Event) {
+            event.preventDefault();
+            var originalEvent = untyped event.originalEvent;
+            originalEvent.dataTransfer.dropEffect = 'move';
+            dropArea.addClass('over');
+            return false;
+        });
+        dropArea.bind('dragleave', null, function(event: jQuery.Event) {
+            event.preventDefault();
+            dropArea.removeClass('over');
+            return false;
+        });
+        dropArea.bind('drop', null, function(event: jQuery.Event) {
+            event.preventDefault();
+            dropArea.removeClass('over');
+
+            var originalEvent = untyped event.originalEvent;
+
+            var filename = originalEvent.dataTransfer.getData('Filename');
+            var mode = Type.createEnumIndex(RegionMode, Std.parseInt(originalEvent.dataTransfer.getData('Mode')));
+            var content = originalEvent.dataTransfer.getData('Content');
+
+            communicator.trigger(new RegionDragTo(this, filename, mode, content));
+        });
+
+        var regionElement = new JQuery('<div class="region" draggable="true"></div>').appendTo(element);
+        regionElement.bind('dragstart', null, function(event: Event) {
+            dropArea.hide();
+            haxe.Timer.delay(function() {
+                communicator.trigger(new RegionDragStart());
+            }, 0);
+            var originalEvent = untyped event.originalEvent;
+            originalEvent.dataTransfer.effectAllowed = 'move';
+            originalEvent.dataTransfer.setData('Text', '/./${filename}');
+            originalEvent.dataTransfer.setData('Filename', filename);
+            originalEvent.dataTransfer.setData('Mode', '${Type.enumIndex(mode)}');
+            originalEvent.dataTransfer.setData('Content', editor.getContent());
+        });
+        regionElement.bind('dragend', null, function(event: Event) {
+            event.preventDefault();
+            dropArea.show();
+            communicator.trigger(new RegionDragStop());
+
+            var originalEvent = untyped event.originalEvent;
+            if(originalEvent.dataTransfer.dropEffect == 'none') {
+                // Cancelled
+                return;
+            }
+
+            // Remove this region
+            events.remove.trigger(this);
+        });
 
         var titlebar = new JQuery('<div class="titlebar"></div>');
         titlebar.append(changeEditorModeButton().element);
@@ -132,12 +189,12 @@ class Region {
         deleteButton.element.addClass('toggle-trim');
         contextToolbar.append(deleteButton.element);
 
-        element.append(titlebar);
+        regionElement.append(titlebar);
 
         editor = createEditor();
         var content = new JQuery('<div class="content"></div>');
         content.append(editor.element);
-        element.append(content);
+        regionElement.append(content);
 
         communicator.request(
             new RequestFileGet(path()),

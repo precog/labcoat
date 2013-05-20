@@ -277,10 +277,38 @@ body {
         line-height: @regionBarHeight - 2px;
     }
     .titlebar {
+        cursor: move;
         background-color: @gutterColor;
     }
     .outputbar {
         border-top: @gutterBorder;
+    }
+
+    .dragging .drop-area {
+        display: block;
+    }
+
+    .drop-area {
+        @outColor: #DDD;
+        @overColor: #000;
+
+        background: #FFF;
+        z-index: 10;
+        width: 90%;
+        left: 5%;
+        margin-top: 10px;
+        position: absolute;
+        display: none;
+
+        border: 2px dashed @outColor;
+        color: @outColor;
+        padding: 1em 0;
+        text-align: center;
+
+        &.over {
+            border-color: @overColor;
+            color: @overColor;
+        }
     }
 
     .titlebar, .outputbar {
