@@ -74,9 +74,21 @@ class QuirrelEditor implements RegionEditor {
                 ResponseFileExecute
             ).then(ProcedureDef.fromArity1(function(res: ResponseFileExecute) {
                 outputElement.html('<div class="out">${region.filename} :=</div><div class="data">${haxe.Json.stringify(res.result.data)}</div>');
+
+                var dataElement = outputElement.find('.data');
+
+                if(res.result.warnings.length > 0) {
+                    dataElement.addClass('warning');
+                }
+
                 for(warning in res.result.warnings) {
                     communicator.queue(new StatusMessage(warning.message, Warning));
                 }
+
+                if(res.result.errors.length > 0) {
+                    dataElement.addClass('error');
+                }
+
                 for(error in res.result.errors) {
                     communicator.queue(new StatusMessage(error.message, Error));
                 }
