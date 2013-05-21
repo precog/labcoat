@@ -1,5 +1,6 @@
 package precog.editor;
 
+import labcoat.message.EditorSave;
 import labcoat.message.PrecogRequest;
 import labcoat.message.PrecogResponse;
 import labcoat.message.RegionDrag;
@@ -100,6 +101,7 @@ class Notebook implements Editor {
     }
 
     public function save(dest: String) {
+        communicator.trigger(new EditorSave(path, dest));
         communicator.request(
             new RequestNotebookMove(path, dest),
             ResponseNotebookMove

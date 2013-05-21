@@ -70,9 +70,10 @@ class EditorModule extends Module {
             getContentTypeOpenCodeEditor(e.path));
         communicator.on(function(e : EditorUpdate)
             changeEditor(e.current));
+        communicator.on(function(e : EditorSave)
+            updateTab(e.from, e.to));
         communicator.on(function(e : ResponseDirectoryDelete)
             closeDeleted(e.path));
-
         communicator.on(function(e : RegionDrag)
             storeDrag(e));
         communicator.on(function(e : RegionDragTo)
@@ -309,6 +310,15 @@ class EditorModule extends Module {
             return;
         panels.get(editor).activate();
         current.show();
+    }
+
+    function updateTab(from: String, to: String) {
+        for(editor in panels.keys()) {
+            if(editor.path == from) {
+                var filename = to.split('/').pop();
+                panels[editor].toggle.text = filename;
+            }
+        }
     }
 
     function closeDeleted(path: String) {

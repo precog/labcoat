@@ -1,5 +1,6 @@
 package precog.editor;
 
+import labcoat.message.EditorSave;
 import labcoat.message.PrecogRequest;
 import labcoat.message.PrecogResponse;
 import precog.communicator.Communicator;
@@ -27,6 +28,7 @@ class CodeEditor implements Editor {
     }
 
     public function save(dest: String) {
+        communicator.trigger(new EditorSave(path, dest));
         communicator.request(
             new RequestFileMove(path, dest),
             ResponseFileMove
