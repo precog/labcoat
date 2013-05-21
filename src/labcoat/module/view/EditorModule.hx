@@ -251,7 +251,7 @@ class EditorModule extends Module {
         var save = new HtmlButton(locale.singular('save'), Icons.save, Mini, true);
         save.element.click(function(event: Event) {
             event.preventDefault();
-            saveEditor();
+            current.save(current.path);
         });
 
         var filename = editor.path.split('/').pop();
@@ -279,9 +279,17 @@ class EditorModule extends Module {
             }
         );
 
+        var saveAs = new JQuery('<a href="#">Save as...</a>').click(function(event: Event) {
+            event.preventDefault();
+            Dialog.prompt(locale.format("Current directory: <code>{0}</code><br>Save file as:", [currentPath]), function(filename: String) {
+                current.save('${currentPath}/${filename}');
+            });
+        });
+
         var btnGroup = new JQuery('<div class="btn-group"></div>').appendTo(containers.toolbar.element);
         save.element.appendTo(btnGroup);
         new JQuery('<button class="btn btn-mini dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>').appendTo(btnGroup);
+        new JQuery('<ul class="dropdown-menu"><li></li></ul>').appendTo(btnGroup).find('li').append(saveAs);
 
         return item;
     }
@@ -322,13 +330,6 @@ class EditorModule extends Module {
         );
         main.removeItem(item);
         saveMetadata();
-    }
-
-    function saveEditor() {
-        var parent = currentPath;
-        Dialog.prompt(locale.format("Current directory: <code>{0}</code><br>Save file as:", [parent]), function(filename: String){
-            current.save('${parent}/${filename}');
-        });
     }
 
     function deleteRegion(region: Region) {
