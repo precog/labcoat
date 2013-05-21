@@ -16,7 +16,4 @@ class RegionDrag implements ValueClass {
 
 class RegionDragTo implements ValueClass {
     var region: Region;
-    var filename: String;
-    var mode: RegionMode;
-    var content: String;
 }

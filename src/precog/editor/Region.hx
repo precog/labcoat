@@ -130,7 +130,7 @@ class Region {
             var mode = Type.createEnumIndex(RegionMode, Std.parseInt(originalEvent.dataTransfer.getData('Mode')));
             var content = originalEvent.dataTransfer.getData('Content');
 
-            communicator.trigger(new RegionDragTo(this, filename, mode, content));
+            communicator.trigger(new RegionDragTo(this));
         });
 
         var regionElement = new JQuery('<div class="region" draggable="true"></div>').appendTo(element);
@@ -142,9 +142,6 @@ class Region {
             var originalEvent = untyped event.originalEvent;
             originalEvent.dataTransfer.effectAllowed = 'move';
             originalEvent.dataTransfer.setData('Text', '/./${filename}');
-            originalEvent.dataTransfer.setData('Filename', filename);
-            originalEvent.dataTransfer.setData('Mode', '${Type.enumIndex(mode)}');
-            originalEvent.dataTransfer.setData('Content', editor.getContent());
         });
         regionElement.bind('dragend', null, function(event: Event) {
             event.preventDefault();
