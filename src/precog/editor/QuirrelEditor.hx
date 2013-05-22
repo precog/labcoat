@@ -73,23 +73,18 @@ class QuirrelEditor implements RegionEditor {
                 new RequestFileExecute(region.path()),
                 ResponseFileExecute
             ).then(ProcedureDef.fromArity1(function(res: ResponseFileExecute) {
-                outputElement.html('<div class="out">${region.filename} :=</div><div class="data">${haxe.Json.stringify(res.result.data)}</div>');
+                outputElement.html('<div class="out">${region.filename} :=</div><div class="data">${haxe.Json.stringify(res.result.data)}</div><ul class="errors"></ul><ul class="warnings"></ul>');
 
-                var dataElement = outputElement.find('.data');
-
-                if(res.result.warnings.length > 0) {
-                    dataElement.addClass('warning');
-                }
+                var errorsElement = outputElement.find('.errors');
+                var warningsElement = outputElement.find('.warning');
 
                 for(warning in res.result.warnings) {
+                    warningsElement.append('<li>${warning.message}</li>');
                     communicator.queue(new StatusMessage(warning.message, Warning));
                 }
 
-                if(res.result.errors.length > 0) {
-                    dataElement.addClass('error');
-                }
-
                 for(error in res.result.errors) {
+                    errorsElement.append('<li>${error.message}</li>');
                     communicator.queue(new StatusMessage(error.message, Error));
                 }
             }));
