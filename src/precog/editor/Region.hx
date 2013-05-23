@@ -124,12 +124,6 @@ class Region {
             event.preventDefault();
             dropArea.removeClass('over');
 
-            var originalEvent = untyped event.originalEvent;
-
-            var filename = originalEvent.dataTransfer.getData('Filename');
-            var mode = Type.createEnumIndex(RegionMode, Std.parseInt(originalEvent.dataTransfer.getData('Mode')));
-            var content = originalEvent.dataTransfer.getData('Content');
-
             communicator.trigger(new RegionDragTo(this));
         });
 
