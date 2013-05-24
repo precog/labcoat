@@ -73,7 +73,7 @@ class TreeViewModule extends Module
         var item = new HtmlPanelGroupItem(locale.singular("file system"));
         message.group.addItem(item);
         item.activate();
-        var renderer = new FSHtmlTreeRenderer(16),
+        var renderer = new FSHtmlTreeRenderer(communicator, 16),
             panels = new ToolbarContainers(item);
         tree = new HtmlTree(panels.main, renderer);
         tree.compare = function(a, b) {

@@ -1,5 +1,10 @@
 package precog.html;
 
+import js.html.File;
+import js.html.FileReader;
+import labcoat.message.PrecogRequest;
+import labcoat.message.PrecogResponse;
+import precog.communicator.Communicator;
 import precog.fs.Node;
 import precog.html.HtmlTree;
 import precog.geom.IRectangle;
@@ -8,13 +13,15 @@ using precog.html.JQuerys;
 
 class FSHtmlTreeRenderer implements IHtmlTreeRenderer<Node>
 {
+	var communicator: Communicator;
 	var height : Float;
 	var connectorWidth : Float;
 	var toggleWidth : Float = 10;
 	var margin : Float = 0;
 	var tree : HtmlTree<Node>;
-	public function new(height : Float, connectorWidth : Float = 10)
+	public function new(communicator: Communicator, height : Float, connectorWidth : Float = 10)
 	{
+		this.communicator = communicator;
 		this.connectorWidth = connectorWidth;
 		this.height = height;
 	}
@@ -42,7 +49,53 @@ class FSHtmlTreeRenderer implements IHtmlTreeRenderer<Node>
 					return false;
 				}
 			);
+
+		el.bind('dragover', null, function(event: jQuery.Event) {
+			event.stopPropagation();
+			event.preventDefault();
+			el.addClass("badge badge-light");
+		});
+		el.bind('dragleave', null, function(event: jQuery.Event) {
+			event.stopPropagation();
+			event.preventDefault();
+			el.removeClass("badge badge-light");
+		});
+		el.bind('drop', null, function(event: jQuery.Event) {
+			event.stopPropagation();
+			event.preventDefault();
+			el.removeClass("badge badge-light");
+
+			var originalEvent = untyped event.originalEvent;
+
+			var files: Array<File> = untyped originalEvent.target.files || originalEvent.dataTransfer.files;
+
+			for(file in files) {
+				var reader = new FileReader();
+				reader.onload = function(event: Dynamic) {
+					var node = cast el.prop("data-node");
+					var type = if(file.type == "") filenameToMimeType(file.name) else file.type;
+					communicator.request(new RequestFileUpload('${node.data}/${file.name}', type, event.target.result), ResponseFileUpload);
+				};
+				reader.readAsBinaryString(file);
+			}
+		});
+
 		return el;
+	}
+	function filenameToMimeType(filename: String): String {
+		var extension = filename.split('.').pop();
+		return switch(extension) {
+		case 'json':
+			'application/json';
+		case 'md':
+			'text/x-markdown';
+		case 'markdown':
+			'text/x-markdown';
+		case 'qrl':
+			'text/x-quirrel-script';
+		default:
+			'text/plain';
+		}
 	}
 	public function updateRow(el : JQuery, node : TreeNode<Node>) : JQuery
 	{
