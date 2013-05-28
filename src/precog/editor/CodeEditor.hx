@@ -20,7 +20,6 @@ class CodeEditor implements Editor {
         var filename = segments.pop();
         var directory = segments.join('/');
 
-        // TODO: Allow files which are not Markdown
         region = new Region(communicator, directory, filename, mode, locale);
         element.append(region.element);
         this.communicator = communicator;
