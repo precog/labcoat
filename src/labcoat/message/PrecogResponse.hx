@@ -128,7 +128,9 @@ typedef FileExecutionError = {
 typedef FileExecution = {
 	data: Array<Dynamic>,
 	errors: Array<FileExecutionError>,
-	warnings: Array<FileExecutionError>
+	warnings: Array<FileExecutionError>,
+	serverErrors: Array<String>, // TODO check String is the correct type
+	serverWarnings: Array<String> // TODO check String is the correct type
 }
 
 class ResponseFileExecute extends ResponseFileBase 

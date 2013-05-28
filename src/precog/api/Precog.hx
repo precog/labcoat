@@ -178,6 +178,8 @@ typedef ProcAsyncQuery = ProcT<ResAsyncQuery>;
 typedef ResQuery = {
 				errors : Array<Dynamic>, // TODO type me
 				warnings : Array<Dynamic>, // TODO type me
+				serverErrors : Array<String>, // TODO type me
+				serverWarnings : Array<String>, // TODO type me
 				data : Array<Dynamic>
 			}
 typedef ProcQuery = ProcT<ResQuery>;

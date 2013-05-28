@@ -76,16 +76,21 @@ class QuirrelEditor implements RegionEditor {
                 outputElement.html('<div class="out">${region.filename} :=</div><div class="data">${haxe.Json.stringify(res.result.data)}</div><ul class="errors"></ul><ul class="warnings"></ul>');
 
                 var errorsElement = outputElement.find('.errors');
-                var warningsElement = outputElement.find('.warning');
+                var warningsElement = outputElement.find('.warnings');
 
-                for(warning in res.result.warnings) {
-                    warningsElement.append('<li>${warning.message}</li>');
-                    communicator.queue(new StatusMessage(warning.message, Warning));
+                var errors = res.result.errors.map(function(e) return e.message).concat(res.result.serverErrors),
+                    warnings = res.result.warnings.map(function(w) return w.message).concat(res.result.serverWarnings);
+
+
+trace(warnings);
+                for(warning in warnings) {
+                    warningsElement.append('<li><i class="icon-warning-sign"></i> ${warning}</li>');
+                    communicator.queue(new StatusMessage(warning, Warning));
                 }
 
-                for(error in res.result.errors) {
-                    errorsElement.append('<li>${error.message}</li>');
-                    communicator.queue(new StatusMessage(error.message, Error));
+                for(error in errors) {
+                    errorsElement.append('<li><i class="icon-exclamation-sign"></i> ${error}</li>');
+                    communicator.queue(new StatusMessage(error, Error));
                 }
             }));
         });

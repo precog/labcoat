@@ -356,7 +356,30 @@ body {
             min-height: @regionBarHeight;
             max-height: @regionBarHeight * 6;
         }
-        min-height: @regionBarHeight;
+        .errors {
+            margin: 0;
+            background-color: #ffeeee;
+
+            i.icon-exclamation-sign {
+                color : #b94a48;
+            }
+        }
+
+        .warnings {
+            margin: 0;
+            background-color: #fff9ee;
+
+            i.icon-warning-sign {
+                color : #c09853;
+            }
+        }
+
+        .errors,
+        .warnings {
+            margin-left: @gutterWidth;
+            padding-left: 7px;
+        }
+//        min-height: @regionBarHeight;
     }
 
     .content {
