@@ -288,26 +288,46 @@ body {
         display: block;
     }
 
+    .region-container {
+        position: relative;
+    }
+
     .drop-area {
-        @outColor: #DDD;
+
+        @outColor: #999;
         @overColor: #000;
 
-        background: #FFF;
-        z-index: 10;
-        width: 90%;
-        left: 5%;
-        margin-top: 10px;
-        position: absolute;
+        background: rgba(255,255,255,0.9);
+//        z-index: 10;
+//        width: 100%;
+//        position: absolute;
         display: none;
+        height: 24px;
 
-        border: 2px dashed @outColor;
         color: @outColor;
-        padding: 1em 0;
-        text-align: center;
+        padding: 8px 8px 8px 8px;
+
+//        left: 0;
+//        bottom: -24px;
+
+        i {
+            font-size: 28px;
+        }
+
 
         &.over {
             border-color: @overColor;
             color: @overColor;
+        }
+
+        .text {
+            margin-left: 8px;
+            line-height: 24px;
+        }
+
+        * {
+            display: block;
+            float: left;
         }
     }
 

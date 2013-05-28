@@ -105,9 +105,9 @@ class Region {
         this.filename = filename;
         this.locale = locale;
 
-        element = new JQuery('<div></div>');
+        element = new JQuery('<div class="region-container"></div>');
 
-        var dropArea = new JQuery('<div class="drop-area">${locale.singular("move here")}</div>').appendTo(element);
+        var dropArea = new JQuery('<div class="drop-area"><i class="icon-arrow-left"></i><span class="text">${locale.singular("move here")}</span></div>');
         dropArea.bind('dragover', null, function(event: jQuery.Event) {
             event.preventDefault();
             var originalEvent = untyped event.originalEvent;
@@ -183,6 +183,8 @@ class Region {
         var content = new JQuery('<div class="content"></div>');
         content.append(editor.element);
         regionElement.append(content);
+
+        dropArea.appendTo(element);
 
         communicator.request(
             new RequestFileGet(path()),
