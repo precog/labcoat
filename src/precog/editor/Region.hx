@@ -151,7 +151,7 @@ class Region {
             communicator.trigger(new RegionDrag(this));
         });
 
-        var titlebar = new JQuery('<div class="titlebar"></div>');
+        var titlebar = new JQuery('<div class="titlebar"><i class="icon-ellipsis-vertical pull-left dragger"></i></div>');
         titlebar.append(changeEditorModeButton().element);
         editorToolbar = new JQuery('<div class="editor toolbar"></div>').appendTo(titlebar);
 
