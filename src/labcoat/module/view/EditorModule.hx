@@ -88,7 +88,7 @@ class EditorModule extends Module {
             setCurrentPath(null);
         });
 
-        communicator.on(function(e : DirectorySelected) {
+        communicator.on(function(e : NodeSelected) {
             setCurrentPath(e.path);
         });
     }

@@ -93,7 +93,6 @@ class TreeViewModule extends Module
             } else {
                 var info = extractNodeInfo(tn.data);
                 communicator.trigger(new NodeSelected(info.path, info.type, info.api, info.meta));
-                communicator.trigger(new DirectorySelected(info.path, info.type, info.api, info.meta));
             }
         });
         tree.events.trigger.on(function(tn : TreeNode<Node>) {
