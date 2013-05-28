@@ -187,13 +187,13 @@ class Region {
         communicator.request(
             new RequestFileGet(path()),
             ResponseFileGet
-        ).then(function(response: ResponseFileGet) {
+        ).then(thx.core.Procedure.ProcedureDef.fromArity1(function(response: ResponseFileGet) {
             // HACK: Precog API loves to send us back [] instead of 404
             if(response.content.contents == '[]' && mode != JSONRegionMode)
                 return;
 
             editor.setContent(response.content.contents);
             editor.evaluate();
-        });
+        }));
     }
 }

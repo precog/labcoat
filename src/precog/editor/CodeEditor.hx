@@ -32,9 +32,9 @@ class CodeEditor implements Editor {
         communicator.request(
             new RequestFileMove(path, dest),
             ResponseFileMove
-        ).then(function(response: ResponseFileMove) {
+        ).then(thx.core.Procedure.ProcedureDef.fromArity1(function(response: ResponseFileMove) {
             path = dest;
-        });
+        }));
     }
 
     public function show() {

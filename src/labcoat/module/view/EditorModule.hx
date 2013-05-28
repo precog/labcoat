@@ -162,7 +162,7 @@ class EditorModule extends Module {
         communicator.request(
             new RequestFileGet(metadataPath),
             ResponseFileGet
-        ).then(function(response: ResponseFileGet) {
+        ).then(thx.core.Procedure.ProcedureDef.fromArity1(function(response: ResponseFileGet) {
             var metadata = haxe.Json.parse(response.content.contents)[0];
             if(metadata == null) {
                 // TODO: Open a new notebook
@@ -180,7 +180,7 @@ class EditorModule extends Module {
                 case 'Notebook': openNotebook(editor.path);
                 }
             }
-        });
+        }));
     }
 
     function contentTypeToRegionMode(contentType: String) {
@@ -217,9 +217,9 @@ class EditorModule extends Module {
         communicator.request(
             new RequestFileGet(path),
             ResponseFileGet
-        ).then(function(response: ResponseFileGet) {
+        ).then(thx.core.Procedure.ProcedureDef.fromArity1(function(response: ResponseFileGet) {
             openCodeEditor(path, contentTypeToRegionMode(response.content.type));
-        });
+        }));
     }
 
     function openCodeEditor(path: String, mode: RegionMode) {

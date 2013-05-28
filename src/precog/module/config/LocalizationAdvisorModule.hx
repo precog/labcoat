@@ -11,13 +11,13 @@ class LocalizationAdvisorModule extends Module
     	var cache = new Map<String, Bool>();
     	communicator
     		.demand(Translation)
-			.then(function(t : Translation) {
+			.then(thx.core.Procedure.ProcedureDef.fromArity1(function(t : Translation) {
 				t.missingKeyCallback = function(domain, key) {
 					if(domain == "en-US" || cache.exists(key))
 						return;
 					cache.set(key, true);
 					trace('missing translation "$key" ($domain)');
 				};
-			});
+			}));
     }
 }

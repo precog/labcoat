@@ -120,11 +120,11 @@ class PrecogModule extends Module
 									};
 								})
 							)
-							.then(function(arr : Array<{ type : String, name : String, metadata : Map<String, Dynamic> }>) {
+							.then(thx.core.Procedure.ProcedureDef.fromArity1(function(arr : Array<{ type : String, name : String, metadata : Map<String, Dynamic> }>) {
 									var response = new ResponseMetadataChildren(request.path, arr, request);
 									deferred.resolve(response);
 									communicator.trigger(response);
-								},
+								}),
 								errorResponse(request, deferred)
 							);
 

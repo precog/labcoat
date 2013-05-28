@@ -14,9 +14,9 @@ class LoginModule extends Module
 	override public function connect(communicator : Communicator)
 	{
 		this.communicator = communicator;
-		communicator.demand(RequestPrecogCredentials).then(function(_ : RequestPrecogCredentials) {
+		communicator.demand(RequestPrecogCredentials).then(thx.core.Procedure.ProcedureDef.fromArity1(function(_ : RequestPrecogCredentials) {
 			displayForm();
-		});
+		}));
 	}
 
 	function findServiceAndAccount(email : String, handler : Null<{ analyticsService : String, accountId : String }> -> Void)

@@ -57,7 +57,7 @@ class Notebook implements Editor {
         communicator.request(
             new RequestFileGet(metadataPath),
             ResponseFileGet
-        ).then(function(response: ResponseFileGet) {
+        ).then(thx.core.Procedure.ProcedureDef.fromArity1(function(response: ResponseFileGet) {
             var metadata = haxe.Json.parse(response.content.contents)[0];
             if(metadata == null) {
                 createRegion(QuirrelRegionMode);
@@ -77,7 +77,7 @@ class Notebook implements Editor {
                 appendUnsavedRegion(region);
                 regions.push(region);
             }
-        });
+        }));
     }
 
     function saveMetadata() {
@@ -105,10 +105,10 @@ class Notebook implements Editor {
         communicator.request(
             new RequestNotebookMove(path, dest),
             ResponseNotebookMove
-        ).then(function(response: ResponseNotebookMove) {
+        ).then(thx.core.Procedure.ProcedureDef.fromArity1(function(response: ResponseNotebookMove) {
             path = dest;
             metadataPath = '${path}/metadata.json';
-        });
+        }));
     }
 
     public function clear()

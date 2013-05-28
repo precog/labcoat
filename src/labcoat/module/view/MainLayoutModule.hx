@@ -28,7 +28,7 @@ class MainLayoutModule extends Module {
 
     override public function connect(communicator: Communicator) {
         this.communicator = communicator;
-        communicator.demand(MainHtmlPanel).then(onMessage);
+        communicator.demand(MainHtmlPanel).then(thx.core.Procedure.ProcedureDef.fromArity1(onMessage));
     }
 
     function onMessage(message: MainHtmlPanel) {

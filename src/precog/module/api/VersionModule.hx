@@ -10,8 +10,8 @@ class VersionModule extends Module
 		var version = precog.macro.VersionMacro.gitVersion();
 		comm.provide(new ApplicationVersion(version));
 		comm.demand(labcoat.message.JavaScriptAPI)
-			.then(function(msg : labcoat.message.JavaScriptAPI) {
+			.then(thx.core.Procedure.ProcedureDef.fromArity1(function(msg : labcoat.message.JavaScriptAPI) {
 				msg.api.version = version;
-			});
+			}));
 	}
 }

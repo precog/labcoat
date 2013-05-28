@@ -68,7 +68,7 @@ class QuirrelEditor implements RegionEditor {
         communicator.request(
             new RequestFileUpload(region.path(), "text/x-quirrel-script", editor.getValue()),
             ResponseFileUpload
-        ).then(function(response: ResponseFileUpload) {
+        ).then(thx.core.Procedure.ProcedureDef.fromArity1(function(response: ResponseFileUpload) {
             return communicator.request(
                 new RequestFileExecute(region.path()),
                 ResponseFileExecute
@@ -81,8 +81,6 @@ class QuirrelEditor implements RegionEditor {
                 var errors = res.result.errors.map(function(e) return e.message).concat(res.result.serverErrors),
                     warnings = res.result.warnings.map(function(w) return w.message).concat(res.result.serverWarnings);
 
-
-trace(warnings);
                 for(warning in warnings) {
                     warningsElement.append('<li><i class="icon-warning-sign"></i> ${warning}</li>');
                     communicator.queue(new StatusMessage(warning, Warning));
@@ -93,7 +91,7 @@ trace(warnings);
                     communicator.queue(new StatusMessage(error, Error));
                 }
             }));
-        });
+        }));
     }
 
     public function focus() {

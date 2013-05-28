@@ -219,7 +219,7 @@ class TreeViewModule extends Module
         communicator.request(
                 new RequestMetadataChildren(path, api),
                 ResponseMetadataChildren
-            ).then(function(response : ResponseMetadataChildren) {
+            ).then(thx.core.Procedure.ProcedureDef.fromArity1(function(response : ResponseMetadataChildren) {
                 // filter out already existing nodes
                 // remove nodes that are not present anymore
                 response.children.map(function(item) {
@@ -246,7 +246,7 @@ class TreeViewModule extends Module
                             );
                     }
                 });
-            });
+            }));
     }
 
     function isHiddenFile(path : String) {

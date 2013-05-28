@@ -51,9 +51,9 @@ class StatusbarModule extends Module {
     		}, 200);
     	}
 
-        communicator.demand(ApplicationVersion).then(function(msg : ApplicationVersion) {
+        communicator.demand(ApplicationVersion).then(thx.core.Procedure.ProcedureDef.fromArity1(function(msg : ApplicationVersion) {
             main.html('<small>v: ${msg.version}</small>');
-        });
+        }));
 
     	communicator.on(function(req : PrecogRequest) {
     		updateRequests();
