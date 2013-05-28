@@ -94,9 +94,10 @@ class TreeViewModule extends Module
                 var info = extractNodeInfo(tn.data);
                 switch(info.type) {
                     case File, Notebook:
+                        communicator.trigger(new NodeSelected(info.path, info.type, info.api, info.meta));
+                    case Directory:
                         var dirinfo = extractNodeInfo(tn.data.parent);
                         communicator.trigger(new NodeSelected(dirinfo.path, dirinfo.type, dirinfo.api, dirinfo.meta));
-                    case _:
                 }
                 communicator.trigger(new DirectorySelected(info.path, info.type, info.api, info.meta));
             }

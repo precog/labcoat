@@ -4,6 +4,7 @@ import js.html.File;
 import js.html.FileReader;
 import labcoat.message.PrecogRequest;
 import labcoat.message.PrecogResponse;
+import labcoat.module.view.fstreeview.MimeType;
 import precog.communicator.Communicator;
 import precog.fs.Node;
 import precog.html.HtmlTree;
@@ -73,7 +74,7 @@ class FSHtmlTreeRenderer implements IHtmlTreeRenderer<Node>
 				var reader = new FileReader();
 				reader.onload = function(event: Dynamic) {
 					var node = cast el.prop("data-node");
-					var type = if(file.type == "") filenameToMimeType(file.name) else file.type;
+					var type = if(file.type == "") MimeType.fromName(file.name) else file.type;
 					communicator.request(new RequestFileUpload('${node.data}/${file.name}', type, event.target.result), ResponseFileUpload);
 				};
 				reader.readAsBinaryString(file);
@@ -81,21 +82,6 @@ class FSHtmlTreeRenderer implements IHtmlTreeRenderer<Node>
 		});
 
 		return el;
-	}
-	function filenameToMimeType(filename: String): String {
-		var extension = filename.split('.').pop();
-		return switch(extension) {
-		case 'json':
-			'application/json';
-		case 'md':
-			'text/x-markdown';
-		case 'markdown':
-			'text/x-markdown';
-		case 'qrl':
-			'text/x-quirrel-script';
-		default:
-			'text/plain';
-		}
 	}
 	public function updateRow(el : JQuery, node : TreeNode<Node>) : JQuery
 	{
