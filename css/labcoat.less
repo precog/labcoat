@@ -298,17 +298,25 @@ body {
         @overColor: #000;
 
         background: rgba(255,255,255,0.9);
-//        z-index: 10;
+        z-index: 10;
 //        width: 100%;
-//        position: absolute;
+        position: absolute;
         display: none;
         height: 24px;
 
-        color: @outColor;
-        padding: 8px 8px 8px 8px;
+        bottom: 0;
+        margin-bottom: -20px;
 
+        color: @outColor;
+        padding: 8px 160px 8px 8px;
+
+
+        .box-shadow(2px 2px 2px rgba(0,0,0,0.25));
 //        left: 0;
 //        bottom: -24px;
+
+        border-radius: 4px;
+        left: @gutterWidth + 4px;
 
         i {
             font-size: 28px;
@@ -322,7 +330,7 @@ body {
 
         .text {
             margin-left: 8px;
-            line-height: 24px;
+            line-height: 28px;
         }
 
         * {
