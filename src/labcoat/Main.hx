@@ -11,7 +11,6 @@ import labcoat.module.config.*;
 import labcoat.module.model.*;
 import labcoat.module.view.*;
 
-
 import precog.editor.*;
 import js.Browser.window;
 
@@ -30,6 +29,7 @@ class Main
 
         // View
         manager.addModule(new LoginModule());
+
 /*
 #if (html5 || cordova)
         manager.addModule(new Html5MenuModule());
