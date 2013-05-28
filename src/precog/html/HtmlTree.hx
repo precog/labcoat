@@ -423,12 +423,14 @@ class BaseHtmlTreeRenderer<T> implements IHtmlTreeRenderer<T>
 
 		var toggle = el.find(".tree-toggle");
 		if(node.collapsed || node.hasChildren) {
-			toggle.get(0).onclick = function(e) {
-				e.preventDefault();
-				node.toggle();
-				tree.update();
-				return false;
-			};
+			toggle
+				.off("click")
+				.on("click", function(e) {
+					e.preventDefault();
+					node.toggle();
+					tree.update();
+					return false;
+				});
 			if(node.collapsed) {
 				toggle.find("i").removeClass("icon-caret-down").addClass("icon-caret-right");
 			} else {

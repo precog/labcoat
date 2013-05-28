@@ -22,14 +22,14 @@ class Dialog
 			el.remove();
 		});
 		ok.element.addClass("ok");
-		ok.element.get(0).onclick = function() {
+		ok.element.on("click", function() {
 			dialog.hide();
 			success();
-		};
+		});
 		cancel.element.addClass("cancel");
-		cancel.element.get(0).onclick = function() {
+		cancel.element.on("click", function() {
 			dialog.hide();
-		};
+		});
 
 		thx.react.promise.Timer.delay(200).then(function() { ok.element.focus(); });
 		el.on("keypress", function(e) {
@@ -62,7 +62,7 @@ class Dialog
 
 		if(null != defaultValue)
 			input.val(defaultValue);
-		ok.element.get(0).onclick = function() {
+		ok.element.on("click", function() {
 			cancel.enabled = ok.enabled = false;
 			error.hide();
 			var value = input.val();
@@ -77,7 +77,7 @@ class Dialog
 					error.show();
 				}
 			});
-		};
+		});
 
 		thx.react.promise.Timer.delay(250).then(function() { input.focus(); });
 		return dialog;

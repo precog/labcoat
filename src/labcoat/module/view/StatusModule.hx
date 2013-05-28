@@ -30,7 +30,7 @@ class StatusModule extends Module {
         communicator.consume(function(messages : Array<StatusMessage>) {
         	messages.map(consumeMessage.bind(locale));
         	group.activate();
-        	group.panel.element.scrollTop(group.panel.element.get(0).scrollHeight);
+        	group.panel.element.scrollTop(group.panel.element.height()); //  get(0).scrollHeight);
         });
     }
 
