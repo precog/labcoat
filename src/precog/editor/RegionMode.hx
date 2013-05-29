@@ -7,12 +7,17 @@ enum RegionMode {
     MarkdownRegionMode;
     JSONRegionMode;
     VegaRegionMode;
+    PolychartCodeRegionMode;
 }
 
 class RegionModes {
 	public static function toEnglish(mode : RegionMode)
 	{
-		var s = ""+mode;
-		return s.replace("RegionMode", "");
+		return switch(""+mode) {
+			case "PolychartCodeRegionMode":
+				"Polychart Code";
+			case s:
+				s.replace("RegionMode", "");
+		};
 	}
 }
