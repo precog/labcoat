@@ -5,9 +5,12 @@ import labcoat.message.PrecogRequest;
 import labcoat.message.PrecogResponse;
 import precog.communicator.Communicator;
 import precog.editor.Editor;
+import precog.editor.RegionModifier;
 import jQuery.JQuery;
 
 class CodeEditor implements Editor {
+    static var modifiers = new RegionModifiers([]);
+
     public var element(default, null): JQuery;
     var region: Region;
     var communicator: Communicator;
@@ -20,7 +23,7 @@ class CodeEditor implements Editor {
         var filename = segments.pop();
         var directory = segments.join('/');
 
-        region = new Region(communicator, directory, filename, mode, locale);
+        region = new Region(communicator, directory, filename, mode, modifiers, locale);
         element.append(region.element);
         this.communicator = communicator;
         this.path = path;

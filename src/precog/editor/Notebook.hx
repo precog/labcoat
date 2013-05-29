@@ -6,6 +6,7 @@ import labcoat.message.PrecogResponse;
 import labcoat.message.RegionDrag;
 import precog.communicator.Communicator;
 import precog.editor.Editor;
+import precog.editor.RegionModifier;
 import precog.util.Locale;
 import jQuery.JQuery;
 import thx.react.Signal;
@@ -13,6 +14,8 @@ import thx.react.Signal;
 using Lambda;
 
 class Notebook implements Editor {
+    static var modifiers = new RegionModifiers([Trimmable, Hidable, Deletable]);
+
     public var events(default, null) : {
         public function clear() : Void;
     };
@@ -73,7 +76,7 @@ class Notebook implements Editor {
             clearInitialRegions();
 
             for(metadataRegion in metadataRegions) {
-                var region = new Region(communicator, path, metadataRegion.filename, Type.createEnumIndex(RegionMode, metadataRegion.mode), locale);
+                var region = new Region(communicator, path, metadataRegion.filename, Type.createEnumIndex(RegionMode, metadataRegion.mode), modifiers, locale);
                 appendUnsavedRegion(region);
                 regions.push(region);
             }
@@ -142,7 +145,7 @@ class Notebook implements Editor {
         oldRegion.events.clear();
 
         var content = oldRegion.editor.getContent();
-        var region = new Region(communicator, oldRegion.directory, oldRegion.filename, mode, locale);
+        var region = new Region(communicator, oldRegion.directory, oldRegion.filename, mode, modifiers, locale);
         region.editor.setContent(content);
         appendUnsavedRegion(region, oldRegion.element);
         regions[regions.indexOf(oldRegion)] = region;
@@ -176,13 +179,13 @@ class Notebook implements Editor {
     public function moveToRegion(from: Region, to: Region) {
         removeRegion(from);
 
-        var created = new Region(communicator, from.path(), from.filename, from.mode, locale);
+        var created = new Region(communicator, from.path(), from.filename, from.mode, modifiers, locale);
         created.editor.setContent(from.editor.getContent());
         appendRegion(created, to.element);
     }
 
     public function createRegion(regionMode: RegionMode, ?target: JQuery) {
-        appendRegion(new Region(communicator, path, 'out${incrementRegionCounter()}', regionMode, locale), target);
+        appendRegion(new Region(communicator, path, 'out${incrementRegionCounter()}', regionMode, modifiers, locale), target);
     }
 
     public function appendRegion(region: Region, ?target: JQuery) {

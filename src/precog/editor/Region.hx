@@ -4,15 +4,14 @@ import labcoat.message.PrecogRequest;
 import labcoat.message.PrecogResponse;
 import labcoat.message.RegionDrag;
 import precog.communicator.Communicator;
+import precog.editor.RegionModifier;
 import precog.editor.codemirror.Externs;
-import precog.html.HtmlButton;
 import precog.html.HtmlDropdown;
-import precog.html.Icons;
 import jQuery.JQuery;
 import jQuery.Event;
 import thx.react.Signal;
 import precog.util.Locale;
-import precog.html.Bootstrap;
+
 using precog.editor.RegionMode;
 
 class Region {
@@ -31,12 +30,9 @@ class Region {
     };
 
     var communicator: Communicator;
+    var modifiers: RegionModifiers;
     var editorToolbar: JQuery;
-    var toggleTrimButton: HtmlButton;
-    var showHideButton: HtmlButton;
-    var deleteButton: HtmlButton;
 
-    // TOOD: Triggering ourselves
     function changeTo(mode: RegionMode) {
         return function(event: Event) {
             events.changeMode.trigger(this, mode);
@@ -68,24 +64,11 @@ class Region {
         }
     }
 
-    function toggleTrimContent(_) {
-        toggleTrimButton.leftIcon = element.find('.content .editor').toggleClass('trimmed').is('.trimmed') ? Icons.resizeFull : Icons.resizeSmall;
-    }
-
-    function showHideContent(_) {
-        showHideButton.leftIcon = element.find('.content .editor').toggle().is(':visible') ? Icons.eyeClose : Icons.eyeOpen;
-    }
-
-    // TOOD: Triggering ourselves
-    function deleteContent() {
-        events.delete.trigger(this);
-    }
-
     public function path() {
         return '${directory}/${filename}';
     }
 
-    public function new(communicator: Communicator, directory: String, filename: String, mode: RegionMode, locale : Locale) {
+    public function new(communicator: Communicator, directory: String, filename: String, mode: RegionMode, modifiers: RegionModifiers, locale : Locale) {
         this.events = {
             changeMode : new Signal2(),
             delete : new Signal1(),
@@ -99,10 +82,11 @@ class Region {
             }
         };
 
-        this.mode = mode;
         this.communicator = communicator;
         this.directory = directory;
         this.filename = filename;
+        this.mode = mode;
+        this.modifiers = modifiers;
         this.locale = locale;
 
         element = new JQuery('<div class="region-container"></div>');
@@ -157,25 +141,11 @@ class Region {
 
         var contextToolbar = new JQuery('<div class="context toolbar"></div>').appendTo(titlebar);
 
-        toggleTrimButton = new HtmlButton(locale.singular('toggle trim'), Icons.resizeFull, Mini, true);
-        toggleTrimButton.type = Flat;
-        toggleTrimButton.element.click(toggleTrimContent);
-        toggleTrimButton.element.addClass('toggle-trim');
-        contextToolbar.append(toggleTrimButton.element);
 
-        showHideButton = new HtmlButton(locale.singular('show/hide'), Icons.eyeClose, Mini, true);
-        showHideButton.type = Flat;
-        showHideButton.element.click(showHideContent);
-        showHideButton.element.addClass('show-hide');
-        contextToolbar.append(showHideButton.element);
-
-        deleteButton = new HtmlButton(locale.singular('delete'), Icons.remove, Mini, true);
-        deleteButton.type = Flat;
-        deleteButton.element.click(function(_) {
-            Dialog.confirm("Are you sure you want to delete this region?", deleteContent);
-        });
-        deleteButton.element.addClass('toggle-trim');
-        contextToolbar.append(deleteButton.element);
+        var buttons = modifiers.toButtons(this, locale);
+        for(button in buttons) {
+            contextToolbar.append(button.element);
+        }
 
         regionElement.append(titlebar);
 
