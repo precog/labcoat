@@ -6,12 +6,15 @@ import labcoat.message.PrecogResponse;
 import precog.editor.codemirror.Externs;
 import precog.communicator.Communicator;
 import jQuery.JQuery;
+import precog.html.HtmlButton;
+import precog.html.Icons;
 using StringTools;
 
 class PolychartCodeEditor implements RegionEditor {
     public var element: JQuery;
     var outputElement: JQuery;
     var outputbarElement: JQuery;
+    var showHideButton: HtmlButton;
     var region: Region;
     var editor: CodeMirror;
     var read : Bool;
@@ -32,8 +35,20 @@ class PolychartCodeEditor implements RegionEditor {
             var editorContainer = new JQuery('<div class="editor"></div>').appendTo(element);
             editor = CodeMirrorFactory.addTo(editorContainer.get(0), options);
             outputbarElement = new JQuery('<div class="outputbar"><div class="buttons dropdown region-type"><button class="btn btn-mini btn-link">chart</button></div><div class="context toolbar"></div></div>').appendTo(element);
+
+            var contextToolbar = outputbarElement.find(".context.toolbar");
+            showHideButton = new HtmlButton('', Icons.eyeClose, Mini, true);
+            showHideButton.type = Flat;
+            showHideButton.element.click(showHideOutput);
+            showHideButton.element.addClass('show-hide');
+            contextToolbar.append(showHideButton.element);
+
             outputElement = new JQuery('<div class="output"><div class="out"></div><div class="data"></div></div>').appendTo(element).find(".data");
         });
+    }
+
+    function showHideOutput(_) {
+        showHideButton.leftIcon = element.find('.output').toggle().is(':visible') ? Icons.eyeClose : Icons.eyeOpen;
     }
 
     public function getContent() {
