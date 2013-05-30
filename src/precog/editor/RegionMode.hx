@@ -15,7 +15,7 @@ class RegionModes {
 	{
 		return switch(""+mode) {
 			case "PolychartCodeRegionMode":
-				"Polychart Code";
+				"Poly Code";
 			case s:
 				s.replace("RegionMode", "");
 		};

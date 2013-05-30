@@ -11,6 +11,7 @@ using StringTools;
 class PolychartCodeEditor implements RegionEditor {
     public var element: JQuery;
     var outputElement: JQuery;
+    var outputbarElement: JQuery;
     var region: Region;
     var editor: CodeMirror;
     var read : Bool;
@@ -26,10 +27,12 @@ class PolychartCodeEditor implements RegionEditor {
         communicator.consume(function(data : Array<PrecogNamedConfig>) {
             credential = data[0].config;
 
-            var options: Dynamic = { lineNumber: true, mode: {name: 'javascript', json: false}, region: region};
-            element = new JQuery('<div></div>');
-            editor = CodeMirrorFactory.addTo(element.get(0), options);
-            outputElement = new JQuery('<div class="output"></div>').appendTo(element);
+            var options: Dynamic = { lineNumbers: true, mode: 'javascript', region: region};
+            element = new JQuery('<div class="polychart-code"></div>');
+            var editorContainer = new JQuery('<div class="editor"></div>').appendTo(element);
+            editor = CodeMirrorFactory.addTo(editorContainer.get(0), options);
+            outputbarElement = new JQuery('<div class="outputbar"><div class="buttons dropdown region-type"><button class="btn btn-mini btn-link">chart</button></div><div class="context toolbar"></div></div>').appendTo(element);
+            outputElement = new JQuery('<div class="output"><div class="out"></div><div class="data"></div></div>').appendTo(element).find(".data");
         });
     }
 
@@ -47,7 +50,7 @@ class PolychartCodeEditor implements RegionEditor {
         var script = editor.getValue(),
             iframeElement = new JQuery('<iframe class="polychart" frameborder="0" marginheight="0" marginwidth="0"></iframe>').appendTo(outputElement),
             iframe = iframeElement.get(0),
-            doc : Dynamic = iframe.contentWindow || iframe.contentDocument;
+            doc : Dynamic = untyped iframe.contentWindow || iframe.contentDocument;
 
         communicator.request(
             new RequestFileUpload(region.path(), "text/javascript", script),
@@ -58,8 +61,8 @@ class PolychartCodeEditor implements RegionEditor {
         template = template.replace("${code}", script);
         template = template.replace("${apiKey}", credential.apiKey);
         template = template.replace("${analyticsService}", credential.analyticsService);
-        // TODO: check this is the right path
-        template = template.replace("${path}", region.path());
+        var path = region.path().split("/").slice(0, -1).join("/");
+        template = template.replace("${path}", path);
 
         if(doc.document) {
             doc = doc.document;

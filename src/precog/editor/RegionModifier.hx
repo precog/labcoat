@@ -15,7 +15,7 @@ enum RegionModifier {
 
 class RegionModifiers {
     static var modifierButtons: Map<RegionModifier, Region -> Locale -> HtmlButton> = {
-        var buttons = new Map();
+        var buttons = new Map<RegionModifier, Region -> Locale -> HtmlButton>();
 
         function makeButton(label: String, icon: String, classes: String) {
             var button = new HtmlButton(label, icon, Mini, true);
