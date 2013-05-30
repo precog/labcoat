@@ -2,6 +2,8 @@ package precog.editor.markdown;
 
 @:native("markdown") extern class Markdown {
     static function toHTML(source: String): String;
+    static function toHTMLTree(source: String): Array<Dynamic>;
+    static function renderJsonML(jsonML: Dynamic): String;
 
     static function __init__() : Void
     {

@@ -20,6 +20,7 @@ class TestAll
 		runner.addCase(new precog.layout.TestWrapLayout());
 
 		runner.addCase(new precog.editor.markdown.TestRenderer());
+		runner.addCase(new precog.editor.markdown.TestJsonML());
 	}
 
 	public static function main()
