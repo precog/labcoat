@@ -10,7 +10,7 @@ import precog.html.HtmlButton;
 import precog.html.Icons;
 using StringTools;
 
-class PolychartCodeEditor implements RegionEditor {
+class PolychartBuilderEditor implements RegionEditor {
     public var element: JQuery;
     var outputElement: JQuery;
     var outputbarElement: JQuery;
@@ -72,7 +72,7 @@ class PolychartCodeEditor implements RegionEditor {
             ResponseFileUpload
         );
 
-        var template = PolychartCodeTemplate.HTML;
+        var template = PolychartBuilderTemplate.HTML;
         template = template.replace("${code}", script);
         template = template.replace("${apiKey}", credential.apiKey);
         template = template.replace("${analyticsService}", credential.analyticsService);
@@ -96,62 +96,68 @@ class PolychartCodeEditor implements RegionEditor {
 }
 
 
-class PolychartCodeTemplate
+class PolychartBuilderTemplate
 {
     public static var HTML = '
-<div id="chart"></div>
-<script src="http://localhost/labcoat2/js/precog.js" type="text/javascript"></script>
-<script src="http://localhost/labcoat2/js/polychart2.js" type="text/javascript"></script>
+<script src="poly/dependencies.js"></script>
+
+<script src="poly/data/iris.js"></script>
+<script src="poly/data/email.js"></script>
+<script src="poly/data/content.js"></script>
+
+<script src="poly/all.js"></script>
+
+<link rel="stylesheet" type="text/css" href="poly/dependencies.css" />
+<link rel="stylesheet" type="text/css" href="poly/app.css" />
+
+<div id="chart" class="polychart-ui"></div>
 <script>
-quirrel = function quirrel(params) {
-    if("string" === typeof params)
-        params = { query : params };
-
-// DYNAMIC VARIABLES
-    var path = "$${path}",
-        apiKey = "$${apiKey}",
-        analyticsService = "$${analyticsService}";
-// END OF DYNAMIC VARIABLES
-
-    params.query = params.query.split("/./").join("/"+path).split("\\"./").join("\\"" + path);
-
-    var api = new Precog.api({ analyticsService : analyticsService, apiKey : apiKey });
-
-    return polyjs.data.api(function quirrelApiFunction(requestParams, callback) {
-        api.execute(params).then(
-            function(data) {
-                callback(undefined, { data : data.data });
-            },
-            function(err) {
-                callback(err);
-            }
-        );
-    });
-};
-(function(outs){
-    outs.map(function(out) {
-        window[out] = quirrel("/./"+out);
-        console.log(window[out]);
-    });
-})([$${outs}]);
-</script>
-<script type="text/javascript">
-// DYNAMIC CODE
-$${code}
-/*
-polyjs.chart({
-    title: "Lord of the Rings Box Office Gross",
-    dom: "chart",
-    width: 720,
-    layer: {
-        data: quirrel("/./test"),
-        type: "bar",
-        x: "movie",
-        y: "gross",
-        color: { const: "darkred" }
-    }
-});
-*/
-// END DYNAMIC CODE
+  poly = require("poly");
+  polychart_global = poly.dashboard({
+    dom: $("#chart")[0],
+    header: false,
+    showTutorial: false,
+    width: "fill",
+    height: "fill",
+    demoData: [{
+      type: "local",
+      tables: [
+        {
+          name: "Email",
+          data: emails,
+          meta: {
+            id: { type: "num" },
+            template_id: { type: "cat" },
+            created: { type: "date" },
+            success: { type: "cat" },
+            message_hash: { type: "cat" },
+            source: { type: "cat" }
+          }
+        },
+        {
+          name: "Content",
+          data: content,
+          meta: {
+            user_id: { type: "cat" },
+            created: { type: "date" },
+            dataset_id: { type: "num" },
+            title: { type: "cat" },
+            public: { type: "cat" },
+          }
+        },
+        {
+          name: "Iris",
+          data: iris,
+          meta: {
+            sepalLength: { type: "num" },
+            sepalWidth: { type: "num" },
+            petalLength: { type: "num" },
+            petalWidth: { type: "num" },
+            category: { type: "cat" },
+          }
+        },
+      ],
+    }]
+  });
 </script>';
 }

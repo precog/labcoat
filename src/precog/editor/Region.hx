@@ -57,11 +57,18 @@ class Region {
 
     function createEditor() {
         return switch(mode) {
-            case QuirrelRegionMode: new QuirrelEditor(communicator, this, editorToolbar);
-            case MarkdownRegionMode: new MarkdownEditor(communicator, this);
-            case JSONRegionMode: new JSONEditor(communicator, this);
-            case VegaRegionMode: new VegaEditor(this);
-            case PolychartCodeRegionMode: new PolychartCodeEditor(communicator, this);
+            case QuirrelRegionMode:
+                new QuirrelEditor(communicator, this, editorToolbar);
+            case MarkdownRegionMode:
+                new MarkdownEditor(communicator, this);
+            case JSONRegionMode:
+                new JSONEditor(communicator, this);
+            case VegaRegionMode:
+                new VegaEditor(this);
+            case PolychartCodeRegionMode:
+                new PolychartCodeEditor(communicator, this);
+            case PolychartBuilderRegionMode:
+                new PolychartBuilderEditor(communicator, this);
         }
     }
 

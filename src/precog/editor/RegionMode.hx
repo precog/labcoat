@@ -8,6 +8,7 @@ enum RegionMode {
     JSONRegionMode;
     VegaRegionMode;
     PolychartCodeRegionMode;
+    PolychartBuilderRegionMode;
 }
 
 class RegionModes {
@@ -16,6 +17,8 @@ class RegionModes {
 		return switch(""+mode) {
 			case "PolychartCodeRegionMode":
 				"Poly Code";
+			case "PolychartBuilderRegionMode":
+				"Poly UI";
 			case s:
 				s.replace("RegionMode", "");
 		};

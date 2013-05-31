@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <script src="dependencies.js"></script>
+
+    <script src="data/iris.js"></script>
+    <script src="data/email.js"></script>
+    <script src="data/content.js"></script>
+
+    <script src="all.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="dependencies.css" />
+    <link rel="stylesheet" type="text/css" href="app.css" />
+  </head>
+  <body>
+    <div id="chart" class="polychart-ui"></div>
+    <script>
+      poly = require('poly');
+      polychart_global = poly.dashboard({
+        dom: $('#chart')[0],
+        header: false,
+        showTutorial: false,
+        width: 'fill',
+        height: 'fill',
+        demoData: [{
+          type: 'local',
+          tables: [
+            {
+              name: 'Email',
+              data: emails,
+              meta: {
+                id: { type: 'num' },
+                template_id: { type: 'cat' },
+                created: { type: 'date' },
+                success: { type: 'cat' },
+                message_hash: { type: 'cat' },
+                source: { type: 'cat' }
+              }
+            },
+            {
+              name: 'Content',
+              data: content,
+              meta: {
+                user_id: { type: 'cat' },
+                created: { type: 'date' },
+                dataset_id: { type: 'num' },
+                title: { type: 'cat' },
+                public: { type: 'cat' },
+              }
+            },
+            {
+              name: 'Iris',
+              data: iris,
+              meta: {
+                sepalLength: { type: 'num' },
+                sepalWidth: { type: 'num' },
+                petalLength: { type: 'num' },
+                petalWidth: { type: 'num' },
+                category: { type: 'cat' },
+              }
+            },
+          ],
+        }]
+      });
+    </script>
+  </body>
+</html>
+
