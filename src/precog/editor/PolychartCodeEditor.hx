@@ -17,7 +17,6 @@ class PolychartCodeEditor implements RegionEditor {
     var showHideButton: HtmlButton;
     var region: Region;
     var editor: CodeMirror;
-    var read : Bool;
     var communicator: Communicator;
 
     var credential : labcoat.message.PrecogConfig;

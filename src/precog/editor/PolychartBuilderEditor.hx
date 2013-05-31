@@ -3,7 +3,6 @@ package precog.editor;
 import labcoat.message.PrecogNamedConfig;
 import labcoat.message.PrecogRequest;
 import labcoat.message.PrecogResponse;
-import precog.editor.codemirror.Externs;
 import precog.communicator.Communicator;
 import jQuery.JQuery;
 import precog.html.HtmlButton;
@@ -12,14 +11,9 @@ using StringTools;
 
 class PolychartBuilderEditor implements RegionEditor {
     public var element: JQuery;
-    var outputElement: JQuery;
-    var outputbarElement: JQuery;
     var showHideButton: HtmlButton;
     var region: Region;
-    var editor: CodeMirror;
-    var read : Bool;
     var communicator: Communicator;
-
     var credential : labcoat.message.PrecogConfig;
     var basePath : String;
 
@@ -27,71 +21,62 @@ class PolychartBuilderEditor implements RegionEditor {
         this.communicator = communicator;
         this.region = region;
 
-        communicator.consume(function(data : Array<PrecogNamedConfig>) {
-            credential = data[0].config;
+        element = new JQuery('<div class="polychart-ui"></div>');
+        var editorContainer = new JQuery('<div class="editor"></div>').appendTo(element);
 
-            var options: Dynamic = { lineNumbers: true, mode: 'javascript', region: region};
-            element = new JQuery('<div class="polychart-code"></div>');
-            var editorContainer = new JQuery('<div class="editor"></div>').appendTo(element);
-            editor = CodeMirrorFactory.addTo(editorContainer.get(0), options);
-            outputbarElement = new JQuery('<div class="outputbar"><div class="buttons dropdown region-type"><button class="btn btn-mini btn-link">chart</button></div><div class="context toolbar"></div></div>').appendTo(element);
+        haxe.Timer.delay(function() {
+            communicator.consume(function(data : Array<PrecogNamedConfig>) {
+                credential = data[0].config;
 
-            var contextToolbar = outputbarElement.find(".context.toolbar");
-            showHideButton = new HtmlButton('', Icons.eyeClose, Mini, true);
-            showHideButton.type = Flat;
-            showHideButton.element.click(showHideOutput);
-            showHideButton.element.addClass('show-hide');
-            contextToolbar.append(showHideButton.element);
 
-            outputElement = new JQuery('<div class="output"><div class="out"></div><div class="data"></div></div>').appendTo(element).find(".data");
-        });
+                editorContainer.children().remove();
+
+                var iframeElement = new JQuery('<iframe class="polychart" frameborder="0" marginheight="0" marginwidth="0"></iframe>').appendTo(editorContainer),
+                    iframe = iframeElement.get(0),
+                    doc : Dynamic = untyped iframe.contentWindow || iframe.contentDocument;
+    /*
+                communicator.request(
+                    new RequestFileUpload(region.path(), "text/javascript", script),
+                    ResponseFileUpload
+                );
+    */
+                var template = PolychartBuilderTemplate.HTML;
+    //            template = template.replace("${code}", script);
+                template = template.replace("${apiKey}", credential.apiKey);
+                template = template.replace("${analyticsService}", credential.analyticsService);
+                var path = region.path().split("/").slice(0, -1).join("/") + "/";
+                template = template.replace("${path}", path);
+                //TODO use regiions to extract out
+                template = template.replace("${outs}", ["out1","out2"].map(function(o) return '"$o"').join(","));
+
+                if(doc.document) {
+                    doc = doc.document;
+                }
+                doc.open();
+                doc.write(template);
+                doc.close();
+            });
+        }, 0);
     }
 
-    function showHideOutput(_) {
-        showHideButton.leftIcon = element.find('.output').toggle().is(':visible') ? Icons.eyeClose : Icons.eyeOpen;
+    public function getContent() : String
+    {
+        return null;
     }
 
-    public function getContent() {
-        return editor.getValue();
+    public function setContent(content : String)
+    {
+        
     }
 
-    public function setContent(content: String) {
-        return editor.setValue(content);
+    public function focus()
+    {
+        
     }
 
-    public function evaluate() {
-        outputElement.children().remove();
-
-        var script = editor.getValue(),
-            iframeElement = new JQuery('<iframe class="polychart" frameborder="0" marginheight="0" marginwidth="0"></iframe>').appendTo(outputElement),
-            iframe = iframeElement.get(0),
-            doc : Dynamic = untyped iframe.contentWindow || iframe.contentDocument;
-
-        communicator.request(
-            new RequestFileUpload(region.path(), "text/javascript", script),
-            ResponseFileUpload
-        );
-
-        var template = PolychartBuilderTemplate.HTML;
-        template = template.replace("${code}", script);
-        template = template.replace("${apiKey}", credential.apiKey);
-        template = template.replace("${analyticsService}", credential.analyticsService);
-        var path = region.path().split("/").slice(0, -1).join("/") + "/";
-        template = template.replace("${path}", path);
-        //TODO use regiions to extract out
-        template = template.replace("${outs}", ["out1","out2"].map(function(o) return '"$o"').join(","));
-
-        if(doc.document) {
-            doc = doc.document;
-        }
-        doc.open();
-        doc.write(template);
-        doc.close();
-    }
-
-    public function focus() {
-        editor.refresh();
-        editor.focus();
+    public function evaluate()
+    {
+        
     }
 }
 
@@ -108,7 +93,7 @@ class PolychartBuilderTemplate
 <script src="poly/all.js"></script>
 
 <link rel="stylesheet" type="text/css" href="poly/dependencies.css" />
-<link rel="stylesheet" type="text/css" href="poly/app.css" />
+<link rel="stylesheet" type="text/css" href="poly/css/app.css" />
 
 <div id="chart" class="polychart-ui"></div>
 <script>
