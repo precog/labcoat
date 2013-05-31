@@ -212,10 +212,11 @@ body {
 
         .main-toolbar {
             background-color: #f3f3f3;
-            padding: 3px;
+            padding: 2px;
             .border-radius(0);
             border-left: 1px solid #ccc;
             border-right: 1px solid #ccc;
+            border-bottom: 1px solid #ccc;
 
             button.btn {
                 color: #666;
@@ -229,6 +230,10 @@ body {
                 .i {
                     
                 }
+            }
+
+            .btn-group {
+                line-height: 20px;
             }
 
             button.btn:hover {
@@ -269,7 +274,7 @@ body {
 
     @gutterWidth : 80px;
     @gutterColor : #f7f7f7;
-    @gutterBorder : 1px solid #ddd;
+    @gutterBorder : 1px solid #eee;
     @regionBarHeight : 21px;
     .titlebar, .outputbar {
         position: relative;
@@ -279,9 +284,6 @@ body {
     .titlebar {
         cursor: move;
         background-color: @gutterColor;
-    }
-    .outputbar {
-        border-top: @gutterBorder;
     }
 
     .dragging .drop-area {
@@ -356,6 +358,10 @@ body {
             ul {
                 text-align: left;
             }
+
+            .btn-link {
+                color: #888;
+            }
         }
 
         .editor {
@@ -377,12 +383,23 @@ body {
         }
     }
 
+    .outputbar {
+        border-top: @gutterBorder;
+        background-color: #fcfcfc;
+
+        .region-type {
+            .btn-link {
+                color: #bbb;
+            }
+        }
+    }
+
     .output {
         position: relative;
         font-family: monospace;
         font-size: 11.5px;
 
-        background-color: #fcfcfc; 
+        background-color: #fff; 
 
         .data {
             overflow-y: auto;
@@ -437,7 +454,7 @@ body {
         font-size: 11.5px;
 
         position: absolute;
-        background-color: @gutterColor;
+        background-color: #fcfcfc; // @gutterColor;
         width: @gutterWidth - 4px;
         border-right: @gutterBorder;
 //        border-bottom: @gutterBorder;
@@ -533,7 +550,7 @@ body {
     }
 
     .region {
-        border-top: 1px solid #ccc;
+        border-bottom: 1px solid #aaa;
     }
     .region:first-child {
 //        border-top: none;
