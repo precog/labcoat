@@ -34,12 +34,6 @@ class PolychartBuilderEditor implements RegionEditor {
                 var iframeElement = new JQuery('<iframe class="polychart" frameborder="0" marginheight="0" marginwidth="0"></iframe>').appendTo(editorContainer),
                     iframe = iframeElement.get(0),
                     doc : Dynamic = untyped iframe.contentWindow || iframe.contentDocument;
-    /*
-                communicator.request(
-                    new RequestFileUpload(region.path(), "text/javascript", script),
-                    ResponseFileUpload
-                );
-    */
                 var template = PolychartBuilderTemplate.HTML;
     //            template = template.replace("${code}", script);
                 template = template.replace("${apiKey}", credential.apiKey);
@@ -76,10 +70,27 @@ class PolychartBuilderEditor implements RegionEditor {
 
     public function evaluate()
     {
-        
+        var definition = getContent();
+        communicator.request(
+            new RequestFileUpload(region.path(), "text/json", definition),
+            ResponseFileUpload
+        );
     }
 }
 
+/*
+    Polychart Questions
+    * is there an event for onchange (to save the chart)?
+    * can we change data sources dynamically?
+    * is it possible to visualize 2 data sources in the same chart? (not the same dashboard)
+    * can we disable the default title "Untitled Dashboard"?
+    * is there a way to define the size of the grid from the config object?
+    * is there a way to snap to the grid but not display it? (or maybe only display when dragging/resizing)
+      This is probably achievable with css I guess.
+
+    TODO
+    * add function to change datasource
+*/
 
 class PolychartBuilderTemplate
 {
