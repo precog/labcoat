@@ -217,9 +217,9 @@ class TreeViewModule extends Module
             return;
         var fs = fss.get(api);
         communicator.request(
-                new RequestMetadataChildren(path, api),
-                ResponseMetadataChildren
-            ).then(thx.core.Procedure.ProcedureDef.fromArity1(function(response : ResponseMetadataChildren) {
+                new RequestListChildren(path, api),
+                ResponseListChildren
+            ).then(thx.core.Procedure.ProcedureDef.fromArity1(function(response : ResponseListChildren) {
                 // filter out already existing nodes
                 // remove nodes that are not present anymore
                 response.children.map(function(item) {

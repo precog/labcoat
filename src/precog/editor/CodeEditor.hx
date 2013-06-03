@@ -23,7 +23,7 @@ class CodeEditor implements Editor {
         var filename = segments.pop();
         var directory = segments.join('/');
 
-        region = new Region(communicator, directory, filename, mode, modifiers, locale);
+        region = new Region(this, communicator, directory, filename, mode, modifiers, locale);
         element.append(region.element);
         this.communicator = communicator;
         this.path = path;

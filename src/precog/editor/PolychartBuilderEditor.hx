@@ -7,50 +7,118 @@ import precog.communicator.Communicator;
 import jQuery.JQuery;
 import precog.html.HtmlButton;
 import precog.html.Icons;
+import precog.util.ValueType;
+using thx.react.Promise;
+using thx.core.Strings;
 using StringTools;
 
 class PolychartBuilderEditor implements RegionEditor {
     public var element: JQuery;
+    var editorContainer: JQuery;
     var showHideButton: HtmlButton;
     var region: Region;
     var communicator: Communicator;
     var credential : labcoat.message.PrecogConfig;
     var basePath : String;
+    var context : Editor;
 
-    public function new(communicator: Communicator, region: Region) {
+    public function new(context : Editor, communicator: Communicator, region: Region, editorToolbar: JQuery) {
+        this.context = context;
         this.communicator = communicator;
         this.region = region;
 
         element = new JQuery('<div class="polychart-ui"></div>');
-        var editorContainer = new JQuery('<div class="editor"></div>').appendTo(element);
+        editorContainer = new JQuery('<div class="editor"></div>').appendTo(element);
+
+        var refreshButton = new HtmlButton('refresh', Icons.refresh, Mini);
+        refreshButton.type = Flat;
+        refreshButton.element.click(function(_) buildEditor());
+        editorToolbar.append(refreshButton.element);
 
         haxe.Timer.delay(function() {
             communicator.consume(function(data : Array<PrecogNamedConfig>) {
                 credential = data[0].config;
-
-
-                editorContainer.children().remove();
-
-                var iframeElement = new JQuery('<iframe class="polychart" frameborder="0" marginheight="0" marginwidth="0"></iframe>').appendTo(editorContainer),
-                    iframe = iframeElement.get(0),
-                    doc : Dynamic = untyped iframe.contentWindow || iframe.contentDocument;
-                var template = PolychartBuilderTemplate.HTML;
-    //            template = template.replace("${code}", script);
-                template = template.replace("${apiKey}", credential.apiKey);
-                template = template.replace("${analyticsService}", credential.analyticsService);
-                var path = region.path().split("/").slice(0, -1).join("/") + "/";
-                template = template.replace("${path}", path);
-                //TODO use regiions to extract out
-                template = template.replace("${outs}", ["out1","out2"].map(function(o) return '"$o"').join(","));
-
-                if(doc.document) {
-                    doc = doc.document;
-                }
-                doc.open();
-                doc.write(template);
-                doc.close();
+                buildEditor();
             });
         }, 0);
+    }
+
+    function buildEditor()
+    {
+        editorContainer.children().remove();
+
+        var iframeElement = new JQuery('<iframe class="polychart" frameborder="0" marginheight="0" marginwidth="0"></iframe>').appendTo(editorContainer),
+            iframe = iframeElement.get(0),
+            doc : Dynamic = untyped iframe.contentWindow || iframe.contentDocument;
+
+        getDataSources(function(datasources : Array<Datasource>) {
+
+            var template = PolychartBuilderTemplate.HTML;
+    //            template = template.replace("${code}", script);
+            template = template.replace("${apiKey}", credential.apiKey);
+            template = template.replace("${analyticsService}", credential.analyticsService);
+            var path = region.path().split("/").slice(0, -1).join("/") + "/";
+            template = template.replace("${path}", path);
+            //TODO use regiions to extract out
+//            template = template.replace("${outs}", ["out1","out2"].map(function(o) return '"$o"').join(","));
+
+            var sdatasources = serializeDatasources(datasources);
+            trace(sdatasources);
+            template = template.replace("${datasources}", sdatasources);
+
+            if(doc.document) {
+                doc = doc.document;
+            }
+            doc.open();
+            doc.write(template);
+            doc.close();
+
+        });
+    }
+
+    function getDataSources(callback : Array<Datasource> -> Void)
+    {
+        // TODO save datasources in content and retrieve for them ... if no datasources refresh as below
+        context.cata(
+            function(codeEditor: CodeEditor) {
+                // TODO, what sources should be displayed in this case?
+                callback([]);
+            },
+            function(notebook: Notebook) {
+                var paths = getNotebookOutputPath(notebook),
+                    promises = paths.map(function(path) {
+                        return communicator.request(
+                            new RequestMetadata('${region.directory}/$path'),
+                            ResponseMetadata
+                        );
+                    });
+                Promise.list(promises).then(function(results : Array<ResponseMetadata>) {
+                    var dss = results.map(function(result) {
+                            var name      = Strings.rtrim(result.parent, "/").split("/").pop(),
+                                directory = Strings.rtrim(result.parent, "/").split("/").slice(0, -1).join("/");
+                            return transformMetadataToDatasource(name, directory, result.metadata);
+                        }).filter(function(ds) {
+                            return ds.meta.iterator().hasNext();
+                        });
+                    callback(dss);
+                });
+            }
+        );
+        
+    }
+
+    function getNotebookOutputPath(notebook : Notebook) : Array<String>
+    {
+        var paths = [];
+        for(other in notebook) {
+            if(region == other) continue;
+            switch (other.mode) {
+                case JSONRegionMode, QuirrelRegionMode:
+                    paths.push(other.filename);
+                case _:
+            }
+        }
+        return paths;
     }
 
     public function getContent() : String
@@ -76,6 +144,86 @@ class PolychartBuilderEditor implements RegionEditor {
             ResponseFileUpload
         );
     }
+
+    static function serializeDatasources(dss : Array<Datasource>)
+    {
+        return "[" + dss.map(function(ds) {
+            var meta = {};
+            for(key in ds.meta.keys())
+                Reflect.setField(meta, key, { type : ds.meta.get(key) });
+            return '{ name : "${escapeQuotes(ds.name)}", data : quirrel("${escapeQuotes(ds.query)}"), meta : ${haxe.Json.stringify(meta)} }';
+/*
+{
+      name: "Email",
+      data: emails,
+      meta: {
+        id: { type: "num" },
+        template_id: { type: "cat" },
+        created: { type: "date" },
+        success: { type: "cat" },
+        message_hash: { type: "cat" },
+        source: { type: "cat" }
+      }
+    }
+*/
+        }).join(", ") + "]";
+    }
+
+    static function escapeQuotes(s : String)
+        return StringTools.replace(s, '"', '\\"');
+
+    static function transformMetadataToDatasource(name : String, directory : String, metadata : Map<String, ValueType>)
+    {
+        var meta = new Map();
+        for(key in metadata.keys())
+        {
+            var dimension = mapDimension(key, metadata.get(key));
+            if(null == dimension)
+                continue;
+            meta.set(key, dimension);
+        }
+        return {
+            name : name,
+            query : "/" + directory + "/" + name,
+            meta : meta
+        };
+    }
+
+    static function mapDimension(name : String, valueType : ValueType)
+    {
+        return switch (valueType) {
+            case Value(type, _) if(type != "Array"):
+                switch(type) {
+                    case "Bool":
+                        "cat";
+                    case "String", "Float" if(isDateName(name)):
+                        "date";
+                    case "String":
+                        "cat";
+                    case "Int" if(name.toLowerCase().startsWith("id") || name.toLowerCase().endsWith("id")):
+                        "cat";
+                    case "Int", "Float":
+                        "num";
+                    case _:
+                        null;
+                };
+//            case Object(fields): // TODO can we use nested objects? what about arrays
+            case _:
+                null;
+        };
+    }
+
+    static function isDateName(name : String)
+    {
+        return (~/(date|create|delete|creation|deletion|removed|time)/i).match(name);
+    }
+}
+
+typedef Datasource =
+{
+    name : String,
+    query : String,
+    meta : Map<String, String>
 }
 
 /*
@@ -95,8 +243,8 @@ class PolychartBuilderEditor implements RegionEditor {
 class PolychartBuilderTemplate
 {
     public static var HTML = '
+<script src="http://localhost/labcoat2/js/precog.js" type="text/javascript"></script>
 <script src="poly/dependencies.js"></script>
-
 <script src="poly/data/iris.js"></script>
 <script src="poly/data/email.js"></script>
 <script src="poly/data/content.js"></script>
@@ -108,52 +256,94 @@ class PolychartBuilderTemplate
 
 <div id="chart" class="polychart-ui"></div>
 <script>
-  poly = require("poly");
-  polychart_global = poly.dashboard({
-    dom: $("#chart")[0],
-    header: false,
-    showTutorial: false,
-    width: "fill",
-    height: "fill",
-    demoData: [{
-      type: "local",
-      tables: [
-        {
-          name: "Email",
-          data: emails,
-          meta: {
-            id: { type: "num" },
-            template_id: { type: "cat" },
-            created: { type: "date" },
-            success: { type: "cat" },
-            message_hash: { type: "cat" },
-            source: { type: "cat" }
-          }
-        },
-        {
-          name: "Content",
-          data: content,
-          meta: {
-            user_id: { type: "cat" },
-            created: { type: "date" },
-            dataset_id: { type: "num" },
-            title: { type: "cat" },
-            public: { type: "cat" },
-          }
-        },
-        {
-          name: "Iris",
-          data: iris,
-          meta: {
-            sepalLength: { type: "num" },
-            sepalWidth: { type: "num" },
-            petalLength: { type: "num" },
-            petalWidth: { type: "num" },
-            category: { type: "cat" },
-          }
-        },
-      ],
-    }]
-  });
+// DYNAMIC VARIABLES
+    var path = "$${path}",
+        apiKey = "$${apiKey}",
+        analyticsService = "$${analyticsService}";
+// END OF DYNAMIC VARIABLES
+
+var api = new Precog.api({ analyticsService : analyticsService, apiKey : apiKey });
+
+quirrel = function quirrel(params) {
+    if("string" === typeof params)
+        params = { query : params };
+
+    params.query = params.query.split("/./").join("/"+path).split("\\"./").join("\\"" + path);   
+
+    return polyjs.data.api(function quirrelApiFunction(requestParams, callback) {
+        api.execute(params).then(
+            function(data) {
+                callback(undefined, { data : data.data });
+            },
+            function(err) {
+                callback(err);
+            }
+        );
+    });
+};
+
+poly = require("poly");
+
+var tables = $${datasources};
+
+var promises = tables.map(function(table) {
+    return api.execute({ query : table });
+});
+
+Precog.Vow.all(promises).then(function(results) {
+    console.log(results);
+
+    polychart_global = poly.dashboard({
+        dom: $("#chart")[0],
+        header: false,
+        showTutorial: false,
+        width: "fill",
+        height: "fill",
+        demoData: [{
+          type: "local",
+          tables: tables
+        /*
+          [
+            {
+              name: "Email",
+              data: emails,
+              meta: {
+                id: { type: "num" },
+                template_id: { type: "cat" },
+                created: { type: "date" },
+                success: { type: "cat" },
+                message_hash: { type: "cat" },
+                source: { type: "cat" }
+              }
+            },
+            {
+              name: "Content",
+              data: content,
+              meta: {
+                user_id: { type: "cat" },
+                created: { type: "date" },
+                dataset_id: { type: "num" },
+                title: { type: "cat" },
+                public: { type: "cat" },
+              }
+            },
+            {
+              name: "Iris",
+              data: iris,
+              meta: {
+                sepalLength: { type: "num" },
+                sepalWidth: { type: "num" },
+                petalLength: { type: "num" },
+                petalWidth: { type: "num" },
+                category: { type: "cat" },
+              }
+            },
+          ]
+        */
+        }]
+    });
+});
+
+
 </script>';
 }

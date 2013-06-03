@@ -7,6 +7,7 @@ import precog.api.Precog;
 import labcoat.message.*;
 import labcoat.message.PrecogRequest;
 import labcoat.message.PrecogResponse;
+using precog.util.ModelTyper;
 using thx.core.Strings;
 using StringTools;
 
@@ -75,7 +76,7 @@ class PrecogModule extends Module
 		}
 
 		communicator.respond(
-			function(request : RequestMetadataChildren) : Null<Promise<ResponseMetadataChildren -> Void>> {
+			function(request : RequestListChildren) : Null<Promise<ResponseListChildren -> Void>> {
 				var deferred = new Deferred(),
 					api      = getApi(request.api);
 				communicator.trigger(request);
@@ -121,7 +122,7 @@ class PrecogModule extends Module
 								})
 							)
 							.then(thx.core.Procedure.ProcedureDef.fromArity1(function(arr : Array<{ type : String, name : String, metadata : Map<String, Dynamic> }>) {
-									var response = new ResponseMetadataChildren(request.path, arr, request);
+									var response = new ResponseListChildren(request.path, arr, request);
 									deferred.resolve(response);
 									communicator.trigger(response);
 								}),
@@ -133,8 +134,40 @@ class PrecogModule extends Module
 				);
 				return deferred.promise;
 			},
-			RequestMetadataChildren,
-			ResponseMetadataChildren
+			RequestListChildren,
+			ResponseListChildren
+		);
+
+		communicator.respond(
+			function(request : RequestMetadata) : Null<Promise<ResponseMetadata -> Void>> {
+				var deferred = new Deferred(),
+					api      = getApi(request.api);
+				communicator.trigger(request);
+				var path = normalizeDirectory(request.path);
+				api.execute({
+						query : "//" + path,
+						limit : 20
+					}).then(
+						function(result) {
+							var data = result.data;
+							if(data.length > 0 && Reflect.isObject(data[0])) {
+								var map = ModelTyper.guessFromManyObjects(data);
+								deferred.resolve(new ResponseMetadata(request.path, map, request));
+							} else if(data.length > 0 && !Std.is(data[0], Array)) {
+								var type = ModelTyper.guessFromManyValues(data),
+									map = new Map();
+								map.set("value", type);
+								deferred.resolve(new ResponseMetadata(request.path, map, request));
+							} else {
+								deferred.resolve(new ResponseMetadata(request.path, new Map(), request));
+							}
+						},
+						errorResponse(request, deferred)
+					);
+				return deferred.promise;
+			},
+			RequestMetadata,
+			ResponseMetadata
 		);
 
 		communicator.respond(

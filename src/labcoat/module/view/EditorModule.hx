@@ -383,8 +383,6 @@ class EditorModule extends Module {
     }
 
     function moveToRegion(drag: RegionDrag, dragTo: RegionDragTo) {
-        trace("moving");
-
         current.cata(
             function(codeEditor: CodeEditor) {},
             function(notebook: Notebook) notebook.moveToRegion(drag.region, dragTo.region)

@@ -32,14 +32,25 @@ class Helper
 	}
 }
 
-class RequestMetadataChildren extends PrecogRequest
+class RequestListChildren extends PrecogRequest
 {
 	public var path(default, null) : String;
 	public function new(path : String, ?api : String)
 	{
 		super(api);
 		this.path = Helper.normalizeDirectoryPath(path);
-		this.description = 'metadata children at ${this.path}';
+		this.description = 'list children at ${this.path}';
+	}
+}
+
+class RequestMetadata extends PrecogRequest
+{
+	public var path(default, null) : String;
+	public function new(path : String, ?api : String)
+	{
+		super(api);
+		this.path = Helper.normalizeDirectoryPath(path);
+		this.description = 'metadata ${this.path}';
 	}
 }
 

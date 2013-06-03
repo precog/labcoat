@@ -18,11 +18,13 @@ class PolychartCodeEditor implements RegionEditor {
     var region: Region;
     var editor: CodeMirror;
     var communicator: Communicator;
+    var context: Editor;
 
     var credential : labcoat.message.PrecogConfig;
     var basePath : String;
 
-    public function new(communicator: Communicator, region: Region) {
+    public function new(context : Editor, communicator: Communicator, region: Region, editorToolbar: JQuery) {
+        this.context = context;
         this.communicator = communicator;
         this.region = region;
 
@@ -31,6 +33,12 @@ class PolychartCodeEditor implements RegionEditor {
 
             var options: Dynamic = { lineNumbers: true, mode: 'javascript', region: region};
             element = new JQuery('<div class="polychart-code"></div>');
+
+            var runButton = new HtmlButton('run', Icons.play, Mini);
+            runButton.type = Flat;
+            runButton.element.click(onclick);
+            editorToolbar.append(runButton.element);
+
             var editorContainer = new JQuery('<div class="editor"></div>').appendTo(element);
             editor = CodeMirrorFactory.addTo(editorContainer.get(0), options);
             outputbarElement = new JQuery('<div class="outputbar"><div class="buttons dropdown region-type"><button class="btn btn-mini btn-link">chart</button></div><div class="context toolbar"></div></div>').appendTo(element);
@@ -45,6 +53,9 @@ class PolychartCodeEditor implements RegionEditor {
             outputElement = new JQuery('<div class="output"><div class="out"></div><div class="data"></div></div>').appendTo(element).find(".data");
         });
     }
+
+    function onclick(_)
+        evaluate();
 
     function showHideOutput(_) {
         showHideButton.leftIcon = element.find('.output').toggle().is(':visible') ? Icons.eyeClose : Icons.eyeOpen;

@@ -29,6 +29,7 @@ class Region {
         public function clear() : Void;
     };
 
+    var context : Editor;
     var communicator: Communicator;
     var modifiers: RegionModifiers;
     var editorToolbar: JQuery;
@@ -66,9 +67,9 @@ class Region {
             case VegaRegionMode:
                 new VegaEditor(this);
             case PolychartCodeRegionMode:
-                new PolychartCodeEditor(communicator, this);
+                new PolychartCodeEditor(context, communicator, this, editorToolbar);
             case PolychartBuilderRegionMode:
-                new PolychartBuilderEditor(communicator, this);
+                new PolychartBuilderEditor(context, communicator, this, editorToolbar);
         }
     }
 
@@ -76,7 +77,8 @@ class Region {
         return '${directory}/${filename}';
     }
 
-    public function new(communicator: Communicator, directory: String, filename: String, mode: RegionMode, modifiers: RegionModifiers, locale : Locale) {
+    public function new(context : Editor, communicator: Communicator, directory: String, filename: String, mode: RegionMode, modifiers: RegionModifiers, locale : Locale) {
+        this.context = context;
         this.events = {
             changeMode : new Signal2(),
             delete : new Signal1(),

@@ -27,7 +27,7 @@ class ResponseError extends PrecogResponse
 	}
 }
 
-class ResponseMetadataChildren extends PrecogResponse
+class ResponseListChildren extends PrecogResponse
 {
 	public var parent(default, null) : String;
 	public var children(default, null) : Array<FileDescriptionMeta>;
@@ -39,7 +39,20 @@ class ResponseMetadataChildren extends PrecogResponse
 		var display = children.slice(0, 5).map(function(o) return o.name);
 		if(display.length < children.length)
 			display.push('...');
-		this.description = 'metadata children at $parent: ${display.length == 0 ? "[none]" : display.join(", ")}';
+		this.description = 'list children at $parent: ${display.length == 0 ? "[none]" : display.join(", ")}';
+	}
+}
+
+class ResponseMetadata extends PrecogResponse
+{
+	public var parent(default, null) : String;
+	public var metadata(default, null) : Dynamic;
+	public function new(parent : String, metadata : Map<String, precog.util.ValueType>, request : PrecogRequest)
+	{
+		super(request);
+		this.parent = parent;
+		this.metadata = metadata;
+		this.description = 'metadata $parent: ${metadata}';
 	}
 }
 

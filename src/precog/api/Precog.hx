@@ -272,7 +272,9 @@ typedef OptExecuteFile = {
 }
 
 typedef OptQuery = {
-    query : String
+    query : String,
+    ?limit : Int,
+    ?skip : Int
 }
 
 typedef OptMove = {
