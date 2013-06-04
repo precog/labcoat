@@ -29,7 +29,7 @@ class PolychartBuilderEditor implements RegionEditor {
 
         element = new JQuery('<div class="polychart-ui"></div>');
         editorContainer = new JQuery('<div class="editor"></div>').appendTo(element);
-
+        
         var refreshButton = new HtmlButton('refresh', Icons.refresh, Mini);
         refreshButton.type = Flat;
         refreshButton.element.click(function(_) buildEditor());
@@ -59,6 +59,7 @@ class PolychartBuilderEditor implements RegionEditor {
             template = template.replace("${analyticsService}", credential.analyticsService);
             var path = region.path().split("/").slice(0, -1).join("/") + "/";
             template = template.replace("${path}", path);
+            template = template.replace("${filePath}", region.path());
             //TODO use regiions to extract out
 //            template = template.replace("${outs}", ["out1","out2"].map(function(o) return '"$o"').join(","));
 
@@ -151,7 +152,7 @@ class PolychartBuilderEditor implements RegionEditor {
             var meta = {};
             for(key in ds.meta.keys())
                 Reflect.setField(meta, key, { type : ds.meta.get(key) });
-            return '{ name : "${escapeQuotes(ds.name)}", data : quirrel("${escapeQuotes(ds.query)}"), meta : ${haxe.Json.stringify(meta)} }';
+            return '{ name : "${escapeQuotes(ds.name)}", query : "${escapeQuotes(ds.query)}", meta : ${haxe.Json.stringify(meta)} }';
 /*
 {
       name: "Email",
@@ -245,10 +246,6 @@ class PolychartBuilderTemplate
     public static var HTML = '
 <script src="http://localhost/labcoat2/js/precog.js" type="text/javascript"></script>
 <script src="poly/dependencies.js"></script>
-<script src="poly/data/iris.js"></script>
-<script src="poly/data/email.js"></script>
-<script src="poly/data/content.js"></script>
-
 <script src="poly/all.js"></script>
 
 <link rel="stylesheet" type="text/css" href="poly/dependencies.css" />
@@ -257,91 +254,49 @@ class PolychartBuilderTemplate
 <div id="chart" class="polychart-ui"></div>
 <script>
 // DYNAMIC VARIABLES
-    var path = "$${path}",
-        apiKey = "$${apiKey}",
-        analyticsService = "$${analyticsService}";
+    var apiKey = "$${apiKey}",
+        analyticsService = "$${analyticsService}",
+        sources = $${datasources},
+        filePath = "$${filePath}";
 // END OF DYNAMIC VARIABLES
 
-var api = new Precog.api({ analyticsService : analyticsService, apiKey : apiKey });
+var api  = new Precog.api({ analyticsService : analyticsService, apiKey : apiKey }),
+    poly = require("poly");
 
-quirrel = function quirrel(params) {
-    if("string" === typeof params)
-        params = { query : params };
 
-    params.query = params.query.split("/./").join("/"+path).split("\\"./").join("\\"" + path);   
-
-    return polyjs.data.api(function quirrelApiFunction(requestParams, callback) {
-        api.execute(params).then(
-            function(data) {
-                callback(undefined, { data : data.data });
-            },
-            function(err) {
-                callback(err);
-            }
-        );
-    });
-};
-
-poly = require("poly");
-
-var tables = $${datasources};
-
-var promises = tables.map(function(table) {
-    return api.execute({ query : table });
-});
-
-Precog.Vow.all(promises).then(function(results) {
-    console.log(results);
-
-    polychart_global = poly.dashboard({
+api.getFile(filePath).then(function(result) {
+  var config = (result.contents && JSON.parse(result.contents)) || [];
+      polychart_global = poly.dashboard({
         dom: $("#chart")[0],
         header: false,
         showTutorial: false,
         width: "fill",
         height: "fill",
         demoData: [{
-          type: "local",
-          tables: tables
-        /*
-          [
-            {
-              name: "Email",
-              data: emails,
-              meta: {
-                id: { type: "num" },
-                template_id: { type: "cat" },
-                created: { type: "date" },
-                success: { type: "cat" },
-                message_hash: { type: "cat" },
-                source: { type: "cat" }
-              }
-            },
-            {
-              name: "Content",
-              data: content,
-              meta: {
-                user_id: { type: "cat" },
-                created: { type: "date" },
-                dataset_id: { type: "num" },
-                title: { type: "cat" },
-                public: { type: "cat" },
-              }
-            },
-            {
-              name: "Iris",
-              data: iris,
-              meta: {
-                sepalLength: { type: "num" },
-                sepalWidth: { type: "num" },
-                petalLength: { type: "num" },
-                petalWidth: { type: "num" },
-                category: { type: "cat" },
-              }
-            },
-          ]
-        */
-        }]
+          type: "precog",
+          api : api,
+          sources: sources
+        }],
+        initial : config
     });
+
+  polychart_global.onSave((function() {
+    var timer;
+    return function() {
+      clearTimeout(timer);
+      timer = setTimeout(function() {
+        var content = JSON.stringify(polychart_global.serialize());
+        console.log(content);
+        api.uploadFile({
+          path : filePath,
+          type : "application/json",
+          contents : content
+        }).then(function() {
+          // communicate up to the iframe
+        });
+      }, 1000)
+    };
+  })());
 });
 
 

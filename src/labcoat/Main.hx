@@ -24,7 +24,6 @@ class Main
         manager.addModule(new LocalizationAdvisorModule());
         manager.addModule(new LocalizationModule());
         manager.addModule(new LogModule());
-
         manager.addModule(new JavascriptErrorInterceptModule());
 
         // View
