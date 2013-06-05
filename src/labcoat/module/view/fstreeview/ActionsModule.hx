@@ -4,6 +4,8 @@ import labcoat.message.*;
 import labcoat.message.NodeInfo;
 import labcoat.message.PrecogRequest;
 import labcoat.message.PrecogResponse;
+import js.html.File;
+import js.html.FileReader;
 import precog.communicator.Communicator;
 import precog.communicator.Module;
 import precog.util.Locale;
@@ -40,11 +42,11 @@ class ActionsModule extends Module
         var rename = new HtmlButton(locale.singular("rename"), Icons.edit, Mini, true);
         rename.element.appendTo(item.element);
         rename.enabled = false;
-/*
+
         var upload = new HtmlButton("upload", Icons.uploadAlt, Mini, true);
         upload.element.appendTo(item.element);
-        upload.enabled = true;
-*/
+        upload.enabled = false;
+
 /*
         var download = new HtmlButton("download", Icons.downloadAlt, Mini, true);
         download.element.appendTo(item.element);
@@ -105,6 +107,7 @@ class ActionsModule extends Module
                     open.enabled = false;
             }
 
+            // RENAME
             function getFileName(s : String)
                 return s.rtrim("/").split("/").pop();
 
@@ -151,6 +154,26 @@ class ActionsModule extends Module
                             }
                         });
                 });
+
+            // UPLOAD
+            upload.enabled = switch(node.type) {
+            case Directory: true;
+            case _: false;
+            }
+            upload.element
+                .off("click")
+                .on("click", function() {
+                    Dialog.files("Upload file(s):", function(files: Array<File>) {
+                        for(file in files) {
+                            var reader = new FileReader();
+                            reader.onload = function(event: Dynamic) {
+                                var type = if(file.type == "") MimeType.fromName(file.name) else file.type;
+                                communicator.request(new RequestFileUpload('${node.path}/${file.name}', type, event.target.result), ResponseFileUpload);
+                            };
+                            reader.readAsBinaryString(file);
+                        }
+                    });
+                });
         });
 
         communicator.on(function(node : NodeTriggered) {
@@ -165,7 +188,7 @@ class ActionsModule extends Module
         });
 
         communicator.on(function(node : NodeDeselected) {
-            rename.enabled = open.enabled = delete.enabled = true;
+            rename.enabled = open.enabled = delete.enabled = false;
         });
     }
 

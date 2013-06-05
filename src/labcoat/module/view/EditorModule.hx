@@ -40,7 +40,7 @@ class EditorModule extends Module {
     var accountId : String;
     var tmpPath : String;
     var metadataPath : String;
-    var currentPath : String;
+    var currentDirectory : String;
 
     var fileCounter : Int = 0;
     var notebookCounter : Int = 0;
@@ -85,12 +85,10 @@ class EditorModule extends Module {
         ]);
 
         communicator.on(function(_ : NodeDeselected) {
-            setCurrentPath(null);
+            setCurrentDirectory(null);
         });
 
-        communicator.on(function(e : DirectorySelected) {
-            setCurrentPath(e.path);
-        });
+        communicator.on(setCurrentDirectory);
     }
 
     public function init(editorPanel: MainEditorHtmlPanel, locale : Locale) {
@@ -143,19 +141,23 @@ class EditorModule extends Module {
         communicator.consume(function(configs : Array<PrecogNamedConfig>) {
             // TODO: Maybe check this is the "default" account
             accountId = configs[0].config.accountId;
-            setCurrentPath(null);
+            setCurrentDirectory(null);
             tmpPath = '${accountId}/temp';
             metadataPath = '${tmpPath}/metadata.json';
             loadMetadata();
         });
     }
 
-    function setCurrentPath(path : String)
+    function setCurrentDirectory(node : NodeSelected)
     {
-        if(null == path)
-            currentPath = "/" + accountId;
+        if(null == node)
+            currentDirectory = "/" + accountId;
         else
-            currentPath = path;
+            currentDirectory = if(node.type == Directory) node.path else {
+                var segments = node.path.split('/');
+                segments.pop();
+                segments.join('/');
+            }
     }
 
     function loadMetadata() {
@@ -283,8 +285,10 @@ class EditorModule extends Module {
 
         var saveAs = new JQuery('<a href="#">Save as...</a>').click(function(event: Event) {
             event.preventDefault();
-            Dialog.prompt(locale.format("Current directory: <code>{0}</code><br>Save file as:", [currentPath]), function(filename: String) {
-                current.save('${currentPath}/${filename}');
+
+            Dialog.prompt(locale.format("Current directory: <code>{0}</code><br>Save file as:", [currentDirectory]), function(filename: String) {
+                var directory = if(currentDirectory == '/') '' else currentDirectory;
+                current.save('${directory}/${filename}');
             });
         });
 

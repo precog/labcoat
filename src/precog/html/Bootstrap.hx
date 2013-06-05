@@ -1,5 +1,6 @@
 package precog.html;
 
+import js.html.File;
 import jQuery.JQuery;
 import precog.html.JQuerys;
 import thx.core.Procedure;
@@ -46,6 +47,32 @@ class Dialog
 	static function emptyValidator(v : String, handler : Null<String> -> Void)
 	{
 		handler(null);
+	}
+
+	public static function files(message  : String, success : Array<File> -> Void)
+	{
+		var item	= confirm(message, null),
+			ok		= item.ok,
+			cancel	= item.cancel,
+			dialog	= item.dialog,
+			el		= dialog.el(),
+			body	= el.find(".modal-body"),
+			input	= new JQuery('<input type="file" multiple="multiple" class="prompt-value">').appendTo(new JQuery('<div class="prompt-input-container"></div>').appendTo(body)),
+			files;
+
+		input.bind('change', null, function(event: jQuery.Event) {
+			files = untyped event.target.files;
+		});
+
+		ok.element.get(0).onclick = function() {
+			cancel.enabled = ok.enabled = false;
+
+            dialog.hide();
+            success(files);
+		};
+
+		thx.react.promise.Timer.delay(250).then(function() { input.focus(); });
+		return dialog;
 	}
 
 	public static function prompt(message : String, ?defaultValue : String, success : String -> Void, ?validator : String -> (Null<String> -> Void) -> Void)
