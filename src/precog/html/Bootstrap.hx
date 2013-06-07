@@ -64,12 +64,12 @@ class Dialog
 			files = untyped event.target.files;
 		});
 
-		ok.element.get(0).onclick = function() {
+		ok.element.click(function(_) {
 			cancel.enabled = ok.enabled = false;
 
             dialog.hide();
             success(files);
-		};
+		});
 
 		thx.react.promise.Timer.delay(250).then(function() { input.focus(); });
 		return dialog;

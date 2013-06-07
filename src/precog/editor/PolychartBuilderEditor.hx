@@ -248,8 +248,7 @@ class PolychartBuilderTemplate
 <script src="poly/dependencies.js"></script>
 <script src="poly/all.js"></script>
 
-<link rel="stylesheet" type="text/css" href="poly/dependencies.css" />
-<link rel="stylesheet" type="text/css" href="poly/app.css" />
+<link rel="stylesheet" type="text/css" href="poly/css/polychart.css" />
 
 <div id="chart" class="polychart-ui"></div>
 <script>
