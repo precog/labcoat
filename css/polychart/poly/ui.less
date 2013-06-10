@@ -47,22 +47,26 @@ INPUT {
 }
 
 .btn-large {
-  #poly .gray-button();
+  .btn();
 
-  padding: 6px 10px;
+  background-color: #fcfcfc;
+
+  padding: 6px;
   margin: 10px 0;
   text-align: center;
 
   IMG {
     float: left;
-    max-width: 15px;
-    margin-right: 6px;
+    max-width: 14px;
+    margin-right: 4px;
+    background-color: #ccc;
+    padding: 2px;
+    border-radius: 2px;
   }
 
   .content {
     display: inline-block;
-    height: 15px;
-    margin-top: 1px;
+    margin-top: 3px;
 
     IMG {
       margin: -4px 6px 0 0;
@@ -71,7 +75,7 @@ INPUT {
 }
 
 .btn-large.green {
-  #poly .green-button();
+//  #poly .green-button();
 }
 
 .btn-small {
@@ -160,31 +164,31 @@ INPUT {
   #poly .box-sizing(border-box);
 
   position: relative;
-  height: 35px;
-  width: 175px;
-  padding: 10px 9px 9px;
+//  height: 35px;
+  width: 155px;
+  padding: 5px;
   margin-top: 0;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 
-  text-align: left;
+//  text-align: left;
 
   .name {
     float: left;
-
-    font-family: @sansSerif;
+    margin-top: 4px;
+//    font-family: @sansSerif;
   }
 }
 
 .dropdown-dialog {
-  #poly .box-shadow(0, 2px, 0, @black);
+  #poly .box-shadow(0, 1px, 2px, rgba(0,0,0,0.2));
   #poly .rounded-corners();
   #poly .rounded-top-left-corner(0);
 
   position: absolute;
-  margin-top: -10px;
+  margin-top: 0px;
 
   background-color: white;
-  border: 1px solid @black;
+  border: 1px solid #ccc;
 
   .cover-top {
     position: relative;
