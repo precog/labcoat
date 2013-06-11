@@ -8,7 +8,6 @@ import precog.macro.ValueClass;
 import precog.util.Locale;
 
 enum RegionModifier {
-    Trimmable;
     Hidable;
     Deletable;
 }
@@ -24,13 +23,6 @@ class RegionModifiers {
             return button;
         }
 
-        buttons.set(Trimmable, function(region: Region, locale: Locale) {
-            var button = makeButton(locale.singular('toggle trim'), Icons.resizeFull, 'toggle-trim');
-            button.element.click(function(_) {
-                button.leftIcon = region.element.find('.content .editor').toggleClass('trimmed').is('.trimmed') ? Icons.resizeFull : Icons.resizeSmall;
-            });
-            return button;
-        });
         buttons.set(Hidable, function(region: Region, locale: Locale) {
             var button = makeButton(locale.singular('show/hide'), Icons.eyeClose, 'show-hide');
             button.element.click(function showHideContent(_) {
@@ -39,7 +31,7 @@ class RegionModifiers {
             return button;
         });
         buttons.set(Deletable, function(region: Region, locale: Locale) {
-            var button = makeButton(locale.singular('delete'), Icons.remove, 'toggle-trim');
+            var button = makeButton(locale.singular('delete'), Icons.remove, 'delete');
             button.element.click(function(_) {
                 Dialog.confirm("Are you sure you want to delete this region?", function() {
                     region.events.delete.trigger(region);

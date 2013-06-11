@@ -14,7 +14,7 @@ import thx.react.Signal;
 using Lambda;
 
 class Notebook implements Editor {
-    static var modifiers = new RegionModifiers([Trimmable, Hidable, Deletable]);
+    static var modifiers = new RegionModifiers([Hidable, Deletable]);
 
     public var events(default, null) : {
         public function clear() : Void;
