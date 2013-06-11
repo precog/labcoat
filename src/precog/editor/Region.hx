@@ -64,11 +64,7 @@ class Region {
                 new MarkdownEditor(communicator, this);
             case JSONRegionMode:
                 new JSONEditor(communicator, this);
-            case VegaRegionMode:
-                new VegaEditor(this);
-            case PolychartCodeRegionMode:
-                new PolychartCodeEditor(context, communicator, this, editorToolbar);
-            case PolychartBuilderRegionMode:
+            case PolychartRegionMode:
                 new PolychartBuilderEditor(context, communicator, this, editorToolbar);
         }
     }

@@ -6,21 +6,17 @@ enum RegionMode {
     QuirrelRegionMode;
     MarkdownRegionMode;
     JSONRegionMode;
-    VegaRegionMode;
-    PolychartCodeRegionMode;
-    PolychartBuilderRegionMode;
+    PolychartRegionMode;
 }
 
 class RegionModes {
 	public static function toEnglish(mode : RegionMode)
 	{
-		return switch(""+mode) {
-			case "PolychartCodeRegionMode":
-				"Poly Code";
-			case "PolychartBuilderRegionMode":
-				"Poly UI";
-			case s:
-				s.replace("RegionMode", "");
+		return switch(mode) {
+			case PolychartRegionMode:
+				"Charts";
+			case _:
+				("" + mode).replace("RegionMode", "");
 		};
 	}
 }
