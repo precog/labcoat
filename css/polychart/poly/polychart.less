@@ -1,7 +1,7 @@
 @import "reset";
 @import "mixins";
 
-@leftPanel: 128px;
+@leftPanel: 129px;
 @leftPanelContent: 120px;
 @middlePanel: 145px;
 @middlePanelLarge: 160px;
@@ -187,12 +187,13 @@ H1 {
 }
 
 .data-panel, .menu-panel {
+  border-right: 1px solid #eeeeee;
   #poly .box-sizing(border-box);
+  overflow: auto;
 
   position: relative;
   z-index: @zIndexLayer1;
   height: 100%;
-  overflow-y: scroll;
   padding: 4px;
   background-color: @lightBackgroundColor;
 }
@@ -309,6 +310,9 @@ BODY.scrolling-disabled {
     display: none;
   }
 */
+  .quickadd-comment {
+    display: none;
+  }
   .quickadd-container {
     width: 100%;
     margin-top: 4px;
@@ -634,8 +638,8 @@ BODY.scrolling-disabled {
   }
   .chart-details {
     position: absolute;
-    right: 0px;
-    bottom: 0px;
+    top: 3px;
+    left: 3px;
   }
 
   &.ui-resizable-resizing {
@@ -714,8 +718,10 @@ BODY.scrolling-disabled {
     }
 
     .btn-flat {
-      #poly .transition(all, 0.1s, linear);
+      .btn();
 
+//      #poly .transition(all, 0.1s, linear);
+/*
       float: none;
       height: 20px;
       padding-top: 6px;
@@ -728,6 +734,7 @@ BODY.scrolling-disabled {
       &:hover, &:active {
         color: @darkGreen;
       }
+*/
     }
 
     .skip {
