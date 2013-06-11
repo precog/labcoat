@@ -9,7 +9,7 @@ enum JsonMLTree {
 
 class JsonML {
     // Convert to typed representation
-    public static function toTree(jsonML: Dynamic): JsonMLTree {
+    public static function toTree(jsonML: Dynamic) {
         if(Type.enumEq(Type.typeof(jsonML), TClass(String)))
             return JsonMLText(jsonML);
 

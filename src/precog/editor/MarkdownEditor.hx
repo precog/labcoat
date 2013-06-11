@@ -1,14 +1,17 @@
 package precog.editor;
 
+import jQuery.Event;
+import jQuery.JQuery;
+import js.html.Node;
 import labcoat.message.PrecogRequest;
 import labcoat.message.PrecogResponse;
 import precog.communicator.Communicator;
 import precog.editor.codemirror.Externs;
 import precog.editor.markdown.Externs;
-import jQuery.JQuery;
-import jQuery.Event;
+import precog.editor.mathjax.MathJax;
 
 using StringTools;
+using precog.editor.markdown.JsonML;
 
 class MarkdownEditor implements RegionEditor {
     public var element: JQuery;
@@ -40,8 +43,32 @@ class MarkdownEditor implements RegionEditor {
         // result in an empty, non-clickable div)
         if(getContent().trim().length == 0) return;
 
+        var parseTree = JsonML.toTree(Markdown.toHTMLTree(getContent()));
+        var mathRE = ~/^maths?\n/m;
+        var tree = parseTree.transform(function(t: JsonMLTree) {
+            return switch(t) {
+            // Math blocks
+            case JsonMLNode('p', _, [JsonMLNode('code', _, [JsonMLText(s)])]) if(mathRE.match(s)):
+                var attrs = new Map();
+                attrs['class'] = 'mathjax';
+                var math = mathRE.replace(s, '');
+                JsonMLNode('div', attrs, [JsonMLText(math)]);
+
+            // Fenced code blocks
+            case JsonMLNode('p', a1, [JsonMLNode('code', a2, code)]):
+                JsonMLNode('pre', a1, [JsonMLNode('code', a2, code)]);
+
+            default:
+                t;
+            }
+        });
+
         editor.getWrapperElement().style.display = 'none';
-        rendered.show().html(Markdown.toHTML(getContent()));
+        rendered.show().html(Markdown.renderJsonML(tree.fromTree()));
+
+        rendered.find('.mathjax').each(function(index: Int, element: Node) {
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub, element]);
+        });
 
         communicator.request(
             new RequestFileUpload(region.path(), "text/x-markdown", getContent()),
