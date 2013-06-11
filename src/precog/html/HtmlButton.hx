@@ -19,7 +19,7 @@ class HtmlButton
 	{
 		element = new JQuery('<button type="button" class="btn"></button>');
 		if(textAsTitle && null != text)
-			this.title = title;
+			this.title = text;
 		else if(null != text)
 			this.text = text;
 		if(null != icon)

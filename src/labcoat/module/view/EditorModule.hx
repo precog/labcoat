@@ -247,11 +247,6 @@ class EditorModule extends Module {
     }
 
     function tabButton(editor: Editor) {
-        var insert = new HtmlButton(locale.singular('insert region'), Icons.reply + " icon-flip-vertical", Mini, true);
-        insert.element.click(function(event: Event) {
-            event.preventDefault();
-            createRegion(QuirrelRegionMode);
-        });
         var save = new HtmlButton(locale.singular('save'), Icons.save, Mini, true);
         save.element.click(function(event: Event) {
             event.preventDefault();
@@ -279,7 +274,14 @@ class EditorModule extends Module {
         editor.cata(
             function(codeEditor: CodeEditor) {},
             function(notebook: Notebook) {
-                insert.element.appendTo(containers.toolbar.element);
+                for(mode in Type.allEnums(RegionMode)) {
+                    var button = new HtmlButton(RegionModes.toEnglish(mode), Mini);
+                    button.element.click(function(event: Event) {
+                        event.preventDefault();
+                        createRegion(mode);
+                    });
+                    button.element.appendTo(containers.toolbar.element);
+                }
             }
         );
 
