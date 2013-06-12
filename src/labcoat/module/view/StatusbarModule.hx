@@ -24,7 +24,7 @@ class StatusbarModule extends Module {
     	});
 
     	communicator.on(function(res : PrecogResponse) {
-    		requests--;
+       		requests--;
     	});
 
         communicator

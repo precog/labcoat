@@ -21,6 +21,7 @@ class PolychartBuilderEditor implements RegionEditor {
     var credential : labcoat.message.PrecogConfig;
     var basePath : String;
     var context : Editor;
+    var iframe : js.html.IFrameElement;
 
     public function new(context : Editor, communicator: Communicator, region: Region, editorToolbar: JQuery) {
         this.context = context;
@@ -47,9 +48,14 @@ class PolychartBuilderEditor implements RegionEditor {
     {
         editorContainer.children().remove();
 
-        var iframeElement = new JQuery('<iframe class="polychart" frameborder="0" marginheight="0" marginwidth="0"></iframe>').appendTo(editorContainer),
-            iframe = iframeElement.get(0),
-            doc : Dynamic = untyped iframe.contentWindow || iframe.contentDocument;
+        var iframeElement = new JQuery('<iframe class="polychart" frameborder="0" marginheight="0" marginwidth="0"></iframe>').appendTo(editorContainer);
+        iframe = cast iframeElement.get(0);
+        var doc : Dynamic = untyped iframe.contentWindow || iframe.contentDocument;
+
+        (untyped iframe.contentWindow).POLYCHART_SAVE_HANDLER = function(content) {
+            setContent(content);
+            evaluate();
+        };
 
         getDataSources(function(datasources : Array<Datasource>) {
 
@@ -64,7 +70,6 @@ class PolychartBuilderEditor implements RegionEditor {
 //            template = template.replace("${outs}", ["out1","out2"].map(function(o) return '"$o"').join(","));
 
             var sdatasources = serializeDatasources(datasources);
-            trace(sdatasources);
             template = template.replace("${datasources}", sdatasources);
 
             if(doc.document) {
@@ -124,12 +129,20 @@ class PolychartBuilderEditor implements RegionEditor {
 
     public function getContent() : String
     {
-        return null;
+        if(null == iframe)
+            return "[]";
+        var win = iframe.contentWindow;
+        if(null == untyped win.POLYCHART_SERIALIZED)
+            return "[]";
+        return untyped win.POLYCHART_SERIALIZED;
     }
 
     public function setContent(content : String)
     {
-        
+        if(null == iframe)
+            return;
+        var win = iframe.contentWindow;
+        untyped win.POLYCHART_SERIALIZED = content;
     }
 
     public function focus()
@@ -153,20 +166,6 @@ class PolychartBuilderEditor implements RegionEditor {
             for(key in ds.meta.keys())
                 Reflect.setField(meta, key, { type : ds.meta.get(key) });
             return '{ name : "${escapeQuotes(ds.name)}", query : "${escapeQuotes(ds.query)}", meta : ${haxe.Json.stringify(meta)} }';
-/*
-{
-      name: "Email",
-      data: emails,
-      meta: {
-        id: { type: "num" },
-        template_id: { type: "cat" },
-        created: { type: "date" },
-        success: { type: "cat" },
-        message_hash: { type: "cat" },
-        source: { type: "cat" }
-      }
-    }
-*/
         }).join(", ") + "]";
     }
 
@@ -285,14 +284,8 @@ api.getFile(filePath).then(function(result) {
       clearTimeout(timer);
       timer = setTimeout(function() {
         var content = JSON.stringify(polychart_global.serialize());
-        console.log(content);
-        api.uploadFile({
-          path : filePath,
-          type : "application/json",
-          contents : content
-        }).then(function() {
-          // communicate up to the iframe
-        });
+        window.POLYCHART_SERIALIZED = content;
+        window.POLYCHART_SAVE_HANDLER && window.POLYCHART_SAVE_HANDLER(content);
       }, 1000)
     };
   })());

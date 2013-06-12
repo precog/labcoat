@@ -37,7 +37,14 @@ class StatusModule extends Module {
     function consumeMessage(locale : Locale, status : StatusMessage) {
     	var type = Std.string(status.type).toLowerCase(),
     		li = new jQuery.JQuery('<li class="text-$type"><i class="icon-${icon(type)}"></i><span class="text"></span><span class="badge badge-light time">${locale.format("{0:T}", [status.time])}</span></li>').appendTo(ul);
-    	li.find(".text").append(status.message);
+    	li.find(".text").append(messageToString(status.message));
+    }
+
+    function messageToString(message : Dynamic)
+    {
+        if(Std.is(message, String))
+            return message;
+        return Std.string(message);
     }
 
     function icon(type : String)

@@ -149,18 +149,21 @@ class PrecogModule extends Module
 						limit : 20
 					}).then(
 						function(result) {
-							var data = result.data;
+							var data = result.data,
+								response;
 							if(data.length > 0 && Reflect.isObject(data[0])) {
 								var map = ModelTyper.guessFromManyObjects(data);
-								deferred.resolve(new ResponseMetadata(request.path, map, request));
+								response = new ResponseMetadata(request.path, map, request);
 							} else if(data.length > 0 && !Std.is(data[0], Array)) {
 								var type = ModelTyper.guessFromManyValues(data),
 									map = new Map();
 								map.set("value", type);
-								deferred.resolve(new ResponseMetadata(request.path, map, request));
+								response = new ResponseMetadata(request.path, map, request);
 							} else {
-								deferred.resolve(new ResponseMetadata(request.path, new Map(), request));
+								response = new ResponseMetadata(request.path, new Map(), request);
 							}
+							deferred.resolve(response);
+							communicator.trigger(response);
 						},
 						errorResponse(request, deferred)
 					);

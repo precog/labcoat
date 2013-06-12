@@ -52,7 +52,7 @@ class ResponseMetadata extends PrecogResponse
 		super(request);
 		this.parent = parent;
 		this.metadata = metadata;
-		this.description = 'metadata $parent: ${metadata}';
+		this.description = 'metadata for $parent: ${metadata}';
 	}
 }
 
@@ -73,7 +73,7 @@ class ResponseFileBase extends PrecogResponse
 	{
 		super(request);
 		this.path = path;
-		this.description = 'response ' + Type.getClassName(Type.getClass(this)).split(".").pop().substr(8).humanize() + ' for $path';
+		this.description = Type.getClassName(Type.getClass(this)).split(".").pop().substr(8).humanize() + ' for $path';
 	}
 }
 
@@ -105,7 +105,7 @@ class ResponseFileExist extends ResponseFileBase
 		super(path, request);
 		this.path = path;
 		this.exist = exist;
-		this.description = 'response ' + Type.getClassName(Type.getClass(this)).split(".").pop().substr(8).humanize() + ' for $path, exists: $exist';
+		this.description = Type.getClassName(Type.getClass(this)).split(".").pop().substr(8).humanize() + ' for $path, exists: $exist';
 	}
 }
 
@@ -117,7 +117,7 @@ class ResponseDirectoryExist extends ResponseFileBase
 		super(path, request);
 		this.path = path;
 		this.exist = exist;
-		this.description = 'response ' + Type.getClassName(Type.getClass(this)).split(".").pop().substr(8).humanize() + ' for $path, exists: $exist';
+		this.description = Type.getClassName(Type.getClass(this)).split(".").pop().substr(8).humanize() + ' for $path, exists: $exist';
 	}
 }
 
@@ -170,7 +170,7 @@ class ResponseDirectoryMove extends PrecogResponse
 		super(request);
 		this.src = src;
 		this.dst = dst;
-		this.description = 'response move directory from ${this.src} to ${this.dst}';
+		this.description = 'move directory from ${this.src} to ${this.dst}';
 	}
 }
 
@@ -183,7 +183,7 @@ class ResponseNotebookMove extends PrecogResponse
 		super(request);
 		this.src = src;
 		this.dst = dst;
-		this.description = 'response move notebook from ${this.src} to ${this.dst}';
+		this.description = 'move notebook from ${this.src} to ${this.dst}';
 	}
 }
 
@@ -196,7 +196,7 @@ class ResponseFileMove extends PrecogResponse
 		super(request);
 		this.src = src;
 		this.dst = dst;
-		this.description = 'response move file from ${this.src} to ${this.dst}';
+		this.description = 'move file from ${this.src} to ${this.dst}';
 	}
 }
 

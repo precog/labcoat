@@ -61,7 +61,7 @@ class RequestFileBase extends PrecogRequest
 	{
 		super(api);
 		this.path = Helper.normalizepath(path);
-		this.description = 'request ' + Type.getClassName(Type.getClass(this)).split(".").pop().substr(7).humanize() + ' for $path';
+		this.description = Type.getClassName(Type.getClass(this)).split(".").pop().substr(7).humanize() + ' for $path';
 	}
 }
 
