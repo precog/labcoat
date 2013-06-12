@@ -281,9 +281,8 @@
               }
             }
             if (info != null) {
-              info = info.info;
+              return info = info.info;
             }
-            return Events.track("dbb_" + str, _.extend({}, defaultprops, info, Events.context));
           });
         }
       });
