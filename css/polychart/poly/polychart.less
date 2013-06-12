@@ -37,20 +37,6 @@
 #poly .colors;
 #poly .fonts;
 #poly .layers;
-/*
-::-webkit-scrollbar {
-  -webkit-appearance: none;
-  width: 6px;
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: @black;
-}
-
-.menu-panel::-webkit-scrollbar-thumb {
-  background-color: @darkerGray;
-}
-*/
 
 .btn {
   display: inline-block;
@@ -210,23 +196,14 @@ BODY.scrolling-disabled {
 }
 
 .table-metric-list {
-//  margin-bottom: 12px;
-//  max-height: 10px;
-
   .table-title {
     width: @leftPanelContent;
-//    padding-bottom: 2px;
     cursor: pointer;
     color: #888;
     text-align: center;
-//    border-bottom: 1px solid #ccc;
 
     .title-text {
       overflow: hidden;
-//      margin-right: 20px;
-//      color: white;
-
-//      font-size: @fontSizeSmall;
     }
 
     .arrow {
@@ -236,20 +213,12 @@ BODY.scrolling-disabled {
       background-color: @iconBackgroundColor;
       border-radius: 2px 2px 2px 2px;
 
-//      padding: 2px;
-
       // Default to pointing right
       float: right;
       position: relative;
       top: -17px;
       width: 16px;
       height: 16px;
-      /*
-      border-left: 7px solid white;
-      border-right-style: none;
-      border-top: 7px solid transparent;
-      border-bottom: 7px solid transparent;
-      */
     }
   }
 
@@ -274,8 +243,6 @@ BODY.scrolling-disabled {
   }
 
   &.selected {
-//    max-height: 500px;
-
     .metrics {
       opacity: 1;
     }
@@ -284,14 +251,6 @@ BODY.scrolling-disabled {
       cursor: default;
 
       .arrow {
-        // Point down when selected
-        //top: -12px;
-        /*
-        border-left: 7px solid transparent;
-        border-right: 7px solid transparent;
-        border-top: 7px solid white;
-        border-bottom-style: none;
-        */
       }
     }
   }
@@ -305,11 +264,7 @@ BODY.scrolling-disabled {
   float: left;
   width: @middlePanel + @scrollbarWidth;
   padding: 0 4px;
-/*
-  .quickadd-container:nth-child(4) {
-    display: none;
-  }
-*/
+
   .quickadd-comment {
     display: none;
   }
@@ -321,11 +276,9 @@ BODY.scrolling-disabled {
 
     .quickadd-item {
       border-radius: 4px;
-//      #poly .gray-button();
       background-color: #eee;
 
       text-align: center;
-//      font-size: @fontSizeSmall;
       padding: 4px 0px;
 
       DIV.large-icon {
@@ -358,7 +311,6 @@ BODY.scrolling-disabled {
       #poly .box-sizing(border-box);
 
       .metric {
-//        height: 31px;
         width: 100%;
       }
     }
@@ -368,7 +320,6 @@ BODY.scrolling-disabled {
       margin: 4px 0 10px;
 
       color: @lightGreen;
-//      font-size: @fontSizeSmall;
       font-weight: 600;
       text-align: center;
 
@@ -383,10 +334,8 @@ BODY.scrolling-disabled {
   }
 
   .quickadd-container.expanded {
-//    border-bottom: 1px solid @white;
 
     .quickadd-item {
-//      #poly .gray-inset();
       background-color: #ddd;
     }
   }
@@ -399,7 +348,6 @@ BODY.scrolling-disabled {
 }
 
 .aes .title {
-//  color: @white;
   margin-bottom: 3px;
   color: #888;
   text-align: center;
@@ -407,15 +355,12 @@ BODY.scrolling-disabled {
 
 .metric {
   #poly .box-sizing(border-box);
-//  #poly .green-button();
 
   position: relative;
-//  z-index: @zIndexLayer2;
   width: @leftPanelContent;
   height: 24px;
   cursor: move;
 
-//  font-size: @fontSizeSmall;
 
   .metric-icon {
     float: left;
@@ -441,25 +386,8 @@ BODY.scrolling-disabled {
   .metric-name {
     padding: 6px 0 2px 4px;
     position: relative;
-//    margin-right: 15px;
-//    top: -2px;
     overflow: hidden;
-//    color: white;
   }
-
-/*
-  .drag-hint {
-    position: absolute;
-    float: right;
-    right: 5px;
-    top: 5px;
-    height: 20px;
-    width: 2px;
-
-    border-left: 2px solid #999999;
-    border-right: 2px solid #999999;
-  }
-*/
 }
 
 .metric-option-arrow {
@@ -472,12 +400,6 @@ BODY.scrolling-disabled {
 
   top: 12px;
   right: 7px;
-  /*
-  border-left: 7px solid transparent;
-  border-right: 7px solid transparent;
-  border-top: 7px solid white;
-  border-bottom-style: none;
-*/
   &:hover {
     cursor: pointer;
     cursor: hand;
@@ -495,27 +417,8 @@ BODY.scrolling-disabled {
   border: 1px solid #ccc;
 
   DIV {
-//    color: @darkGreen;
-//    font-weight: bold;
+
   }
-/*
-  .metric-option-arrow {
-    border-top-color: @darkGreen;
-  }
-  */
-/*
-  .metric-icon {
-    &.date {
-      background-image: url('assets/icon_type_green_date.svg');
-    }
-    &.num {
-      background-image: url('assets/icon_type_green_num.svg');
-    }
-    &.cat {
-      background-image: url('assets/icon_type_green_cat.svg');
-    }
-  }
-*/
 }
 
 .metric-option {
@@ -570,29 +473,20 @@ BODY.scrolling-disabled {
   #poly .user-select(none);
 
   width: 155px;
-//  height: 38px;
   padding: 4px;
-//  margin-bottom: 3px;
   text-align: center;
   cursor: pointer;
 
-//  #poly .white-inset();
   .inset();
 
   padding: 8px;
-//  background-color: #fff;
 
   .inner {
-//    margin: 3px auto 0;
   }
 
   .droppable-text {
     white-space: nowrap;
     margin-left: 18px;
-//    float: left;
-//    margin: 3px 0 0 6px;
-//    font-size: 0.85em;
-//    font-family: @sansSerif;
   }
   .droppable-img {
     width: @iconSize;
@@ -632,7 +526,6 @@ BODY.scrolling-disabled {
   #poly .animation-fill-made(both);
 
   .chart-inner {
-//    font-family: "Arial", sans-serif;
     width: 100%;
     height: 100%;
   }
@@ -682,7 +575,6 @@ BODY.scrolling-disabled {
     padding: 15px 0 15px 45px;
     z-index: @zIndexOverlay;
 
-//    color: white;
     line-height: 1.3em;
     background: url('assets/nux_arrow.svg') top left no-repeat;
 
@@ -719,36 +611,16 @@ BODY.scrolling-disabled {
 
     .btn-flat {
       .btn();
-
-//      #poly .transition(all, 0.1s, linear);
-/*
-      float: none;
-      height: 20px;
-      padding-top: 6px;
-
-      background-color: @white;
-      color: @black;
-      font-weight: bold;
-      text-transform: uppercase;
-
-      &:hover, &:active {
-        color: @darkGreen;
-      }
-*/
     }
 
     .skip {
       margin-top: 25px;
 
       A {
-//        color: @medGray;
-//        font-size: @fontSizeSmall;
       }
       A:hover {
-//        color: @white;
       }
       A:active {
-//        color: @lightGray;
       }
     }
   }
