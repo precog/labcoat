@@ -75,7 +75,7 @@ extern class Precog
 	// *** ANALYSIS ***
 	// ****************
 
-    public function executeFile(info : OptExecuteFile, ?success : ProcQuery, ?failure : ProcFailure) : Future<ProcQuery, ProcFailure>;
+    public function executeFile(info : OptExecuteFile, ?success : ProcFileQuery, ?failure : ProcFailure) : Future<ProcFileQuery, ProcFailure>;
     public function execute(info : OptQuery, ?success : ProcQuery, ?failure : ProcFailure) : Future<ProcQuery, ProcFailure>;
     public function _asyncQuery(info : OptQuery, ?success : ProcAsyncQuery, ?failure : ProcFailure) : Future<ProcAsyncQuery, ProcFailure>;
     public function _asyncQueryResults(jobId : String, ?success : ProcQuery, ?failure : ProcFailure) : Future<ProcQuery, ProcFailure>;
@@ -175,6 +175,8 @@ typedef ResAsyncQuery = {
 				jobId : String
 			}
 typedef ProcAsyncQuery = ProcT<ResAsyncQuery>;
+typedef ResFileQuery = Array<Dynamic>;
+typedef ProcFileQuery = ProcT<ResFileQuery>;
 typedef ResQuery = {
 				errors : Array<Dynamic>, // TODO type me
 				warnings : Array<Dynamic>, // TODO type me

@@ -7,7 +7,7 @@ import precog.html.LabcoatAccountWindow;
 
 class LoginModule extends Module
 {
-	static var SERVICES = ['https://nebula.precog.com','https://beta.precog.com'];
+	static var SERVICES = ['https://devspace01.precog.com', 'https://nebula.precog.com','https://beta.precog.com'];
 	static var DEFAULT_SERVICE = 'https://beta.precog.com';
 	var communicator : Communicator;
 

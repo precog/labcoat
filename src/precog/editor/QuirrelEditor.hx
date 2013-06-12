@@ -73,12 +73,13 @@ class QuirrelEditor implements RegionEditor {
                 new RequestFileExecute(region.path()),
                 ResponseFileExecute
             ).then(ProcedureDef.fromArity1(function(res: ResponseFileExecute) {
-                outputElement.html('<div class="out">${region.filename} :=</div><div class="data">${haxe.Json.stringify(res.result.data)}</div><ul class="errors"></ul><ul class="warnings"></ul>');
+                outputElement.html('<div class="out">${region.filename} :=</div><div class="data">${haxe.Json.stringify(res.result)}</div><ul class="errors"></ul><ul class="warnings"></ul>');
 
                 var errorsElement = outputElement.find('.errors');
                 var warningsElement = outputElement.find('.warnings');
 
-                var errors = res.result.errors.map(function(e) return e.message).concat(res.result.serverErrors),
+                // Cached file execute doesn't give a report...
+                /*var errors = res.result.errors.map(function(e) return e.message).concat(res.result.serverErrors),
                     warnings = res.result.warnings.map(function(w) return w.message).concat(res.result.serverWarnings);
 
                 for(warning in warnings) {
@@ -89,7 +90,7 @@ class QuirrelEditor implements RegionEditor {
                 for(error in errors) {
                     errorsElement.append('<li><i class="icon-exclamation-sign"></i> ${error}</li>');
                     communicator.queue(new StatusMessage(error, Error));
-                }
+                }*/
             }));
         }));
     }

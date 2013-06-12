@@ -157,13 +157,7 @@ typedef FileExecutionError = {
 	timestame: String
 }
 
-typedef FileExecution = {
-	data: Array<Dynamic>,
-	errors: Array<FileExecutionError>,
-	warnings: Array<FileExecutionError>,
-	serverErrors: Array<String>, // TODO check String is the correct type
-	serverWarnings: Array<String> // TODO check String is the correct type
-}
+typedef FileExecution = Array<Dynamic>;
 
 class ResponseFileExecute extends ResponseFileBase 
 {
