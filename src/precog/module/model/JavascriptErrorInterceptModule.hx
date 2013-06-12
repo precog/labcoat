@@ -14,7 +14,6 @@ class JavascriptErrorInterceptModule extends Module
 		super();
 		buffer = new Buffer();
 		js.Browser.window.onerror = cast function(msg : String, url : String, line : String) {
-trace(untyped arguments);
 			var message = '$msg <small>(line $line) at $url</small>';
 			buffer.queue(new StatusMessage(message, Error));
 		};

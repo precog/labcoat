@@ -1,6 +1,7 @@
 package labcoat.message;
 
 using thx.core.Strings;
+using Lambda;
 
 class PrecogResponse
 {
@@ -52,7 +53,15 @@ class ResponseMetadata extends PrecogResponse
 		super(request);
 		this.parent = parent;
 		this.metadata = metadata;
-		this.description = 'metadata for $parent: ${metadata}';
+
+		var meta = [];
+
+		for(key in metadata.keys())
+		{
+			meta.push(key + "=" + precog.util.ValueTypes.toString(metadata.get(key)));
+		}
+
+		this.description = 'metadata for $parent: ${meta.join(", ")}';
 	}
 }
 

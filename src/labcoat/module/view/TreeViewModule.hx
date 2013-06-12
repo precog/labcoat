@@ -114,9 +114,10 @@ class TreeViewModule extends Module
 
         function ensureFileAt(path : String, api : String)
         {
-            var fs   = fss.get(api),
-                node = fs.root.pick(path);
-            if(null == node) {
+            var fs     = fss.get(api),
+                parent = fs.root.pick(path.split("/").slice(0, -1).join("/")),
+                node   = fs.root.pick(path);
+            if(null != parent && parent.meta.get("type") != "notebook" && null == node) {
                 fs.root.createFileAt(path, true);
             }
         }
@@ -218,12 +219,15 @@ class TreeViewModule extends Module
                 // remove nodes that are not present anymore
                 response.children.map(function(item) {
                     var path = response.parent + item.name;
-
-                    switch (item.type) {
-                        case "file":
-                            if(fs.root.existsFile(path)) return;
-                        case "directory":
-                            if(fs.root.existsDirectory(path)) return;
+                    if(switch (item.type) {
+                            case "file"      if(fs.root.existsFile(path)):
+                                true;
+                            case "directory" if(fs.root.existsDirectory(path)):
+                                true;
+                            case _:
+                                false;
+                        }) {
+                        fs.root.pick(path).remove();
                     }
 
                     switch (item.type) {
@@ -246,7 +250,7 @@ class TreeViewModule extends Module
     function isHiddenFile(path : String) {
         function filter(segment : String) 
         {
-            return segment.startsWith(".") || segment == "temp"; // TODO remove the second condition once dot-prefix is supported
+            return segment.startsWith("."); // TODO remove the second condition once dot-prefix is supported
         }
         return path.split("/").filter(filter).length > 0;
     }
