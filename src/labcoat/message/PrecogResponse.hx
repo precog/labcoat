@@ -124,9 +124,19 @@ class ResponseDirectoryExist extends ResponseFileBase
 	public function new(path : String, exist : Bool, request : PrecogRequest)
 	{
 		super(path, request);
-		this.path = path;
 		this.exist = exist;
 		this.description = Type.getClassName(Type.getClass(this)).split(".").pop().substr(8).humanize() + ' for $path, exists: $exist';
+	}
+}
+
+class ResponseVirtualDirectoryCreate extends ResponseFileBase 
+{
+	public var success(default, null) : Bool;
+	public function new(path : String, success : Bool, request : PrecogRequest)
+	{
+		super(path, request);
+		this.success = success;
+		this.description = Type.getClassName(Type.getClass(this)).split(".").pop().substr(8).humanize() + ' for $path, success: $success';
 	}
 }
 

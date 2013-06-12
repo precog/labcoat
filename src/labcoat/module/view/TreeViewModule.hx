@@ -184,6 +184,23 @@ class TreeViewModule extends Module
             // new MenuItem(MenuFile(SubgroupFileLocal), "Open File...", function(){}, 0),
             // new MenuItem(MenuFile(SubgroupFileLocal), "Close", function(){}, 1)
         ]);
+
+        communicator.respond(
+            function(request : RequestVirtualDirectoryCreate) : Null<Promise<ResponseVirtualDirectoryCreate -> Void>> {
+                var fs = fss.get(request.api),
+                    deferred = new Deferred(),
+                    success = !fs.root.exists(request.path);
+                if(success)
+                    fs.root.ensureDirectory(request.path);
+                var response = new ResponseVirtualDirectoryCreate(request.path, success, request);
+                deferred.resolve(response);
+                communicator.trigger(response);
+
+                return deferred.promise;
+            },
+            RequestVirtualDirectoryCreate,
+            ResponseVirtualDirectoryCreate
+        );
     }
 
     function addTree(communicator : Communicator, nfs : NamedFileSystem)

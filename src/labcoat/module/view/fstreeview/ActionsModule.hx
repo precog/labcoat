@@ -30,11 +30,11 @@ class ActionsModule extends Module
         var delete = new HtmlButton(locale.singular("delete"), Icons.trash, Mini, true);
         delete.element.appendTo(item.element);
         delete.enabled = false;
-/*
-        var create = new HtmlButton("create", Icons.folderClose, Mini, true);
+
+        var create = new HtmlButton(locale.singular("create directory"), Icons.folderClose, Mini, true);
         create.element.appendTo(item.element);
         create.enabled = false;
-*/
+
         var open = new HtmlButton(locale.singular("open"), Icons.folderOpen, Mini, true);
         open.element.appendTo(item.element);
         open.enabled = false;
@@ -157,8 +157,8 @@ class ActionsModule extends Module
 
             // UPLOAD
             upload.enabled = switch(node.type) {
-            case Directory: true;
-            case _: false;
+                case Directory: true;
+                case _: false;
             }
             upload.element
                 .off("click")
@@ -173,6 +173,31 @@ class ActionsModule extends Module
                             reader.readAsBinaryString(file);
                         }
                     });
+                });
+
+            // CREATE
+            create.enabled = switch(node.type) {
+                case Directory if(node.path != "/"): true;
+                case _: false;
+            }
+            create.element
+                .off("click")
+                .on("click", function() {
+                    Dialog.prompt("Create a new folder with name:", null,
+                        function(name : String) {
+                            var path = '${node.path}/$name';
+                            communicator.request(new RequestVirtualDirectoryCreate(path, node.api), ResponseVirtualDirectoryCreate)
+                                .then(thx.core.Procedure.ProcedureDef.fromArity1(function(res : ResponseVirtualDirectoryCreate) {
+                                    communicator.queue(new StatusMessage(locale.format('created directory "{0}"', [res.path]), Info));
+                                }));
+                        },
+                        function(name : String, handler : String -> Void) {
+                            var path = '${node.path}/$name';
+                            communicator.request(new RequestDirectoryExist(path, node.api), ResponseDirectoryExist)
+                                .then(thx.core.Procedure.ProcedureDef.fromArity1(function(res : ResponseDirectoryExist) {
+                                    handler(res.exist ? locale.singular("duplicated name, please pick a different one") : null);
+                                }));
+                        });
                 });
         });
 

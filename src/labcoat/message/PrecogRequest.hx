@@ -80,6 +80,11 @@ class RequestDirectoryExist extends RequestFileBase
 	
 }
 
+class RequestVirtualDirectoryCreate extends RequestFileBase
+{
+	
+}
+
 class RequestFileCreate extends RequestFileBase 
 {
 	public var type(default, null) : String;

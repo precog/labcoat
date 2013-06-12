@@ -25,7 +25,8 @@ class Dialog
 		ok.element.addClass("ok");
 		ok.element.on("click", function() {
 			dialog.hide();
-			success();
+			if(null != success)
+				success();
 		});
 		cancel.element.addClass("cancel");
 		cancel.element.on("click", function() {
@@ -68,7 +69,8 @@ class Dialog
 			cancel.enabled = ok.enabled = false;
 
             dialog.hide();
-            success(files);
+            if(null != success)
+            	success(files);
 		});
 
 		thx.react.promise.Timer.delay(250).then(function() { input.focus(); });
@@ -97,7 +99,8 @@ class Dialog
 			validator(value, function(msg) {
 				if(null == msg) {
 					dialog.hide();
-					success(value);
+					if(null != success)
+						success(value);
 				} else {
 					cancel.enabled = ok.enabled = true;
 					error.html(msg);
