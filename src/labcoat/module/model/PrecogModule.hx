@@ -66,11 +66,17 @@ class PrecogModule extends Module
 			communicator.trigger(new Log("response: " + response.description));		
 		});
 
-		function errorResponse(request : PrecogRequest, deferred : Deferred<Dynamic>) {
+		function silentErrorResponse(request : PrecogRequest, deferred : Deferred<Dynamic>) {
 			return function(err) {
 				var response = new ResponseError(err, request);
 				deferred.reject(response);
 				communicator.trigger(response);
+			};
+		}
+
+		function errorResponse(request : PrecogRequest, deferred : Deferred<Dynamic>) {
+			return function(err) {
+				silentErrorResponse(request, deferred)(err);
 				communicator.queue(new StatusMessage(err));
 			};
 		}
@@ -113,7 +119,7 @@ class PrecogModule extends Module
 														metadata : metadata
 													});
 												},
-												errorResponse(request, deferred)
+												silentErrorResponse(request, deferred)
 											);	
 											deferred.promise;
 										case invalid:
