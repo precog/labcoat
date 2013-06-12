@@ -407,16 +407,44 @@ class EditorModule extends Module {
     }
 
     function closeEditor(editor: Editor) {
-        editor.clear();
-        editors.remove(editor);
-        var item = panels.get(editor);
-        panels.remove(editor);
-        editor.cata(
-            function(codeEditor: CodeEditor) { /* TODO: Clear CodeEditor events */ },
-            function(notebook: Notebook) { notebook.events.clear(); }
-        );
-        main.removeItem(item);
-        saveMetadata();
+        function close() {
+            editor.clear();
+            editors.remove(editor);
+            var item = panels.get(editor);
+            panels.remove(editor);
+            editor.cata(
+                function(codeEditor: CodeEditor) { /* TODO: Clear CodeEditor events */ },
+                function(notebook: Notebook) { notebook.events.clear(); }
+            );
+            main.removeItem(item);
+            saveMetadata();
+        }
+
+        function deleteAndClose() {
+            editor.cata(
+                function(_: CodeEditor) {
+                    communicator.request(
+                        new RequestFileDelete(editor.path),
+                        ResponseFileDelete
+                    );
+                },
+                function(_: Notebook) {
+                    communicator.request(
+                        new RequestDirectoryDelete(editor.path),
+                        ResponseDirectoryDelete
+                    );
+                }
+            );
+            close();
+        }
+
+        if(editor.path.startsWith(tmpPath + '/')) {
+            Dialog.confirm("File is unsaved, are you sure you want to close?", function() {
+                deleteAndClose();
+            });
+        } else {
+            close();
+        }
     }
 
     function deleteRegion(region: Region) {
