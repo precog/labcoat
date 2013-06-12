@@ -39,7 +39,8 @@ class EditorModule extends Module {
 
     var accountId : String;
     var tmpPath : String;
-    var metadataPath : String;
+    var remoteMetadataPath : String;
+    var localMetadataKey : String;
     var currentDirectory : String;
 
     var fileCounter : Int = 0;
@@ -143,8 +144,10 @@ class EditorModule extends Module {
             accountId = configs[0].config.accountId;
             setCurrentDirectory(null);
             tmpPath = '${accountId}/temp';
-            metadataPath = '${tmpPath}/metadata.json';
+            remoteMetadataPath = '${tmpPath}/metadata.json';
+            localMetadataKey = 'labcoat.editor.metadata';
             loadMetadata();
+            loadTempFiles();
         });
     }
 
@@ -160,29 +163,95 @@ class EditorModule extends Module {
             }
     }
 
+    function loadTempFiles() {
+        trace('TODO: Open all files under ${tmpPath}');
+    }
+
+    // Load metadata
     function loadMetadata() {
+        loadRemoteMetadata();
+        loadLocalMetadata();
+    }
+
+    function loadRemoteMetadata() {
         communicator.request(
-            new RequestFileGet(metadataPath),
+            new RequestFileGet(remoteMetadataPath),
             ResponseFileGet
         ).then(thx.core.Procedure.ProcedureDef.fromArity1(function(response: ResponseFileGet) {
             var metadata = haxe.Json.parse(response.content.contents)[0];
-            if(metadata == null) {
-                // TODO: Open a new notebook
-                createNotebook();
-                return;
-            }
 
             fileCounter = metadata.fileCounter;
             notebookCounter = metadata.notebookCounter;
-
-            var editors: Array<{type: String, path: String}> = metadata.editors;
-            for(editor in editors) {
-                switch(editor.type) {
-                case 'CodeEditor': getContentTypeOpenCodeEditor(editor.path);
-                case 'Notebook': openNotebook(editor.path);
-                }
-            }
         }));
+    }
+
+    function loadLocalMetadata() {
+        var ls = js.Browser.getLocalStorage();
+        var metadata = haxe.Json.parse(ls.getItem(localMetadataKey));
+
+        if(metadata == null) {
+            createNotebook();
+            return;
+        }
+
+        var editors: Array<{type: String, path: String}> = metadata.editors;
+        for(editor in editors) {
+            switch(editor.type) {
+            case 'CodeEditor': getContentTypeOpenCodeEditor(editor.path).then(function(_) {
+                // Hack: this is async so keep trying to open what current should be when finished
+                openExisting(metadata.current.path);
+            });
+            case 'Notebook': openNotebook(editor.path);
+            }
+        }
+
+        openExisting(metadata.current.path);
+    }
+
+    // Save metadata
+    function saveMetadata() {
+        saveRemoteMetadata();
+        saveLocalMetadata();
+    }
+
+    function saveRemoteMetadata() {
+        communicator.request(
+            new RequestFileUpload(remoteMetadataPath, 'application/json', serializeRemoteMetadata()),
+            ResponseFileUpload
+        );
+    }
+
+    function saveLocalMetadata() {
+        var ls = js.Browser.getLocalStorage();
+        ls.setItem(localMetadataKey, serializeLocalMetadata());
+    }
+
+    // Serialize metdata
+    function serializeRemoteMetadata() {
+        return haxe.Json.stringify({
+            fileCounter: fileCounter,
+            notebookCounter: notebookCounter
+        });
+    }
+
+    function serializeEditor(e: Editor) {
+        if(e == null)
+            return null;
+
+        return {
+            type: e.cata(
+                function(codeEditor: CodeEditor) return 'CodeEditor',
+                function(notebook: Notebook) return 'Notebook'
+            ),
+            path: e.path
+        }
+    }
+
+    function serializeLocalMetadata() {
+        return haxe.Json.stringify({
+            editors: editors.map(serializeEditor),
+            current: serializeEditor(current)
+        });
     }
 
     function contentTypeToRegionMode(contentType: String) {
@@ -194,29 +263,8 @@ class EditorModule extends Module {
         }
     }
 
-    function saveMetadata() {
-        communicator.request(
-            new RequestFileUpload(metadataPath, 'application/json', serializeMetadata()),
-            ResponseFileUpload
-        );
-    }
-
-    function serializeMetadata() {
-        return haxe.Json.stringify({
-            editors: editors.map(function(e: Editor) return {
-                type: e.cata(
-                    function(codeEditor: CodeEditor) return 'CodeEditor',
-                    function(notebook: Notebook) return 'Notebook'
-                ),
-                path: e.path
-            }),
-            fileCounter: fileCounter,
-            notebookCounter: notebookCounter
-        });
-    }
-
     function getContentTypeOpenCodeEditor(path: String) {
-        communicator.request(
+        return communicator.request(
             new RequestFileGet(path),
             ResponseFileGet
         ).then(thx.core.Procedure.ProcedureDef.fromArity1(function(response: ResponseFileGet) {
@@ -224,7 +272,26 @@ class EditorModule extends Module {
         }));
     }
 
+    function existingEditor(path: String) {
+        for(editor in editors) {
+            if(editor.path == path) return editor;
+        }
+        return null;
+    }
+
+    function openExisting(path: String) {
+        var existing = existingEditor(path);
+
+        if(existing != null) {
+            communicator.trigger(new EditorUpdate(existing, editors));
+            return true;
+        }
+
+        return false;
+    }
+
     function openCodeEditor(path: String, mode: RegionMode) {
+        if(openExisting(path)) return;
         var codeEditor = new CodeEditor(communicator, path, mode, locale);
         addEditor(codeEditor);
     }
@@ -313,6 +380,7 @@ class EditorModule extends Module {
 
     function changeEditor(editor: Editor) {
         current = editor;
+        saveLocalMetadata();
         if(null == current)
             return;
         panels.get(editor).activate();
