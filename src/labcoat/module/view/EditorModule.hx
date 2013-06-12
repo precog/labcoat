@@ -341,14 +341,16 @@ class EditorModule extends Module {
         editor.cata(
             function(codeEditor: CodeEditor) {},
             function(notebook: Notebook) {
+                var group = new JQuery('<div class="btn-group"></div>');
                 for(mode in Type.allEnums(RegionMode)) {
                     var button = new HtmlButton(RegionModes.toEnglish(mode), Mini);
                     button.element.click(function(event: Event) {
                         event.preventDefault();
                         createRegion(mode);
                     });
-                    button.element.appendTo(containers.toolbar.element);
+                    button.element.appendTo(group);
                 }
+                group.appendTo(containers.toolbar.element);
             }
         );
 
