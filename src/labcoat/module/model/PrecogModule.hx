@@ -104,7 +104,6 @@ class PrecogModule extends Module
 				api.listChildren(path).then(
 					function(result : Array<FileDescription>) {
 						// load metadata file if available
-trace(result);
 						Promise.list(
 							result
 								.map(function(o) {
@@ -134,7 +133,17 @@ trace(result);
 														metadata : metadata
 													});
 												},
-												silentErrorResponse(request, deferred)
+												function(err) {
+													if(err.status == 404) {
+														deferred.resolve({
+															type : o.type,
+															name : o.name,
+															metadata : new Map<String, Dynamic>()
+														});
+													} else {
+														silentErrorResponse(request, deferred)(err);
+													}
+												}
 											);	
 											deferred.promise;
 										case invalid:
