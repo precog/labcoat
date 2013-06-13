@@ -32,6 +32,17 @@ class Helper
 	}
 }
 
+class RequestExecute extends PrecogRequest
+{
+	public var query(default, null) : String;
+	public function new(query : String, ?api : String)
+	{
+		super(api);
+		this.query = query;
+		this.description = 'query ${query}';
+	}
+}
+
 class RequestListChildren extends PrecogRequest
 {
 	public var path(default, null) : String;

@@ -145,16 +145,34 @@ class ResponseFileUpload extends ResponseFileBase
 
 }
 
-typedef FileExecutionErrorPosition = {
+typedef ExecutionErrorPosition = {
 	column: Int,
 	line: Int,
 	text: String
 }
 
-typedef FileExecutionError = {
+typedef ExecutionError = {
 	message: String,
-	position: FileExecutionErrorPosition,
+	position: ExecutionErrorPosition,
 	timestame: String
+}
+
+typedef Execution = {
+    data: FileExecution,
+    errors: Array<ExecutionError>,
+    warnings: Array<ExecutionError>,
+    serverErrors: Array<String>,
+    serverWarnings: Array<String>
+};
+
+class ResponseExecute extends ResponseFileBase
+{
+	public var result(default, null) : Execution;
+	public function new(result : Execution, request : PrecogRequest)
+	{
+		super(path, request);
+		this.result = result;
+	}
 }
 
 typedef FileExecution = Array<Dynamic>;

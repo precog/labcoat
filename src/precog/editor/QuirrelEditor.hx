@@ -108,29 +108,44 @@ class QuirrelEditor implements RegionEditor {
     }
 
     function requestExecute(): thx.react.Promise<Dynamic> {
+        function handleError(_) {
+            return communicator.request(
+                new RequestExecute(getContent()),
+                ResponseExecute
+            ).then(function(res: ResponseExecute) {
+                var errorsElement = outputElement.find('.errors');
+                var warningsElement = outputElement.find('.warnings');
+
+                var errors = res.result.errors.map(function(e) return e.message).concat(res.result.serverErrors),
+                    warnings = res.result.warnings.map(function(w) return w.message).concat(res.result.serverWarnings);
+
+                for(warning in warnings) {
+                    warningsElement.append('<li><i class="icon-warning-sign"></i> ${warning}</li>');
+                    communicator.queue(new StatusMessage(warning, Warning));
+                }
+
+                for(error in errors) {
+                    errorsElement.append('<li><i class="icon-exclamation-sign"></i> ${error}</li>');
+                    communicator.queue(new StatusMessage(error, Error));
+                }
+            });
+        }
+
         return communicator.request(
             new RequestFileExecute(region.path()),
             ResponseFileExecute
         ).then(ProcedureDef.fromArity1(function(res: ResponseFileExecute) {
-            outputElement.html('<div class="out">${region.filename} :=</div><div class="data">${haxe.Json.stringify(res.result)}</div><ul class="errors"></ul><ul class="warnings"></ul>');
-
-            var errorsElement = outputElement.find('.errors');
-            var warningsElement = outputElement.find('.warnings');
-
-            // Cached file execute doesn't give a report...
-            /*var errors = res.result.errors.map(function(e) return e.message).concat(res.result.serverErrors),
-                warnings = res.result.warnings.map(function(w) return w.message).concat(res.result.serverWarnings);
-
-            for(warning in warnings) {
-                warningsElement.append('<li><i class="icon-warning-sign"></i> ${warning}</li>');
-                communicator.queue(new StatusMessage(warning, Warning));
+            switch(untyped res.result) {
+            case haxe.io.Error.Custom(500):
+                handleError(null);
+                return;
+            case _:
             }
 
-            for(error in errors) {
-                errorsElement.append('<li><i class="icon-exclamation-sign"></i> ${error}</li>');
-                communicator.queue(new StatusMessage(error, Error));
-            }*/
-        }));
+            outputElement.html('<div class="out">${region.filename} :=</div><div class="data">${haxe.Json.stringify(res.result)}</div><ul class="errors"></ul><ul class="warnings"></ul>');
+
+            // Cached file execute doesn't give a report...
+        }), handleError);
     }
 
     public function focus() {

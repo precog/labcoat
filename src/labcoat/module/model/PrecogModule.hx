@@ -329,12 +329,42 @@ class PrecogModule extends Module
 						deferred.resolve(response);
 						communicator.trigger(response);
 					},
-					errorResponse(request, deferred)
+					function(error) {
+						if(error.status == 500) {
+							// TODO: Don't think React works properly. Try again:
+							var response = new ResponseFileExecute(request.path, untyped haxe.io.Error.Custom(500), request);
+							deferred.resolve(response);
+							communicator.trigger(response);
+							return;
+						}
+						return errorResponse(request, deferred)(error);
+					}
 				);
 				return deferred.promise;
 			},
 			RequestFileExecute,
 			ResponseFileExecute
+		);
+
+		communicator.respond(
+			function(request: RequestExecute) : Null<Promise<ResponseExecute -> Void>> {
+				var deferred = new Deferred(),
+					api      = getApi(request.api);
+				communicator.trigger(request);
+				api.execute({
+					query: request.query
+				}).then(
+					function(result) {
+						var response = new ResponseExecute(result, request);
+						deferred.resolve(response);
+						communicator.trigger(response);
+					},
+					errorResponse(request, deferred)
+				);
+				return deferred.promise;
+			},
+			RequestExecute,
+			ResponseExecute
 		);
 
 		communicator.respond(
