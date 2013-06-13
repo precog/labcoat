@@ -65,22 +65,26 @@ class QuirrelEditor implements RegionEditor {
     }
 
     public function evaluate() {
-        communicator.request(
-            new RequestFileGet(region.path()),
-            ResponseFileGet
-        ).then(function(response: ResponseFileGet) {
-            var changed = response.content.contents != getContent();
-
-            if(!changed)
-                return requestExecute();
-
+        function uploadExecute(_) {
             return communicator.request(
                 new RequestFileUpload(region.path(), "text/x-quirrel-script", editor.getValue()),
                 ResponseFileUpload
             ).then(thx.core.Procedure.ProcedureDef.fromArity1(function(response: ResponseFileUpload) {
                 return retryRequestExecute(getContent());
             }));
-        });
+        }
+
+        communicator.request(
+            new RequestFileGet(region.path()),
+            ResponseFileGet
+        ).then(function(response: ResponseFileGet) {
+            var changed = response.content == null ? true : response.content.contents != getContent();
+
+            if(!changed)
+                return requestExecute();
+
+            return uploadExecute(null);
+        }, uploadExecute);
     }
 
     function retryRequestExecute(query: String) {
@@ -108,11 +112,17 @@ class QuirrelEditor implements RegionEditor {
     }
 
     function requestExecute(): thx.react.Promise<Dynamic> {
+        function setOutput(data: Array<Dynamic>) {
+            outputElement.html('<div class="out">${region.filename} :=</div><div class="data">${haxe.Json.stringify(data)}</div><ul class="errors"></ul><ul class="warnings"></ul>');
+        }
+
         function handleError(_) {
             return communicator.request(
                 new RequestExecute(getContent()),
                 ResponseExecute
             ).then(function(res: ResponseExecute) {
+                if(res.result.data.length > 0) setOutput(res.result.data);
+
                 var errorsElement = outputElement.find('.errors');
                 var warningsElement = outputElement.find('.warnings');
 
@@ -142,7 +152,7 @@ class QuirrelEditor implements RegionEditor {
             case _:
             }
 
-            outputElement.html('<div class="out">${region.filename} :=</div><div class="data">${haxe.Json.stringify(res.result)}</div><ul class="errors"></ul><ul class="warnings"></ul>');
+            setOutput(res.result);
 
             // Cached file execute doesn't give a report...
         }), handleError);
