@@ -81,6 +81,20 @@ class PrecogModule extends Module
 			};
 		}
 
+		function accept404Response(request : PrecogRequest, deferred : Deferred<Dynamic>, createResponse : Dynamic -> PrecogResponse) {
+			return function(err) {
+//				trace(err);
+				if(err.status == 404) {
+					var response = createResponse(err);
+					deferred.resolve(response);
+					communicator.trigger(response);
+				} else {
+					silentErrorResponse(request, deferred)(err);
+					communicator.queue(new StatusMessage(err));
+				}
+			};
+		}
+
 		communicator.respond(
 			function(request : RequestListChildren) : Null<Promise<ResponseListChildren -> Void>> {
 				var deferred = new Deferred(),
@@ -90,6 +104,7 @@ class PrecogModule extends Module
 				api.listChildren(path).then(
 					function(result : Array<FileDescription>) {
 						// load metadata file if available
+trace(result);
 						Promise.list(
 							result
 								.map(function(o) {
@@ -191,7 +206,7 @@ class PrecogModule extends Module
 						deferred.resolve(response);
 						communicator.trigger(response);
 					},
-					errorResponse(request, deferred)
+					accept404Response(request, deferred, function(_) return new ResponseFileGet(request.path, null, request))
 				);
 				return deferred.promise;
 			},
