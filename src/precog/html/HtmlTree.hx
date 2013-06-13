@@ -239,6 +239,7 @@ class HtmlTree<T>
 	public var events(default, null) : TreeEvents<T>;
 	public var selected(default, null) : Null<TreeNode<T>>;
 	public var compare(get, set) : T -> T -> Int;
+	public var root(get, null) : TreeNode<T>;
 
 	public function new(panel : HtmlPanel, renderer : IHtmlTreeRenderer<T>)
 	{
@@ -376,6 +377,11 @@ class HtmlTree<T>
 	function set_compare(f)
 	{
 		return tree.compare = f;
+	}
+
+	function get_root()
+	{
+		return tree.root;
 	}
 }
 

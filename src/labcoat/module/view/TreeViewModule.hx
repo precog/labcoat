@@ -274,14 +274,15 @@ class TreeViewModule extends Module
 
     function wireFileSystem(fs : FileSystem)
     {
-        var root = tree.addRoot(fs.root);
+        var first = tree.root == null,
+            root = tree.addRoot(fs.root);
         fs.root.meta.set(UI_TREE_NODE, root);
         fs.on(function(e : NodeAddEvent) {
             var node = e.node,
                 parent = node.parent.meta.get(UI_TREE_NODE);
             if(isHiddenFile(node.toString())) return;
             var tree_node = parent.appendChildOrdered(node);
-            if(node.isDirectory && node.level > 0)
+            if(node.isDirectory && (first && node.level > 1) || (!first && node.level > 0))
             {
                 tree_node.collapse();
             }
