@@ -31,6 +31,8 @@ class JSONEditor implements RegionEditor {
         return editor.getValue();
     }
     public function setContent(content: String) {
+        var json = (untyped haxe.Json).parse(content);
+        content = (untyped haxe.Json).stringify(json, null, "  ");
         return editor.setValue(content);
     }
 
