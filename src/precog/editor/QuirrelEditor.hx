@@ -69,7 +69,7 @@ class QuirrelEditor implements RegionEditor {
             new RequestFileGet(region.path()),
             ResponseFileGet
         ).then(function(response: ResponseFileGet) {
-            var changed = getContent() != response.content.contents;
+            var changed = response.content.contents != getContent();
 
             if(!changed)
                 return requestExecute();
@@ -78,9 +78,33 @@ class QuirrelEditor implements RegionEditor {
                 new RequestFileUpload(region.path(), "text/x-quirrel-script", editor.getValue()),
                 ResponseFileUpload
             ).then(thx.core.Procedure.ProcedureDef.fromArity1(function(response: ResponseFileUpload) {
-                return requestExecute();
+                return retryRequestExecute(getContent());
             }));
         });
+    }
+
+    function retryRequestExecute(query: String) {
+        var retrySeconds = 10.0;
+        var startTime = Date.now().getTime() / 1000;
+
+        function retry() {
+            trace(startTime + retrySeconds);
+            trace(Date.now().getTime() / 100);
+            if(startTime + retrySeconds <= Date.now().getTime() / 1000)
+                throw "Could not execute Quirrel script: did not finish uploading";
+
+            return communicator.request(
+                new RequestFileGet(region.path()),
+                ResponseFileGet
+            ).then(function(response: ResponseFileGet) {
+                if(response.content.contents != query)
+                    return retry();
+
+                return requestExecute();
+            });
+        }
+
+        return retry();
     }
 
     function requestExecute(): thx.react.Promise<Dynamic> {
