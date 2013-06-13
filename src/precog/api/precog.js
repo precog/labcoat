@@ -2266,24 +2266,23 @@
   
       var path = Util.sanitizePath(path0);
   
-      var countPath = function(path) {
-        return self.execute({query: 'count(load("' + path + '"))'}).then(function(results) {
-          return results.data && results.data[0] || 0;
-        });
-      };
+      var countPath = self.execute({query: 'count(load("' + path + '"))'}).then(function(results) {
+        return results.data && results.data[0] || 0;
+      });
   
-      var listRawChildren = function(path) {
-        return self._retrieveMetadata(path).then(function(metadata) {
-          return metadata.children;
-        });
-      };
+      var listRawChildren = self._retrieveMetadata(path).then(function(metadata) {
+        return metadata.children;
+      });
   
-      return listRawChildren(path).then(function(children) {
-        return countPath(path).then(function(count) {
+      return listRawChildren.then(function(children) {
+        return countPath.then(function(count) {
           var types = [];
   
           if (children.length > 0) types.push('directory');
           if (count > 0) types.push('file');
+  
+          // Default to directory
+          if (!types.length) types.push('directory');
   
           return types;
         });
