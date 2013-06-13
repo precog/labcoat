@@ -2490,18 +2490,6 @@
   
       Util.requireParam(path, 'path');
   
-      // HACK: We have to manually remove identities from response
-      function transformBadJSON(content) {
-        var newContent = [],
-            i;
-  
-        for(i = 0; i < content.length; i++) {
-          newContent.push(content[i].value);
-        }
-  
-        return newContent;
-      }
-  
       return PrecogHttp.get({
         url:      self.fileUrl("fs/" + path),
         headers:  { Accept: 'application/json, */*' },
@@ -2514,7 +2502,7 @@
           if(contentType == 'application/json') {
             return {
               type: contentType,
-              contents: JSON.stringify(transformBadJSON(Util.extractContent(response)))
+              contents: JSON.stringify(Util.extractContent(response))
             };
           }
           return {
