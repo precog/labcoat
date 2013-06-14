@@ -307,11 +307,13 @@ class HtmlTree<T>
 
 	public function collapse(node : TreeNode<T>)
 	{
+		select(null);
 		events.collapse.trigger(node);
 	}
 
 	public function expand(node : TreeNode<T>)
 	{
+		select(null);
 		events.expand.trigger(node);
 	}
 
