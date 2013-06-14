@@ -1,5 +1,6 @@
 package precog.editor;
 
+import jQuery.JQuery;
 import labcoat.message.PrecogRequest;
 import labcoat.message.PrecogResponse;
 import labcoat.message.StatusMessage;
@@ -7,8 +8,8 @@ import precog.communicator.Communicator;
 import precog.editor.codemirror.Externs;
 import precog.html.HtmlButton;
 import precog.html.Icons;
-import jQuery.JQuery;
 import thx.core.Procedure;
+import thx.react.promise.Timer;
 
 class QuirrelEditor implements RegionEditor {
     public var element: JQuery;
@@ -83,7 +84,7 @@ class QuirrelEditor implements RegionEditor {
             if(!changed)
                 return requestExecute();
 
-            return uploadExecute(null);
+            return untyped uploadExecute(null);
         }, uploadExecute);
     }
 
@@ -102,16 +103,16 @@ class QuirrelEditor implements RegionEditor {
                 ResponseFileGet
             ).then(function(response: ResponseFileGet) {
                 if(response.content.contents != query)
-                    return retry();
+                    return Timer.delay(200).then(retry);
 
-                return requestExecute();
+                return untyped requestExecute();
             });
         }
 
         return retry();
     }
 
-    function requestExecute(): thx.react.Promise<Dynamic> {
+    function requestExecute() {
         function setOutput(data: Array<Dynamic>) {
             outputElement.html('<div class="out">${region.filename} :=</div><div class="data">${haxe.Json.stringify(data)}</div><ul class="errors"></ul><ul class="warnings"></ul>');
         }
