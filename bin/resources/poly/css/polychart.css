@@ -2576,10 +2576,6 @@ H1.underlined {
 .menu-item .slider-container {
   margin-top: 10px;
 }
-.menu-item .slider-container .selector {
-  width: 155px;
-  margin-left: 9px;
-}
 .menu-item .slider-container .slider-value {
   width: 100%;
   margin: 8px 0 10px;
@@ -3342,7 +3338,7 @@ html[xmlns] .metric-option .metric-option-item {
   margin: 6px 3px;
 }
 .droppable .slider-container .slider {
-  width: 150px;
+  width: 130px;
 }
 .aes.full-width {
   position: relative;
