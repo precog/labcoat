@@ -155,6 +155,19 @@ class RequestDirectoryMove extends PrecogRequest
 	}
 }
 
+class RequestNotebookCopy extends PrecogRequest
+{
+	public var src(default, null) : String;
+	public var dst(default, null) : String;
+	public function new(src : String, dst : String, ?api : String)
+	{
+		super(api);
+		this.src = Helper.normalizeDirectoryPath(src);
+		this.dst = Helper.normalizeDirectoryPath(dst);
+		this.description = 'copy notebook from ${this.src} to ${this.dst}';
+	}
+}
+
 class RequestNotebookMove extends PrecogRequest 
 {
 	public var src(default, null) : String;
@@ -165,6 +178,19 @@ class RequestNotebookMove extends PrecogRequest
 		this.src = Helper.normalizeDirectoryPath(src);
 		this.dst = Helper.normalizeDirectoryPath(dst);
 		this.description = 'move notebook from ${this.src} to ${this.dst}';
+	}
+}
+
+class RequestFileCopy extends PrecogRequest
+{
+	public var src(default, null) : String;
+	public var dst(default, null) : String;
+	public function new(src : String, dst : String, ?api : String)
+	{
+		super(api);
+		this.src = Helper.normalizepath(src);
+		this.dst = Helper.normalizepath(dst);
+		this.description = 'copy file from ${this.src} to ${this.dst}';
 	}
 }
 

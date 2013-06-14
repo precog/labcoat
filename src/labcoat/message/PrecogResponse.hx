@@ -205,6 +205,19 @@ class ResponseDirectoryMove extends PrecogResponse
 	}
 }
 
+class ResponseNotebookCopy extends PrecogResponse
+{
+	public var src(default, null) : String;
+	public var dst(default, null) : String;
+	public function new(src : String, dst : String, request : PrecogRequest)
+	{
+		super(request);
+		this.src = src;
+		this.dst = dst;
+		this.description = 'copy notebook from ${this.src} to ${this.dst}';
+	}
+}
+
 class ResponseNotebookMove extends PrecogResponse 
 {
 	public var src(default, null) : String;
@@ -215,6 +228,19 @@ class ResponseNotebookMove extends PrecogResponse
 		this.src = src;
 		this.dst = dst;
 		this.description = 'move notebook from ${this.src} to ${this.dst}';
+	}
+}
+
+class ResponseFileCopy extends PrecogResponse
+{
+	public var src(default, null) : String;
+	public var dst(default, null) : String;
+	public function new(src : String, dst : String, request : PrecogRequest)
+	{
+		super(request);
+		this.src = src;
+		this.dst = dst;
+		this.description = 'copy file from ${this.src} to ${this.dst}';
 	}
 }
 

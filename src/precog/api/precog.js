@@ -2657,14 +2657,14 @@
     });
   
     /**
-     * Moves a directory and its contents from one location to another.
+     * Copys a directory and its contents from one location to another.
      *
-     * @method moveDirectory
+     * @method copyDirectory
      * @memberof precog.api.prototype
      * @example
-     * Precog.moveDirectory({source: '/foo/helloo', dest: '/foo/hello'})
+     * Precog.copyDirectory({source: '/foo/helloo', dest: '/foo/hello'})
      */
-    Precog.prototype.moveDirectory = Util.addCallbacks(function(info) {
+    Precog.prototype.copyDirectory = Util.addCallbacks(function(info) {
       var self = this;
   
       Util.requireField(info, 'source');
@@ -2684,9 +2684,23 @@
           }));
         }
   
-        return Vow.all(resolvers).then(function() {
-          return self.deleteAll(info.source);
-        });
+        return Vow.all(resolvers);
+      });
+    });
+  
+    /**
+     * Moves a directory and its contents from one location to another.
+     *
+     * @method moveDirectory
+     * @memberof precog.api.prototype
+     * @example
+     * Precog.moveDirectory({source: '/foo/helloo', dest: '/foo/hello'})
+     */
+    Precog.prototype.moveDirectory = Util.addCallbacks(function(info) {
+      var self = this;
+  
+      return self.copyDirectory(info).then(function() {
+        return self.deleteAll(info.source);
       });
     });
   

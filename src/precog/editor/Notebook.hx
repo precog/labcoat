@@ -106,9 +106,9 @@ class Notebook implements Editor {
     public function save(dest: String) {
         communicator.trigger(new EditorSave(path, dest));
         communicator.request(
-            new RequestNotebookMove(path, dest),
-            ResponseNotebookMove
-        ).then(thx.core.Procedure.ProcedureDef.fromArity1(function(response: ResponseNotebookMove) {
+            new RequestNotebookCopy(path, dest),
+            ResponseNotebookCopy
+        ).then(thx.core.Procedure.ProcedureDef.fromArity1(function(response: ResponseNotebookCopy) {
             path = dest;
             metadataPath = '${path}/metadata.json';
         }));

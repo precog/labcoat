@@ -68,7 +68,9 @@ extern class Precog
     public function delete0(path0 : String, ?success : ProcT<Dynamic>, ?failure : ProcFailure) : Future<ProcT<Dynamic>, ProcFailure>;
 	// TODO needs typing
     public function deleteAll(path : String, ?success : ProcT<Dynamic>, ?failure : ProcFailure) : Future<ProcT<Dynamic>, ProcFailure>;
+    public function copyDirectory(info : OptMove, ?success : ProcVoid, ?failure : ProcFailure) : Future<ProcVoid, ProcFailure>;
     public function moveDirectory(info : OptMove, ?success : ProcVoid, ?failure : ProcFailure) : Future<ProcVoid, ProcFailure>;
+    public function copyFile(info : OptMove, ?success : ProcVoid, ?failure : ProcFailure) : Future<ProcVoid, ProcFailure>;
     public function moveFile(info : OptMove, ?success : ProcVoid, ?failure : ProcFailure) : Future<ProcVoid, ProcFailure>;
 
 	// ****************

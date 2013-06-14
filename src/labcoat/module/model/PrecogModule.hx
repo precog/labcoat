@@ -410,6 +410,28 @@ class PrecogModule extends Module
 		);
 
 		communicator.respond(
+			function(request : RequestNotebookCopy) : Null<Promise<ResponseNotebookCopy -> Void>> {
+				var deferred = new Deferred(),
+					api      = getApi(request.api);
+				communicator.trigger(request);
+				api.copyDirectory({
+						source : normalizeDirectory(request.src),
+						dest   : normalizeDirectory(request.dst)
+					}).then(
+					function() {
+						var response = new ResponseNotebookCopy(request.src, request.dst, request);
+						deferred.resolve(response);
+						communicator.trigger(response);
+					},
+					errorResponse(request, deferred)
+				);
+				return deferred.promise;
+			},
+			RequestNotebookCopy,
+			ResponseNotebookCopy
+		);
+
+		communicator.respond(
 			function(request : RequestNotebookMove) : Null<Promise<ResponseNotebookMove -> Void>> {
 				var deferred = new Deferred(),
 					api      = getApi(request.api);
@@ -429,6 +451,28 @@ class PrecogModule extends Module
 			},
 			RequestNotebookMove,
 			ResponseNotebookMove
+		);
+
+		communicator.respond(
+			function(request : RequestFileCopy) : Null<Promise<ResponseFileCopy -> Void>> {
+				var deferred = new Deferred(),
+					api      = getApi(request.api);
+				communicator.trigger(request);
+				api.copyFile({
+						source : normalizeFilePath(request.src),
+						dest   : normalizeFilePath(request.dst)
+					}).then(
+					function() {
+						var response = new ResponseFileCopy(request.src, request.dst, request);
+						deferred.resolve(response);
+						communicator.trigger(response);
+					},
+					errorResponse(request, deferred)
+				);
+				return deferred.promise;
+			},
+			RequestFileCopy,
+			ResponseFileCopy
 		);
 
 		communicator.respond(
