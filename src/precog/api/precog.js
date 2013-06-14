@@ -2684,7 +2684,7 @@
           }));
         }
   
-        return Vow.all(resolvers);
+        return Vow.allResolved(resolvers);
       });
     });
   
