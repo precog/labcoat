@@ -169,6 +169,11 @@ class QuirrelEditor implements RegionEditor {
             case _:
             }
 
+            if(res.result.length == 0) {
+                handleError(null);
+                return;
+            }
+
             setOutput(res.result);
 
             // Cached file execute doesn't give a report...
