@@ -112,13 +112,15 @@ class TreeViewModule extends Module
         });
 
 
-        function ensureFileAt(path : String, api : String)
+        function ensureFileAt(path : String, meta : Map<String, Dynamic>, api : String)
         {
             var fs     = fss.get(api),
                 parent = fs.root.pick(path.split("/").slice(0, -1).join("/")),
                 node   = fs.root.pick(path);
+            if(null != node)
+                node.remove();
             if(null != parent && parent.meta.get("type") != "notebook" && null == node) {
-                fs.root.createFileAt(path, true);
+                fs.root.createFileAt(path, true, meta);
             }
         }
 
@@ -142,11 +144,11 @@ class TreeViewModule extends Module
         });
 
         communicator.on(function(res : ResponseFileCreate) {
-            ensureFileAt(res.path, res.api);
+            ensureFileAt(res.path, null, res.api);
         });
 
         communicator.on(function(res : ResponseFileUpload) {
-            ensureFileAt(res.path, res.api);
+            ensureFileAt(res.path, null, res.api);
         });
 
         communicator.on(function(res : ResponseFileMove) {
@@ -170,6 +172,19 @@ class TreeViewModule extends Module
                 node = fs.root.pick(res.src);
             if(null != node)
                 cast(node, Directory).removeRecursive();
+            var meta = null == node ? null : node.meta.getAll();
+            if(null == meta)
+            {
+                meta = new Map<String, Dynamic>();
+            }
+            if(!meta.exists("type"))
+                meta.set("type", "notebook");
+            fs.root.createFileAt(res.dst, true, meta);
+        });
+
+        communicator.on(function(res : ResponseNotebookCopy) {
+            var fs = fss.get(res.api),
+                node = fs.root.pick(res.src);
             var meta = null == node ? null : node.meta.getAll();
             if(null == meta)
             {
