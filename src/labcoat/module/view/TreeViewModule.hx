@@ -171,7 +171,12 @@ class TreeViewModule extends Module
             var fs = fss.get(res.api),
                 node = fs.root.pick(res.src);
             if(null != node)
-                cast(node, Directory).removeRecursive();
+            {
+                if(Std.is(node, Directory))
+                    cast(node, Directory).removeRecursive();
+                else
+                    node.remove();
+            }
             var meta = null == node ? null : node.meta.getAll();
             if(null == meta)
             {
