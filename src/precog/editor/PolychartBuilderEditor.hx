@@ -52,10 +52,13 @@ class PolychartBuilderEditor implements RegionEditor {
         iframe = cast iframeElement.get(0);
         var doc : Dynamic = untyped iframe.contentWindow || iframe.contentDocument;
 
-        (untyped iframe.contentWindow).POLYCHART_SAVE_HANDLER = function(content) {
-            setContent(content);
-            evaluate();
-        };
+        if(null != untyped iframe.contentWindow) 
+        {
+            (untyped iframe.contentWindow).POLYCHART_SAVE_HANDLER = function(content) {
+                setContent(content);
+                evaluate();
+            };
+        }
 
         getDataSources(function(datasources : Array<Datasource>) {
 
@@ -132,7 +135,7 @@ class PolychartBuilderEditor implements RegionEditor {
         if(null == iframe)
             return "[]";
         var win = iframe.contentWindow;
-        if(null == untyped win.POLYCHART_SERIALIZED)
+        if(null == win && null == untyped win.POLYCHART_SERIALIZED)
             return "[]";
         return untyped win.POLYCHART_SERIALIZED;
     }
