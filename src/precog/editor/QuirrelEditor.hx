@@ -70,7 +70,13 @@ class QuirrelEditor implements RegionEditor {
     function parentLoad() {
         var segments = region.path().split('/');
         segments.pop();
-        return '/' + segments.join('/') + '/';
+
+        var rooted = segments.join('/');
+        if(!rooted.startsWith('/')) {
+           rooted = '/' + rooted;
+        }
+
+        return '/' + rooted + '/';
     }
 
     function unhack(content: String) {
