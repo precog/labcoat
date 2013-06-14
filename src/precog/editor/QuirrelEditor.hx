@@ -11,6 +11,8 @@ import precog.html.Icons;
 import thx.core.Procedure;
 import thx.react.promise.Timer;
 
+using StringTools;
+
 class QuirrelEditor implements RegionEditor {
     public var element: JQuery;
     var outputElement: JQuery;
@@ -58,20 +60,36 @@ class QuirrelEditor implements RegionEditor {
     }
 
     public function setContent(content: String) {
-        editor.setValue(content);
+        editor.setValue(unhack(content));
     }
 
     function onclick(_ : jQuery.Event) {
         evaluate();
     }
 
+    function parentLoad() {
+        var segments = region.path().split('/');
+        segments.pop();
+        return '/' + segments.join('/') + '/';
+    }
+
+    function unhack(content: String) {
+        return content.replace(parentLoad(), './');
+    }
+
+    function hack(content: String) {
+        return ~/\.\//.replace(content, parentLoad());
+    }
+
     public function evaluate() {
+        var content = hack(getContent());
+
         function uploadExecute(_) {
             return communicator.request(
-                new RequestFileUpload(region.path(), "text/x-quirrel-script", editor.getValue()),
+                new RequestFileUpload(region.path(), "text/x-quirrel-script", content),
                 ResponseFileUpload
             ).then(thx.core.Procedure.ProcedureDef.fromArity1(function(response: ResponseFileUpload) {
-                return retryRequestExecute(getContent());
+                return retryRequestExecute(content);
             }));
         }
 
@@ -79,7 +97,7 @@ class QuirrelEditor implements RegionEditor {
             new RequestFileGet(region.path()),
             ResponseFileGet
         ).then(function(response: ResponseFileGet) {
-            var changed = response.content == null ? true : response.content.contents != getContent();
+            var changed = response.content == null ? true : response.content.contents != content;
 
             if(!changed)
                 return requestExecute();
@@ -93,8 +111,6 @@ class QuirrelEditor implements RegionEditor {
         var startTime = Date.now().getTime() / 1000;
 
         function retry() {
-            trace(startTime + retrySeconds);
-            trace(Date.now().getTime() / 100);
             if(startTime + retrySeconds <= Date.now().getTime() / 1000)
                 throw "Could not execute Quirrel script: did not finish uploading";
 
@@ -119,7 +135,7 @@ class QuirrelEditor implements RegionEditor {
 
         function handleError(_) {
             return communicator.request(
-                new RequestExecute(getContent()),
+                new RequestExecute(hack(getContent())),
                 ResponseExecute
             ).then(function(res: ResponseExecute) {
                 if(res.result.data.length > 0) setOutput(res.result.data);
