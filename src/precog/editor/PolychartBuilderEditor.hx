@@ -243,7 +243,7 @@ typedef Datasource =
 class PolychartBuilderTemplate
 {
     public static var HTML = '
-<script src="http://localhost/labcoat2/js/precog.js" type="text/javascript"></script>
+<script src="js/precog.js" type="text/javascript"></script>
 <script src="poly/dependencies.js"></script>
 <script src="poly/all.js"></script>
 
