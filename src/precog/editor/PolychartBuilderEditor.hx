@@ -262,8 +262,8 @@ var api  = new Precog.api({ analyticsService : analyticsService, apiKey : apiKey
     poly = require("poly");
 
 
-api.getFile(filePath).then(function(result) {
-  var config = (result.contents && JSON.parse(result.contents)) || [];
+function execute(result) {
+    var config = (result && result.contents && JSON.parse(result.contents)) || [];
       polychart_global = poly.dashboard({
         dom: $("#chart")[0],
         header: false,
@@ -278,18 +278,20 @@ api.getFile(filePath).then(function(result) {
         initial : config
     });
 
-  polychart_global.onSave((function() {
-    var timer;
-    return function() {
-      clearTimeout(timer);
-      timer = setTimeout(function() {
-        var content = JSON.stringify(polychart_global.serialize());
-        window.POLYCHART_SERIALIZED = content;
-        window.POLYCHART_SAVE_HANDLER && window.POLYCHART_SAVE_HANDLER(content);
-      }, 1000)
-    };
-  })());
-});
+    polychart_global.onSave((function() {
+        var timer;
+        return function() {
+          clearTimeout(timer);
+          timer = setTimeout(function() {
+            var content = JSON.stringify(polychart_global.serialize());
+            window.POLYCHART_SERIALIZED = content;
+            window.POLYCHART_SAVE_HANDLER && window.POLYCHART_SAVE_HANDLER(content);
+          }, 1000)
+        };
+    })());
+}
+
+api.getFile(filePath).then(execute, execute);
 
 
 </script>';

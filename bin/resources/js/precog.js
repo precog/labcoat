@@ -579,10 +579,17 @@
       }
   }());
 
-  function memoryStorage()
-  {
+  if (typeof window !== 'undefined') {
+    /** HTML5 sessionStorage
+     * @build       2009-08-20 23:35:12
+     * @author      Andrea Giammarchi
+     * @license     Mit Style License
+     * @project     http://code.google.com/p/sessionstorage/
+     */if(typeof sessionStorage==="undefined"){(function(j){var k=j;try{while(k!==k.top){k=k.top}}catch(i){}var f=(function(e,n){return{decode:function(o,p){return this.encode(o,p)},encode:function(y,u){for(var p=y.length,w=u.length,o=[],x=[],v=0,s=0,r=0,q=0,t;v<256;++v){x[v]=v}for(v=0;v<256;++v){s=(s+(t=x[v])+y.charCodeAt(v%p))%256;x[v]=x[s];x[s]=t}for(s=0;r<w;++r){v=r%256;s=(s+(t=x[v]))%256;p=x[v]=x[s];x[s]=t;o[q++]=e(u.charCodeAt(r)^x[(p+t)%256])}return o.join("")},key:function(q){for(var p=0,o=[];p<q;++p){o[p]=e(1+((n()*255)<<0))}return o.join("")}}})(j.String.fromCharCode,j.Math.random);var a=(function(n){function o(r,q,p){this._i=(this._data=p||"").length;if(this._key=q){this._storage=r}else{this._storage={_key:r||""};this._key="_key"}}o.prototype.c=String.fromCharCode(1);o.prototype._c=".";o.prototype.clear=function(){this._storage[this._key]=this._data};o.prototype.del=function(p){var q=this.get(p);if(q!==null){this._storage[this._key]=this._storage[this._key].replace(e.call(this,p,q),"")}};o.prototype.escape=n.escape;o.prototype.get=function(q){var s=this._storage[this._key],t=this.c,p=s.indexOf(q=t.concat(this._c,this.escape(q),t,t),this._i),r=null;if(-1<p){p=s.indexOf(t,p+q.length-1)+1;r=s.substring(p,p=s.indexOf(t,p));r=this.unescape(s.substr(++p,r))}return r};o.prototype.key=function(){var u=this._storage[this._key],v=this.c,q=v+this._c,r=this._i,t=[],s=0,p=0;while(-1<(r=u.indexOf(q,r))){t[p++]=this.unescape(u.substring(r+=2,s=u.indexOf(v,r)));r=u.indexOf(v,s)+2;s=u.indexOf(v,r);r=1+s+1*u.substring(r,s)}return t};o.prototype.set=function(p,q){this.del(p);this._storage[this._key]+=e.call(this,p,q)};o.prototype.unescape=n.unescape;function e(p,q){var r=this.c;return r.concat(this._c,this.escape(p),r,r,(q=this.escape(q)).length,r,q)}return o})(j);if(Object.prototype.toString.call(j.opera)==="[object Opera]"){history.navigationMode="compatible";a.prototype.escape=j.encodeURIComponent;a.prototype.unescape=j.decodeURIComponent}function l(){function r(){s.cookie=["sessionStorage="+j.encodeURIComponent(h=f.key(128))].join(";");g=f.encode(h,g);a=new a(k,"name",k.name)}var e=k.name,s=k.document,n=/\bsessionStorage\b=([^;]+)(;|$)/,p=n.exec(s.cookie),q;if(p){h=j.decodeURIComponent(p[1]);g=f.encode(h,g);a=new a(k,"name");for(var t=a.key(),q=0,o=t.length,u={};q<o;++q){if((p=t[q]).indexOf(g)===0){b.push(p);u[p]=a.get(p);a.del(p)}}a=new a.constructor(k,"name",k.name);if(0<(this.length=b.length)){for(q=0,o=b.length,c=a.c,p=[];q<o;++q){p[q]=c.concat(a._c,a.escape(t=b[q]),c,c,(t=a.escape(u[t])).length,c,t)}k.name+=p.join("")}}else{r();if(!n.exec(s.cookie)){b=null}}}l.prototype={length:0,key:function(e){if(typeof e!=="number"||e<0||b.length<=e){throw"Invalid argument"}return b[e]},getItem:function(e){e=g+e;if(d.call(m,e)){return m[e]}var n=a.get(e);if(n!==null){n=m[e]=f.decode(h,n)}return n},setItem:function(e,n){this.removeItem(e);e=g+e;a.set(e,f.encode(h,m[e]=""+n));this.length=b.push(e)},removeItem:function(e){var n=a.get(e=g+e);if(n!==null){delete m[e];a.del(e);this.length=b.remove(e)}},clear:function(){a.clear();m={};b.length=0}};var g=k.document.domain,b=[],m={},d=m.hasOwnProperty,h;b.remove=function(n){var e=this.indexOf(n);if(-1<e){this.splice(e,1)}return this.length};if(!b.indexOf){b.indexOf=function(o){for(var e=0,n=this.length;e<n;++e){if(this[e]===o){return e}}return -1}}if(k.sessionStorage){l=function(){};l.prototype=k.sessionStorage}l=new l;if(b!==null){j.sessionStorage=l}})(window)};
+  } else {
     var storage = {};
-    return {
+
+    localStorage = {
       setItem: function(key, value) {
         storage[key] = value;
       },
@@ -595,22 +602,6 @@
         delete storage[key];
       }
     };
-  }
-
-  if (typeof window !== 'undefined') {
-    /** HTML5 sessionStorage
-     * @build       2009-08-20 23:35:12
-     * @author      Andrea Giammarchi
-     * @license     Mit Style License
-     * @project     http://code.google.com/p/sessionstorage/
-     */
-    try {
-      if(typeof sessionStorage==="undefined"){(function(j){var k=j;try{while(k!==k.top){k=k.top}}catch(i){}var f=(function(e,n){return{decode:function(o,p){return this.encode(o,p)},encode:function(y,u){for(var p=y.length,w=u.length,o=[],x=[],v=0,s=0,r=0,q=0,t;v<256;++v){x[v]=v}for(v=0;v<256;++v){s=(s+(t=x[v])+y.charCodeAt(v%p))%256;x[v]=x[s];x[s]=t}for(s=0;r<w;++r){v=r%256;s=(s+(t=x[v]))%256;p=x[v]=x[s];x[s]=t;o[q++]=e(u.charCodeAt(r)^x[(p+t)%256])}return o.join("")},key:function(q){for(var p=0,o=[];p<q;++p){o[p]=e(1+((n()*255)<<0))}return o.join("")}}})(j.String.fromCharCode,j.Math.random);var a=(function(n){function o(r,q,p){this._i=(this._data=p||"").length;if(this._key=q){this._storage=r}else{this._storage={_key:r||""};this._key="_key"}}o.prototype.c=String.fromCharCode(1);o.prototype._c=".";o.prototype.clear=function(){this._storage[this._key]=this._data};o.prototype.del=function(p){var q=this.get(p);if(q!==null){this._storage[this._key]=this._storage[this._key].replace(e.call(this,p,q),"")}};o.prototype.escape=n.escape;o.prototype.get=function(q){var s=this._storage[this._key],t=this.c,p=s.indexOf(q=t.concat(this._c,this.escape(q),t,t),this._i),r=null;if(-1<p){p=s.indexOf(t,p+q.length-1)+1;r=s.substring(p,p=s.indexOf(t,p));r=this.unescape(s.substr(++p,r))}return r};o.prototype.key=function(){var u=this._storage[this._key],v=this.c,q=v+this._c,r=this._i,t=[],s=0,p=0;while(-1<(r=u.indexOf(q,r))){t[p++]=this.unescape(u.substring(r+=2,s=u.indexOf(v,r)));r=u.indexOf(v,s)+2;s=u.indexOf(v,r);r=1+s+1*u.substring(r,s)}return t};o.prototype.set=function(p,q){this.del(p);this._storage[this._key]+=e.call(this,p,q)};o.prototype.unescape=n.unescape;function e(p,q){var r=this.c;return r.concat(this._c,this.escape(p),r,r,(q=this.escape(q)).length,r,q)}return o})(j);if(Object.prototype.toString.call(j.opera)==="[object Opera]"){history.navigationMode="compatible";a.prototype.escape=j.encodeURIComponent;a.prototype.unescape=j.decodeURIComponent}function l(){function r(){s.cookie=["sessionStorage="+j.encodeURIComponent(h=f.key(128))].join(";");g=f.encode(h,g);a=new a(k,"name",k.name)}var e=k.name,s=k.document,n=/\bsessionStorage\b=([^;]+)(;|$)/,p=n.exec(s.cookie),q;if(p){h=j.decodeURIComponent(p[1]);g=f.encode(h,g);a=new a(k,"name");for(var t=a.key(),q=0,o=t.length,u={};q<o;++q){if((p=t[q]).indexOf(g)===0){b.push(p);u[p]=a.get(p);a.del(p)}}a=new a.constructor(k,"name",k.name);if(0<(this.length=b.length)){for(q=0,o=b.length,c=a.c,p=[];q<o;++q){p[q]=c.concat(a._c,a.escape(t=b[q]),c,c,(t=a.escape(u[t])).length,c,t)}k.name+=p.join("")}}else{r();if(!n.exec(s.cookie)){b=null}}}l.prototype={length:0,key:function(e){if(typeof e!=="number"||e<0||b.length<=e){throw"Invalid argument"}return b[e]},getItem:function(e){e=g+e;if(d.call(m,e)){return m[e]}var n=a.get(e);if(n!==null){n=m[e]=f.decode(h,n)}return n},setItem:function(e,n){this.removeItem(e);e=g+e;a.set(e,f.encode(h,m[e]=""+n));this.length=b.push(e)},removeItem:function(e){var n=a.get(e=g+e);if(n!==null){delete m[e];a.del(e);this.length=b.remove(e)}},clear:function(){a.clear();m={};b.length=0}};var g=k.document.domain,b=[],m={},d=m.hasOwnProperty,h;b.remove=function(n){var e=this.indexOf(n);if(-1<e){this.splice(e,1)}return this.length};if(!b.indexOf){b.indexOf=function(o){for(var e=0,n=this.length;e<n;++e){if(this[e]===o){return e}}return -1}}if(k.sessionStorage){l=function(){};l.prototype=k.sessionStorage}l=new l;if(b!==null){j.sessionStorage=l}})(window)};
-    } catch(_) {
-      localStorage = memoryStorage();  
-    }
-  } else {
-    localStorage = memoryStorage();
   }
 
   /**
@@ -1660,7 +1651,15 @@
       return this.serviceUrl("ingest", 1, path);
     };
   
+    Precog.prototype.fileUrl = function(path) {
+      return this.serviceUrl("data", 1, path);
+    };
+  
     Precog.prototype.analysisUrl = function(path) {
+      return this.serviceUrl("analysis", 1, path);
+    };
+  
+    Precog.prototype.analyticsUrl = function(path) {
       return this.serviceUrl("analytics", 1, path);
     };
   
@@ -2210,129 +2209,6 @@
       });
     });
   
-    Precog.prototype._uniqueHash = function() {
-      var self = this;
-  
-      var hashCode = function(str){
-        var hash = 0;
-        if (str.length === 0) return hash;
-        for (var i = 0; i < str.length; i++) {
-          var chr = str.charCodeAt(i);
-          hash = ((hash<<5)-hash) + chr;
-          hash = hash & hash;
-        }
-        return hash;
-      };
-  
-      self.requireConfig('apiKey');
-  
-      return hashCode('Precog' + self.config.apiKey);
-    };
-  
-    Precog.prototype._localStorageKey = function(key) {
-      return this._uniqueHash() + key;
-    };
-  
-    Precog.prototype._isEmulateData = function(path0) {
-      var self = this;
-  
-      Util.requireParam(path0, 'path');
-  
-      if (typeof localStorage !== 'undefined') {
-        var path = Util.sanitizePath(path0);
-  
-        return localStorage.getItem(self._localStorageKey(path)) != null;
-      }
-  
-      return false;
-    };
-  
-    Precog.prototype._getEmulateData = function(path0) {
-      var self = this;
-  
-      Util.requireParam(path0, 'path');
-  
-      var data = {};
-      if (typeof localStorage !== 'undefined') {
-        var path = Util.sanitizePath(path0);
-  
-        data = JSON.parse(localStorage.getItem(self._localStorageKey(path)) || '{}');
-      } else {
-        if (console && console.error) console.error('Missing local storage!');
-      }
-  
-      return data;
-    };
-  
-    Precog.prototype._deleteEmulateData = function(path0) {
-      var self = this;
-  
-      Util.requireParam(path0, 'path');
-  
-      if (typeof localStorage !== 'undefined') {
-        var path = Util.sanitizePath(path0);
-  
-        localStorage.removeItem(self._localStorageKey(path));
-      } else {
-        if (console && console.error) console.error('Missing local storage!');
-      }
-    };
-  
-    Precog.prototype._setEmulateData = function(path0, data) {
-      var self = this;
-  
-      Util.requireParam(path0, 'path');
-  
-      if (typeof localStorage !== 'undefined') {
-        var path = Util.sanitizePath(path0);
-  
-        localStorage.setItem(self._localStorageKey(path), JSON.stringify(data));
-      } else {
-        if (console && console.error) console.error('Missing local storage!');
-      }
-    };
-  
-    Precog.prototype._getChildren = function(path0) {
-      var self = this;
-  
-      var children = [];
-      var key;
-      var relative;
-      var filename;
-  
-      if (typeof localStorage !== 'undefined') {
-        var path = Util.sanitizePath(path0);
-  
-        for (key in localStorage) {
-          if (key.indexOf(self._localStorageKey(path))) continue;
-          relative = key.substr((self._localStorageKey(path)).length);
-          filename = relative.substr(0, relative.indexOf('/') == -1 ? relative.length : relative.indexOf('/'));
-          if (!filename || children.indexOf(filename) != -1) continue;
-          children.push(filename);
-        }
-      } else {
-        if (console && console.error) console.error('Missing local storage!');
-      }
-  
-      return children;
-    };
-  
-    Precog.prototype._getTypedChildren = function(path0) {
-      var children = this._getChildren(path0);
-      var typedChildren = [];
-      var i;
-      var path = Util.sanitizePath(path0 + '/');
-  
-      for (i = 0; i < children.length; i++) {
-        typedChildren.push({
-          name: children[i],
-          type: this._getChildren(path + children[i] + '/').length ? 'directory' : 'file'
-        });
-      }
-  
-      return typedChildren;
-    };
-  
     /**
      * Retrieves metadata for the specified path.
      *
@@ -2363,13 +2239,7 @@
           }
   
           if (Util.acontains(nodeType, 'file')) {
-            if (self._isEmulateData(path)) {
-              var data = self._getEmulateData(path);
-  
-              metadata.type = data.type;
-            } else {
-              metadata.type = 'application/json';
-            }
+            metadata.type = 'application/json';
           }
   
           return metadata;
@@ -2396,24 +2266,23 @@
   
       var path = Util.sanitizePath(path0);
   
-      var countPath = function(path) {
-        return self.execute({query: 'count(load("' + path + '"))'}).then(function(results) {
-          return results.data && results.data[0] || 0;
-        });
-      };
+      var countPath = self.execute({query: 'count(load("' + path + '"))'}).then(function(results) {
+        return results.data && results.data[0] || 0;
+      });
   
-      var listRawChildren = function(path) {
-        return self._retrieveMetadata(path).then(function(metadata) {
-          return metadata.children;
-        });
-      };
+      var listRawChildren = self._retrieveMetadata(path).then(function(metadata) {
+        return metadata.children;
+      });
   
-      return listRawChildren(path).then(function(children) {
-        return countPath(path).then(function(count) {
+      return listRawChildren.then(function(children) {
+        return countPath.then(function(count) {
           var types = [];
   
           if (children.length > 0) types.push('directory');
-          if (count > 0 || self._isEmulateData(path)) types.push('file');
+          if (count > 0) types.push('file');
+  
+          // Default to directory
+          if (!types.length) types.push('directory');
   
           return types;
         });
@@ -2434,8 +2303,6 @@
   
       Util.requireParam(path, 'path');
   
-      var extraChildren = self._getTypedChildren(path);
-      
       return this._retrieveMetadata(path).then(function(metadata) {
         var childNames = metadata.children || [];
   
@@ -2460,15 +2327,6 @@
                 name: name
               });
             }
-          }
-  
-          for (i = 0; i < extraChildren.length; i++) {
-            name = Util.removeTrailingSlash(extraChildren[i].name);
-            if (slashlessNames.indexOf(name) != -1) continue;
-            flattened.push({
-              name: name,
-              type: extraChildren[i].type
-            });
           }
   
           return flattened;
@@ -2584,84 +2442,17 @@
   
       var fullPath = targetDir + '/' + targetName;
   
-      // FIXME: EMULATION
-      var emulate;
-  
-      switch (info.type) {
-        case Precog.FileTypes.JSON:
-        case Precog.FileTypes.JSON_STREAM:
-        case Precog.FileTypes.CSV:
-        case Precog.FileTypes.ZIP:
-        case Precog.FileTypes.GZIP:
-  
-          emulate = false;
-        break;
-  
-        default: 
-          emulate = true;
-  
-        break;
-      }
-  
-      if (emulate) {
-        // Keep track of the contents & type of this file:
-        var fileNode = self._getEmulateData(fullPath);
-  
-        fileNode.type     = info.type;
-        fileNode.contents = info.contents;
-        fileNode.version  = fileNode.version ? fileNode.version + 1 : 1;
-        fileNode.lastModified = new Date().getTime();
-  
-        self._setEmulateData(fullPath, fileNode);
-  
-        if (info.type === 'text/x-quirrel-script') {
-          // The file is a script, immediately execute it:
-          return self.executeFile({
-            path: fullPath
-          }).then(function(results) {
-            // Take the data, and upload it to the file system.
-            return self.uploadFile({
-              path:     fullPath,
-              type:     'application/json',
-              contents: JSON.stringify(results.data),
-              saveEmulation: true // Don't delete the emulation data
-            });
-          }).then(function() {
-            return {versions: {head: fileNode.version}};
-          });
-        } else {
-          // The file is not a script, so we can't execute it, so just
-          // report success:
-          resolver = Vow.promise();
-          resolver.fulfill({versions:{head: fileNode.version}});
-          return resolver;
-        }
-  
-        // END EMULATION
-      } else {
-        var doUpload = function() {
-          return PrecogHttp.post({
-            url:      self.dataUrl((info.async ? "async" : "sync") + "/fs/" + fullPath),
-            content:  info.contents,
-            query:    {
-              apiKey:         self.config.apiKey,
-              ownerAccountId: info.ownerAccountId,
-              delimiter:      info.delimiter,
-              quote:          info.quote,
-              escape:         info.escape
-            },
-            headers:  { 'Content-Type': info.type },
-            success: Util.extractContent
-          });
-        };
-  
-        // First delete data, then upload!
-        return PrecogHttp.delete0({
-          url:      self.dataUrl("async/fs/" + fullPath),
-          query:    {apiKey: self.config.apiKey},
-          success:  Util.extractContent
-        }).then(doUpload, doUpload);
-      }
+      return PrecogHttp.put({
+        url:     self.dataUrl('data/fs/' + fullPath),
+        content: info.contents,
+        query:   {
+          apiKey         : self.config.apiKey
+        },
+        headers: {
+          'Content-Type' : info.type
+        },
+        success: Util.extractContent
+      });
     });
   
     /**
@@ -2699,25 +2490,27 @@
   
       Util.requireParam(path, 'path');
   
-      // FIXME: EMULATION
-      if (self._isEmulateData(path)) {
-        var fileNode = self._getEmulateData(path);
-        var resolver = Vow.promise();
-        resolver.fulfill({
-          contents: fileNode.contents, 
-          type:     fileNode.type
-        });
+      return PrecogHttp.get({
+        url:      self.fileUrl("fs/" + path),
+        headers:  { Accept: 'application/json, */*' },
+        query:    {
+                    apiKey: self.config.apiKey
+                  },
+        success:  function(response) {
+          var contentType = response.headers['content-type'] || response.headers['Content-Type'];
   
-        return resolver;
-      } else {
-        return self.execute({query: 'load("' + path + '")'}).then(function(results) {
+          if(contentType == 'application/json') {
+            return {
+              type: contentType,
+              contents: JSON.stringify(Util.extractContent(response))
+            };
+          }
           return {
-            contents: JSON.stringify(results.data),
-            type:    'application/json'
+            type: contentType,
+            contents: Util.extractContent(response)
           };
-        });
-      }
-      // END EMULATION
+        }
+      });
     });
   
     /**
@@ -2784,8 +2577,6 @@
       Util.requireParam(path, 'path');
   
       self.requireConfig('apiKey');
-  
-      self._deleteEmulateData(path);
   
       return PrecogHttp.delete0({
         url:      self.dataUrl("async/fs/" + path),
@@ -2866,14 +2657,14 @@
     });
   
     /**
-     * Moves a directory and its contents from one location to another.
+     * Copys a directory and its contents from one location to another.
      *
-     * @method moveDirectory
+     * @method copyDirectory
      * @memberof precog.api.prototype
      * @example
-     * Precog.moveDirectory({source: '/foo/helloo', dest: '/foo/hello'})
+     * Precog.copyDirectory({source: '/foo/helloo', dest: '/foo/hello'})
      */
-    Precog.prototype.moveDirectory = Util.addCallbacks(function(info) {
+    Precog.prototype.copyDirectory = Util.addCallbacks(function(info) {
       var self = this;
   
       Util.requireField(info, 'source');
@@ -2893,9 +2684,23 @@
           }));
         }
   
-        return Vow.all(resolvers).then(function() {
-          return self.deleteAll(info.source);
-        });
+        return Vow.all(resolvers);
+      });
+    });
+  
+    /**
+     * Moves a directory and its contents from one location to another.
+     *
+     * @method moveDirectory
+     * @memberof precog.api.prototype
+     * @example
+     * Precog.moveDirectory({source: '/foo/helloo', dest: '/foo/hello'})
+     */
+    Precog.prototype.moveDirectory = Util.addCallbacks(function(info) {
+      var self = this;
+  
+      return self.copyDirectory(info).then(function() {
+        return self.deleteAll(info.source);
       });
     });
   
@@ -2917,74 +2722,24 @@
   
       Util.requireField(info, 'path');
   
-      // FIXME: EMULATION
-      if (self._isEmulateData(info.path) && info.maxAge) {
-        // User wants to cache, see if there's a cached version:
-        var fileNode = self._getEmulateData(info.path);
+      self.requireConfig('apiKey');
   
-        if (fileNode.cached) {
-          var cached = fileNode.cached;
-  
-          // There's a cached version, see if it's fresh enough:
-          var now = (new Date()).getTime() / 1000;
-  
-          var age = now - cached.timestamp;
-  
-          if (age < info.maxAge || info.maxStale && (age < (info.maxAge + info.maxStale))) {
-            var resolver = Vow.promise();
-            resolver.fulfill(cached.results);
-            return resolver;
-          }
-        }
-      }
-      // END EMULATION
-  
-      // FIXME: EMULATION
-  
-      // Pull back the contents of the file:
-      return self.getFile(info.path).then(function(file) {
-        var scriptDir = Util.parentPath(info.path);
-  
-        // See if the file is executable:
-        if (file.type === 'text/x-quirrel-script') {
-          var path1 = Util.sanitizePath('/' + scriptDir + '/');
-          var path2 = path1.split('/').join('//');
-  
-          // /./
-          // "./
-  
-          // FIXME: HORRIBLE HACK FOR RELATIVE PATHS!!!! THE HORROR!!!!
-          var query2 = file.contents.split('/./').join(path2).split('"./').join('"' + path1);
-  
-          var executeRequest = {
-            query: query2 // file.contents
-          };
-  
-          // Execute the script:
-          return self.execute(executeRequest).then(function(results) {
-            if (typeof localStorage !== 'undefined') {
-              // If there are no errors, store the cached execution of the script:
-              if (results && (results.errors == null || results.errors.length === 0)) {
-                var fileNode = self._getEmulateData(info.path);
-  
-                fileNode.cached = {
-                  results:   results,
-                  timestamp: (new Date()).getTime() / 1000
-                };
-  
-                self._setEmulateData(info.path, fileNode);
-              }
-            }
-  
-            return results;
-          });
-        } else {
-          Util.error('The file ' + info.path +
-                     ' does not have type text/x-quirrel-script and therefore cannot be executed');
+      return PrecogHttp.get({
+        url:      self.analysisUrl("fs/" + info.path),
+        query:    {
+          apiKey: self.config.apiKey,
+          limit:  info.limit,
+          skip:   info.skip,
+          sortOn: info.sortOn,
+          format: 'detailed'
+        },
+        success:  function(response) {
+          // TODO: Cached query API doesn't return Content-Type. Change
+          // this whole function into just Util.extractContent when it
+          // does.
+          return JSON.parse(Util.extractContent(response));
         }
       });
-  
-      // END EMULATION
     });
   
     /**
@@ -3008,7 +2763,7 @@
       self.requireConfig('apiKey');
   
       return PrecogHttp.get({
-        url:      self.analysisUrl("fs/" + (info.path || '')),
+        url:      self.analyticsUrl("fs/" + (info.path || '')),
         query:    {
                     apiKey: self.config.apiKey, 
                     q:      info.query,
@@ -3036,7 +2791,7 @@
       Util.requireField(info, 'query');
   
       return PrecogHttp.post({
-        url:      self.analysisUrl("queries"),
+        url:      self.analyticsUrl("queries"),
         query:    {
                     apiKey     : self.config.apiKey,
                     q          : info.query,
@@ -3068,7 +2823,7 @@
       Util.requireParam(jobId, 'jobId');
   
       return PrecogHttp.get({
-        url:      self.analysisUrl("queries/") + jobId,
+        url:      self.analyticsUrl("queries/") + jobId,
         query:    {apiKey: self.config.apiKey},
         success:  Util.extractContent
       });
