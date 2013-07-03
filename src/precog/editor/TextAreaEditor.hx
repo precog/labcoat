@@ -35,11 +35,8 @@ class TextAreaEditor
 	{
 		var t = element.get(0);
 		untyped __js__("var offset= !window.opera ? (t.offsetHeight - t.clientHeight) : (t.offsetHeight + parseInt(window.getComputedStyle(t, null).getPropertyValue('border-top-width'))) ;
- console.log(offset);
     var resize  = function(t) {
-console.log(t.scrollHeight);
         t.style.height = 'auto';
-console.log(t.scrollHeight);
         t.style.height = (t.scrollHeight  + offset ) + 'px';    
     }
  
