@@ -14,7 +14,7 @@ import labcoat.module.view.*;
 import precog.editor.*;
 import js.Browser.window;
 
-class Main 
+class Main
 {
     static function main()
     {
@@ -28,7 +28,6 @@ class Main
 
         // View
         manager.addModule(new LoginModule());
-
 /*
 #if (html5 || cordova)
         manager.addModule(new Html5MenuModule());

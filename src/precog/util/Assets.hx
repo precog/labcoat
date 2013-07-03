@@ -26,13 +26,13 @@ class Assets
 		} else {
 			return
 				json('localization/$name.json')
-				.await(json('translation/$name.json'))
-				.pipe(function(ob_culture : Dynamic, ob_translation : Dynamic) : Promise<Culture -> Translation -> Void> {
-					var culture = Culture.createFromObject(ob_culture),
-						translation = new Translation(culture);
-					translation.addPo2JsonObject(ob_translation);
-					return Promise.value2(culture, translation);
-				});
+					.await(json('translation/$name.json'))
+					.pipe2(function(ob_culture : Dynamic, ob_translation : Dynamic) : Promise<Culture -> Translation -> Void> {
+						var culture = Culture.createFromObject(ob_culture),
+							translation = new Translation(culture);
+						translation.addPo2JsonObject(ob_translation);
+						return Promise.value2(culture, translation);
+					});
 		}
 	}
 }
